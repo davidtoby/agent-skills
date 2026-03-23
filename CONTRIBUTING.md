@@ -1,8 +1,8 @@
 # Contributing / 贡献指南
 
-Thanks for contributing agent skills.
+Thanks for contributing skills to `agent-skills`.
 
-感谢你为 agent-skills 贡献 Skill。
+感谢你为 `agent-skills` 贡献 Skill。
 
 ## What we want / 我们欢迎什么
 
@@ -43,7 +43,7 @@ Keep the skill folder clean. Avoid dumping extra README files inside a single sk
 - [ ] 这个 Skill 解决的是一个真实任务
 - [ ] `SKILL.md` 清楚写明了做什么、何时触发
 - [ ] 配套脚本真的能跑
-- [ ] references 不是凑数，而是真的有用
+- [ ] `references/` 不是凑数，而是真的有用
 - [ ] 输出命名清晰
 - [ ] 如果有典型踩坑，最好写进 troubleshooting 或经验总结
 
@@ -52,18 +52,18 @@ Keep the skill folder clean. Avoid dumping extra README files inside a single sk
 Good PRs usually include:
 - what problem the skill solves
 - what makes it reusable
-- what scripts/references were added
+- what scripts or references were added
 - what edge cases were learned from real usage
 
 一个好的 PR 通常会说明：
 - 这个 Skill 解决什么问题
 - 为什么它值得复用
-- 新增了哪些脚本 / 参考资料
+- 新增了哪些脚本或参考资料
 - 从真实使用中学到了哪些边界条件或坑
 
 ## Quality bar / 质量门槛
 
-A clever prompt is not automatically a skill.
+A clever prompt is not automatically a skill.  
 A skill should help another agent succeed faster and fail less.
 
 一个聪明的 prompt，不等于一个 Skill。  

@@ -9,6 +9,47 @@ A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and othe
 
 ---
 
+## Featured skill / 精选技能
+
+### `video-bilingual-subtitle-delivery`
+
+> **What it does**  
+> Create, repair, audit, and deliver bilingual video subtitles with English speech timing and Chinese aligned on the same subtitle event.
+>
+> **它能做什么**  
+> 创建、修复、审计并交付**中英双语视频字幕**，重点解决时间轴对齐、中文漏挂、softsub 交付和 hardcode 成片问题。
+
+**Highlights / 亮点**
+- English timing first, then Chinese alignment / 先锁英文时间轴，再挂中文
+- Audit missing Chinese lines before final delivery / 最终交付前审计中文漏挂
+- Softsub → hardcode delivery path / 先软字幕，再硬字幕
+- Hardcode fallback when local ffmpeg lacks subtitle filters / 本地 ffmpeg 缺字幕滤镜时的 fallback 硬字幕方案
+
+**Jump in / 快速入口**
+- Source skill folder: [`skills/video-bilingual-subtitle-delivery/`](./skills/video-bilingual-subtitle-delivery/)
+- Packaged artifact: [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+
+---
+
+## How to contribute your first skill / 如何贡献你的第一个 Skill
+
+**Fast path / 最短路径**
+1. Pick a workflow that already survived real work.  
+   先选一个已经在真实任务里跑通过的流程。
+2. Turn it into a clean skill folder with `SKILL.md`, `scripts/`, and `references/`.  
+   把它整理成干净的 Skill 目录：`SKILL.md`、`scripts/`、`references/`。
+3. Keep the trigger clear and the workflow honest.  
+   触发条件要清楚，工作流要诚实，不要把玄学包装成方法论。
+4. Add failure notes if the task has common traps.  
+   如果这个任务有典型踩坑，最好把失败经验也写进去。
+5. Open a PR.  
+   然后直接提 PR。
+
+**Need the full guide? / 想看完整说明？**
+- Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+
+---
+
 ## Why this repo / 为什么做这个仓库
 
 Most AI workflows die after one chat. Good skills do not.  

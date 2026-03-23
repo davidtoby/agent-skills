@@ -9,6 +9,34 @@ A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and othe
 
 ---
 
+## Why this repo / 为什么做这个仓库
+
+Most AI workflows die after one chat. Good skills do not.  
+This repo exists to turn one-off agent heroics into repeatable, shareable, inspectable skills.
+
+大多数所谓“AI 工作流”都死在一次对话里。真正好的 Skill 不会。  
+这个仓库的目标，就是把一次性的 Agent 灵光乍现，沉淀成**可复用、可共享、可审阅、可迭代**的 Skill。
+
+---
+
+## What lives here / 这里放什么
+
+**English**
+- Reusable agent skills
+- Skill source folders
+- Bundled helper scripts
+- References, troubleshooting notes, and field-tested workflows
+- Optional packaged `.skill` artifacts for easier distribution
+
+**中文**
+- 可复用的 Agent Skill
+- Skill 源码目录
+- 配套脚本
+- 参考文档、故障排查、实战流程总结
+- 可选的 `.skill` 打包产物，方便分发
+
+---
+
 ## Featured skill / 精选技能
 
 ### `video-bilingual-subtitle-delivery`
@@ -28,6 +56,24 @@ A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and othe
 **Jump in / 快速入口**
 - Source skill folder: [`skills/video-bilingual-subtitle-delivery/`](./skills/video-bilingual-subtitle-delivery/)
 - Packaged artifact: [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+
+---
+
+## How to use / 如何使用
+
+### Option A: Use the source skill folder / 直接使用源码目录
+
+Copy a skill folder into your own skill workspace:
+
+```bash
+cp -R skills/video-bilingual-subtitle-delivery /path/to/your/skills/
+```
+
+### Option B: Use the packaged artifact / 使用打包产物
+
+Use the packaged `.skill` file under `packages/` if your environment supports direct skill import.
+
+如果你的运行环境支持直接导入 Skill，也可以使用 `packages/` 下的 `.skill` 文件。
 
 ---
 
@@ -104,34 +150,6 @@ If your OpenClaw environment supports direct `.skill` import, you can also use t
 
 ---
 
-## Why this repo / 为什么做这个仓库
-
-Most AI workflows die after one chat. Good skills do not.  
-This repo exists to turn one-off agent heroics into repeatable, shareable, inspectable skills.
-
-大多数所谓“AI 工作流”都死在一次对话里。真正好的 Skill 不会。  
-这个仓库的目标，就是把一次性的 Agent 灵光乍现，沉淀成**可复用、可共享、可审阅、可迭代**的 Skill。
-
----
-
-## What lives here / 这里放什么
-
-**English**
-- Reusable agent skills
-- Skill source folders
-- Bundled helper scripts
-- References, troubleshooting notes, and field-tested workflows
-- Optional packaged `.skill` artifacts for easier distribution
-
-**中文**
-- 可复用的 Agent Skill
-- Skill 源码目录
-- 配套脚本
-- 参考文档、故障排查、实战流程总结
-- 可选的 `.skill` 打包产物，方便分发
-
----
-
 ## Repository structure / 仓库结构
 
 ```text
@@ -188,24 +206,6 @@ Includes / 包含：
 4. **Failure notes matter**  
    A good skill records not only what worked, but also what failed and why.  
    **失败经验同样重要。**
-
----
-
-## How to use / 如何使用
-
-### Option A: Use the source skill folder / 直接使用源码目录
-
-Copy a skill folder into your own skill workspace:
-
-```bash
-cp -R skills/video-bilingual-subtitle-delivery /path/to/your/skills/
-```
-
-### Option B: Use the packaged artifact / 使用打包产物
-
-Use the packaged `.skill` file under `packages/` if your environment supports direct skill import.
-
-如果你的运行环境支持直接导入 Skill，也可以使用 `packages/` 下的 `.skill` 文件。
 
 ---
 

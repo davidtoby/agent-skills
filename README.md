@@ -9,7 +9,7 @@ A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and othe
 
 ---
 
-## Brutal pitch / 残酷简介
+## Repo pitch / 仓库简介
 
 Most “AI workflows” die after one chat. Good skills do not.  
 This repo exists to turn one-off agent heroics into repeatable, shareable, inspectable skills.

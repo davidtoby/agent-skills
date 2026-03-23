@@ -31,6 +31,60 @@ A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and othe
 
 ---
 
+## About `.skill` packages / 关于 `.skill` 打包文件
+
+**English**
+- A `.skill` file is a packaged distribution artifact for a skill.
+- In practice, it is a zip-style bundle of the skill folder, including `SKILL.md`, `scripts/`, and `references/`.
+- It is useful for sharing, attaching to releases, and importing into environments that support direct skill installation.
+
+**中文**
+- `.skill` 文件可以理解为 Skill 的打包分发格式。
+- 实际上，它本质上是把 Skill 目录（包括 `SKILL.md`、`scripts/`、`references/`）打成一个可分发的包。
+- 它适合拿来分享、挂在 release 里，或者导入支持直接安装 Skill 的运行环境。
+
+### How it is packaged / 它是怎么打包的
+
+Use the OpenClaw skill packaging script:
+
+```bash
+python3 /opt/homebrew/lib/node_modules/openclaw/skills/skill-creator/scripts/package_skill.py \
+  /path/to/skill-folder \
+  /path/to/output-dir
+```
+
+This validator-packager flow first checks the skill structure, then emits a `.skill` artifact.
+
+这个流程会先校验 Skill 结构是否合规，再生成 `.skill` 打包文件。
+
+### How to use with OpenClaw / OpenClaw 怎么用
+
+**Recommended / 推荐方式**
+- Copy the source skill folder into `<workspace>/skills/`
+- Or place shared skills under `~/.openclaw/skills/`
+
+```bash
+cp -R skills/video-bilingual-subtitle-delivery /path/to/workspace/skills/
+```
+
+If your OpenClaw environment supports direct `.skill` import, you can also use the packaged file under `packages/`.
+
+如果你的 OpenClaw 环境支持直接导入 `.skill`，也可以直接使用 `packages/` 下的打包文件。
+
+### How to use with Claude or other agent runtimes / Claude 或其他 Agent 运行时怎么用
+
+**Recommended / 推荐方式**
+- Prefer the source skill folder as the portable format
+- Use `.skill` only when the target environment explicitly supports direct import
+- Otherwise, treat `.skill` as a distributable package and unpack it into a normal skill folder
+
+**中文说明**
+- 最稳妥的方式仍然是直接使用 Skill 源码目录
+- 只有在目标运行环境明确支持 `.skill` 导入时，才优先使用 `.skill`
+- 如果不支持，可以把 `.skill` 当作一个分发包，解包后按普通 Skill 目录使用
+
+---
+
 ## How to contribute your first skill / 如何贡献你的第一个 Skill
 
 **Fast path / 最短路径**

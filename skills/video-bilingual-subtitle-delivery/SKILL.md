@@ -16,9 +16,40 @@ Produce bilingual subtitle deliverables in a strict order: get the right source 
 5. Audit the SRT for English-only blocks with `scripts/audit_bilingual_srt.py`.
 6. Export softsub first. Export hardcode last.
 
+## Local Whisper pipeline
+
+Use the bundled builder when you want a no-OpenAI baseline pipeline:
+
+```bash
+python scripts/build_bilingual_subtitles.py \
+  --video /path/input.mp4 \
+  --output-dir /path/output_dir \
+  --basename topic_name \
+  --whisper-model turbo \
+  --translate-backend argos
+```
+
+What this does:
+- extracts mono 16 kHz audio from the source video
+- runs local `whisper` CLI to create an English timing baseline
+- groups short ASR lines into more readable subtitle events
+- translates with a pluggable backend
+- applies lightweight Chinese polishing by default for machine-translated output
+- writes a bilingual SRT on the same time axis
+
+Current translation backends:
+- `manual` — no API key required; writes `【待补中文】...` placeholders under each English line so timing/editing can continue locally
+- `none` — English-only output on the grouped time axis
+- `argos` — fully local offline translation using Argos Translate (`en -> zh`) installed in the skill-local virtual environment
+
+Important:
+- Local Whisper does **not** need `OPENAI_API_KEY`.
+- Chinese translation is a separate step. This skill is now structured so translation backends can be swapped in later without changing the transcription pipeline.
+
 ## Workflow
 
 Read `references/workflow.md` when you need the full delivery sequence or checkpoint strategy.
+Read `references/local-pipeline.md` when you want the no-OpenAI local transcription baseline and artifact layout.
 Read `references/lessons-from-terafab.md` when you want a concrete failure-to-fix case study for bilingual subtitle repair, including wrong-source-cut drift, missing-Chinese audits, and hardcode fallback strategy.
 
 ## Hardcode delivery

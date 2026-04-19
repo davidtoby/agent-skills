@@ -162,7 +162,8 @@ agent-skills/
 │       ├── scripts/
 │       └── references/
 └── packages/
-    └── video-bilingual-subtitle-delivery.skill
+    ├── video-bilingual-subtitle-delivery.skill
+    └── pdf-chinese-report-delivery.skill
 ```
 
 ---
@@ -186,6 +187,23 @@ Includes / 包含：
 - `references/workflow.md`
 - `references/troubleshooting.md`
 - `references/lessons-from-terafab.md`
+
+### pdf-chinese-report-delivery
+
+Create professional Chinese PDF reports with reliable font rendering on macOS, especially when HTML-to-PDF output produced garbled Chinese text or weak typography.
+
+用于生成或重导出**中文优先的专业 PDF 报告**，重点解决：
+- 中文乱码或缺字
+- 中文字体回退失控
+- HTML 转 PDF 样式看似成功但成品不专业
+- macOS 上中文字体选择与嵌入不稳定
+
+Includes / 包含：
+- `SKILL.md`
+- `scripts/render_cn_report_pdf.py`
+- `references/workflow.md`
+- `references/troubleshooting.md`
+- `references/font-notes-macos.md`
 
 ---
 

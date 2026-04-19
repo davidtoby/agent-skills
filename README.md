@@ -204,6 +204,8 @@ Includes / 包含：
 - `references/workflow.md`
 - `references/troubleshooting.md`
 - `references/font-notes-macos.md`
+- `assets/examples/uk-prime-ministers-report-example-input.md`
+- `assets/examples/uk-prime-ministers-report-example-output-v2.pdf`
 
 ---
 

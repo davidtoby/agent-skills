@@ -107,6 +107,11 @@ Read these references when needed:
 - `references/troubleshooting.md` for garbling, font-registration, and renderer-choice problems
 - `references/font-notes-macos.md` for the macOS font choices validated in real usage
 
+Use these bundled assets when you want a real starting point instead of a toy example:
+
+- `assets/examples/uk-prime-ministers-report-example-input.md` as a real Chinese long-form report input
+- `assets/examples/uk-prime-ministers-report-example-output-v2.pdf` as a real polished output reference generated from this workflow
+
 ## Output standard
 
 Deliver:

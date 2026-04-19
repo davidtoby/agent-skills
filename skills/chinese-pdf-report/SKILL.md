@@ -1,9 +1,9 @@
 ---
-name: pdf-chinese-report-delivery
+name: chinese-pdf-report
 description: Create professional Chinese PDF reports with reliable font rendering on macOS, especially when previous HTML-to-PDF output produced garbled Chinese text, missing glyphs, or ugly default typography. Use when asked to generate or re-export Chinese-heavy PDFs, fix Chinese font issues, improve typography for formal reports, or turn one-off Chinese PDF formatting lessons into a repeatable delivery workflow.
 ---
 
-# PDF Chinese Report Delivery
+# Chinese PDF Report
 
 Generate Chinese-first PDF reports with explicit font control. Prefer deterministic rendering over convenient but fragile HTML pipelines when Chinese readability matters.
 

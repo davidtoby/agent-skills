@@ -92,6 +92,12 @@ Use this quick map if you are not sure where to start:
 
 ---
 
+## Topic guides / 专题索引
+
+- [`topics/feishu-hermes-stability.md`](./topics/feishu-hermes-stability.md) — Feishu / Hermes 稳定性专题：审批按钮 200340、文本兜底、websocket 重连调优、GitHub 发布回写
+
+---
+
 ## Why this repo exists / 为什么做这个仓库
 
 ### English

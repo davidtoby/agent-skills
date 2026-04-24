@@ -3,9 +3,9 @@
 **Build once. Ship to many agents.**  
 **一次沉淀，多个 Agent 复用。**
 
-A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and other agent runtimes. This repo is for skills that survive real work: not toy prompts, but workflows, scripts, references, and battle-tested operating patterns.
+A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and other agent runtimes. This repo is for skills that survive real work: not toy prompts, but workflows, scripts, references, examples, and battle-tested operating patterns.
 
-这是一个面向 **OpenClaw**、**Claude** 以及其他 Agent 运行时的**可复用 Skill 仓库**。这里不追求“花哨 prompt”，而是沉淀那些经得起真实任务验证的工作流、脚本、参考资料和踩坑经验。
+这是一个面向 **OpenClaw**、**Claude** 以及其他 Agent 运行时的**可复用 Skill 仓库**。这里不追求“花哨 prompt”，而是沉淀那些经得起真实任务验证的工作流、脚本、参考资料、示例产物和踩坑经验。
 
 ---
 
@@ -25,19 +25,32 @@ This repo exists to turn one-off agent heroics into repeatable, shareable, inspe
 - Reusable agent skills
 - Skill source folders
 - Bundled helper scripts
-- References, troubleshooting notes, and field-tested workflows
+- References, troubleshooting notes, examples, and field-tested workflows
 - Optional packaged `.skill` artifacts for easier distribution
 
 **中文**
 - 可复用的 Agent Skill
 - Skill 源码目录
 - 配套脚本
-- 参考文档、故障排查、实战流程总结
+- 参考文档、故障排查、示例产物、实战流程总结
 - 可选的 `.skill` 打包产物，方便分发
 
 ---
 
-## Featured skill / 精选技能
+## Skill catalog / 技能目录
+
+| Skill | What it does | Key assets |
+|---|---|---|
+| [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual video subtitles with English timing and Chinese aligned on the same subtitle event. | Multiple subtitle scripts, workflow notes, troubleshooting, real repair lessons |
+| [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering and stronger typography on macOS. | Renderer script, font notes, troubleshooting, example input/output |
+| [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/) | Turn an academic paper PDF into a polished Chinese insight report PDF. | Text extraction script, PDF renderer, output structure and quality-bar references |
+| [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and produce premium PDF report variants including consulting, McKinsey-style, BCG-style, and Apple-inspired personal-brand editions. | Workflow guide inside `SKILL.md`, output package reference, style-variant reference |
+
+More detail: see [`skills/README.md`](./skills/README.md).
+
+---
+
+## Featured skills / 精选技能
 
 ### `video-bilingual-subtitle-delivery`
 
@@ -53,9 +66,19 @@ This repo exists to turn one-off agent heroics into repeatable, shareable, inspe
 - Softsub → hardcode delivery path / 先软字幕，再硬字幕
 - Hardcode fallback when local ffmpeg lacks subtitle filters / 本地 ffmpeg 缺字幕滤镜时的 fallback 硬字幕方案
 
-**Jump in / 快速入口**
-- Source skill folder: [`skills/video-bilingual-subtitle-delivery/`](./skills/video-bilingual-subtitle-delivery/)
-- Packaged artifact: [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+### `consulting-pdf-from-youtube`
+
+> **What it does**  
+> Download a YouTube video, extract transcript/metadata, synthesize structured insights, and export premium PDF report variants.
+>
+> **它能做什么**  
+> 下载 YouTube 视频、提取字幕与元数据、整理核心观点与洞察，并导出**高端报告风格 PDF**，包括咨询风、麦肯锡风、BCG 风和 Apple 风个人品牌版。
+
+**Highlights / 亮点**
+- Transcript-first reporting workflow / 先拿到可分析字幕，再做报告
+- Markdown + HTML + PDF layered deliverables / Markdown、HTML、PDF 分层交付
+- Multi-style output from one content base / 一份内容母版衍生多种视觉版本
+- Explicit PDF QA with page-count and text-extraction checks / 交付前明确做页数与文本抽检
 
 ---
 
@@ -66,6 +89,8 @@ This repo exists to turn one-off agent heroics into repeatable, shareable, inspe
 Copy a skill folder into your own skill workspace:
 
 ```bash
+cp -R skills/consulting-pdf-from-youtube /path/to/your/skills/
+# or
 cp -R skills/video-bilingual-subtitle-delivery /path/to/your/skills/
 ```
 
@@ -74,6 +99,10 @@ cp -R skills/video-bilingual-subtitle-delivery /path/to/your/skills/
 Use the packaged `.skill` file under `packages/` if your environment supports direct skill import.
 
 如果你的运行环境支持直接导入 Skill，也可以使用 `packages/` 下的 `.skill` 文件。
+
+Current packaged artifacts in this repo:
+- [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+- [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 
 ---
 
@@ -103,51 +132,6 @@ This validator-packager flow first checks the skill structure, then emits a `.sk
 
 这个流程会先校验 Skill 结构是否合规，再生成 `.skill` 打包文件。
 
-### How to use with OpenClaw / OpenClaw 怎么用
-
-**Recommended / 推荐方式**
-- Copy the source skill folder into `<workspace>/skills/`
-- Or place shared skills under `~/.openclaw/skills/`
-
-```bash
-cp -R skills/video-bilingual-subtitle-delivery /path/to/workspace/skills/
-```
-
-If your OpenClaw environment supports direct `.skill` import, you can also use the packaged file under `packages/`.
-
-如果你的 OpenClaw 环境支持直接导入 `.skill`，也可以直接使用 `packages/` 下的打包文件。
-
-### How to use with Claude or other agent runtimes / Claude 或其他 Agent 运行时怎么用
-
-**Recommended / 推荐方式**
-- Prefer the source skill folder as the portable format
-- Use `.skill` only when the target environment explicitly supports direct import
-- Otherwise, treat `.skill` as a distributable package and unpack it into a normal skill folder
-
-**中文说明**
-- 最稳妥的方式仍然是直接使用 Skill 源码目录
-- 只有在目标运行环境明确支持 `.skill` 导入时，才优先使用 `.skill`
-- 如果不支持，可以把 `.skill` 当作一个分发包，解包后按普通 Skill 目录使用
-
----
-
-## How to contribute your first skill / 如何贡献你的第一个 Skill
-
-**Fast path / 最短路径**
-1. Pick a workflow that already survived real work.  
-   先选一个已经在真实任务里跑通过的流程。
-2. Turn it into a clean skill folder with `SKILL.md`, `scripts/`, and `references/`.  
-   把它整理成干净的 Skill 目录：`SKILL.md`、`scripts/`、`references/`。
-3. Keep the trigger clear and the workflow honest.  
-   触发条件要清楚，工作流要诚实，不要把玄学包装成方法论。
-4. Add failure notes if the task has common traps.  
-   如果这个任务有典型踩坑，最好把失败经验也写进去。
-5. Open a PR.  
-   然后直接提 PR。
-
-**Need the full guide? / 想看完整说明？**
-- Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
-
 ---
 
 ## Repository structure / 仓库结构
@@ -157,13 +141,26 @@ agent-skills/
 ├── README.md
 ├── CONTRIBUTING.md
 ├── skills/
+│   ├── README.md
+│   ├── academic-paper-to-chinese-insight-pdf/
+│   │   ├── SKILL.md
+│   │   ├── scripts/
+│   │   └── references/
+│   ├── chinese-pdf-report/
+│   │   ├── SKILL.md
+│   │   ├── scripts/
+│   │   ├── references/
+│   │   └── assets/
+│   ├── consulting-pdf-from-youtube/
+│   │   ├── SKILL.md
+│   │   └── references/
 │   └── video-bilingual-subtitle-delivery/
 │       ├── SKILL.md
 │       ├── scripts/
 │       └── references/
 └── packages/
-    ├── video-bilingual-subtitle-delivery.skill
-    └── chinese-pdf-report.skill
+    ├── chinese-pdf-report.skill
+    └── video-bilingual-subtitle-delivery.skill
 ```
 
 ---
@@ -207,6 +204,38 @@ Includes / 包含：
 - `assets/examples/uk-prime-ministers-report-example-input.md`
 - `assets/examples/uk-prime-ministers-report-example-output-v2.pdf`
 
+### academic-paper-to-chinese-insight-pdf
+
+Turn an academic paper PDF into a readable Chinese insight report and export it as a polished Chinese PDF.
+
+用于把**学术论文 PDF** 转成可读性更高的中文精读/洞察版 PDF，适合：
+- 论文精读版
+- 中文观点总结
+- 方法与实验提炼
+- “更容易读懂”的说明型交付
+
+Includes / 包含：
+- `SKILL.md`
+- `scripts/extract_paper_text.py`
+- `scripts/render_cn_pdf.py`
+- `references/output-structure.md`
+- `references/quality-bar.md`
+
+### consulting-pdf-from-youtube
+
+Download a YouTube video, extract transcript/metadata, synthesize structured insights, and export premium PDF report variants.
+
+用于把 **YouTube 视频** 变成高质量报告交付，支持：
+- 视频下载
+- 字幕/转录提取与清洗
+- 核心观点、Key Takeaways、个人洞察整理
+- 咨询风 / 麦肯锡风 / BCG 风 / Apple 风品牌版 PDF 导出
+
+Includes / 包含：
+- `SKILL.md`
+- `references/output-package.md`
+- `references/style-variants.md`
+
 ---
 
 ## Design principles / 设计原则
@@ -226,6 +255,29 @@ Includes / 包含：
 4. **Failure notes matter**  
    A good skill records not only what worked, but also what failed and why.  
    **失败经验同样重要。**
+
+5. **Deliverables matter**  
+   A strong skill should make the output package and verification standard explicit, not implicit.  
+   **交付物和验收标准要写清楚。**
+
+---
+
+## How to contribute your first skill / 如何贡献你的第一个 Skill
+
+**Fast path / 最短路径**
+1. Pick a workflow that already survived real work.  
+   先选一个已经在真实任务里跑通过的流程。
+2. Turn it into a clean skill folder with `SKILL.md`, `scripts/`, `references/`, and optionally `assets/`.  
+   把它整理成干净的 Skill 目录：`SKILL.md`、`scripts/`、`references/`，必要时加 `assets/`。
+3. Keep the trigger clear and the workflow honest.  
+   触发条件要清楚，工作流要诚实，不要把玄学包装成方法论。
+4. Add failure notes if the task has common traps.  
+   如果这个任务有典型踩坑，最好把失败经验也写进去。
+5. Open a PR.  
+   然后直接提 PR。
+
+Need the full guide? / 想看完整说明？  
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ---
 

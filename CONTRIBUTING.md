@@ -24,12 +24,14 @@ We want skills that are:
 skill-name/
 ├── SKILL.md
 ├── scripts/
-└── references/
+├── references/
+└── assets/        # optional, only when examples materially help reuse
 ```
 
 Keep the skill folder clean. Avoid dumping extra README files inside a single skill unless they are truly necessary.
 
 请尽量保持单个 Skill 目录简洁。除非确有必要，不要在 Skill 内部堆很多额外 README。
+如果示例文件确实能显著提升复用价值，可以加 `assets/`，但不要把仓库变成素材堆放区。
 
 ## Submission checklist / 提交前检查
 
@@ -38,6 +40,7 @@ Keep the skill folder clean. Avoid dumping extra README files inside a single sk
 - [ ] Scripts are actually runnable
 - [ ] References are useful and not just filler
 - [ ] Output naming is clear
+- [ ] Verification or quality checks are explicit when output quality matters
 - [ ] Failure cases or troubleshooting notes are documented when relevant
 
 - [ ] 这个 Skill 解决的是一个真实任务
@@ -45,6 +48,7 @@ Keep the skill folder clean. Avoid dumping extra README files inside a single sk
 - [ ] 配套脚本真的能跑
 - [ ] `references/` 不是凑数，而是真的有用
 - [ ] 输出命名清晰
+- [ ] 如果交付质量重要，最好写清楚验收或校验步骤
 - [ ] 如果有典型踩坑，最好写进 troubleshooting 或经验总结
 
 ## Preferred PR style / 推荐 PR 风格

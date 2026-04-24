@@ -8,6 +8,7 @@ This directory contains the source-of-truth skill folders.
 - `../packages/academic-paper-to-chinese-insight-pdf.skill`
 - `../packages/chinese-pdf-report.skill`
 - `../packages/consulting-pdf-from-youtube.skill`
+- `../packages/github-auth-recovery.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
 <!-- package-list:end -->
 
@@ -54,6 +55,14 @@ Contains:
 - workflow and troubleshooting references
 - concrete field lessons from a real rebuild
 - packaged artifact: `../packages/video-bilingual-subtitle-delivery.skill`
+
+### `github-auth-recovery`
+Recover from broken GitHub auth and push flows when `gh` is logged out, HTTPS credentials fail, or SSH may already work.
+
+Contains:
+- `SKILL.md`
+- `references/ssh-vs-https.md`
+- packaged artifact: `../packages/github-auth-recovery.skill`
 
 ## Contribution note
 

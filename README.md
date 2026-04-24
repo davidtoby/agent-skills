@@ -64,6 +64,8 @@ Use this quick map if you are not sure where to start:
   → [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/)
 - **I need bilingual English/Chinese subtitles for a video**  
   → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
+- **My GitHub push/auth flow is broken and I need a reliable recovery path**  
+  → [`github-auth-recovery`](./skills/github-auth-recovery/)
 
 ### 中文
 
@@ -77,6 +79,8 @@ Use this quick map if you are not sure where to start:
   → [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/)
 - **我需要给视频做中英双语字幕**  
   → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
+- **我的 GitHub push / 认证流程坏了，需要一条可靠恢复路径**  
+  → [`github-auth-recovery`](./skills/github-auth-recovery/)
 
 ---
 
@@ -135,6 +139,7 @@ This repo exists to turn one-off agent heroics into reusable, inspectable, share
 | [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering on macOS / 生成中文字体更稳、排版更专业的 PDF 报告 | renderer script, troubleshooting, font notes, example assets |
 | [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and export premium PDF report variants / 下载 YouTube 视频、提取字幕与元数据，并导出高端报告风格 PDF | workflow guide, output package reference, style-variant reference |
 | [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual subtitles with shared EN/ZH timing / 创建、修复、审计并交付中英双语字幕 | subtitle scripts, workflow docs, troubleshooting, real repair lessons |
+| [`github-auth-recovery`](./skills/github-auth-recovery/) | Recover from broken GitHub auth/push flows when `gh` is logged out, HTTPS credentials fail, or SSH may already work / 当 `gh` 未登录、HTTPS 凭证失效、但 SSH 可能已可用时，恢复 GitHub push/认证流程 | concise recovery workflow, SSH-vs-HTTPS reference |
 
 More detail: see [`skills/README.md`](./skills/README.md).
 
@@ -261,6 +266,7 @@ Current packaged artifacts:
 - [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
+- [`packages/github-auth-recovery.skill`](./packages/github-auth-recovery.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
 <!-- package-list:end -->
 

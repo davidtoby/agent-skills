@@ -11,7 +11,7 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 ## [2026-04-24] - Skill catalog, packaging, and CI refresh
 
 ### Summary
-This update expands the repository from a subtitle/PDF-focused collection into a more coherent multi-skill catalog covering video subtitle delivery, Chinese PDF generation, academic-paper insight reporting, and YouTube-to-consulting-report workflows. It also improves README navigation, adds package-list consistency checks, adds a rebuild helper for maintainers, and surfaces repository popularity with Star History in the README.
+This update expands the repository from a subtitle/PDF-focused collection into a more coherent multi-skill catalog covering video subtitle delivery, Chinese PDF generation, academic-paper insight reporting, and YouTube-to-consulting-report workflows. It also improves README navigation, adds package-list consistency checks, adds a rebuild helper for maintainers, surfaces repository popularity with Star History in the README, and now includes a dedicated package-list sync helper.
 
 ### Added
 - New skill: `skills/consulting-pdf-from-youtube/`
@@ -30,6 +30,7 @@ This update expands the repository from a subtitle/PDF-focused collection into a
   - `.github/workflows/release-skill-packages.yml`
   - `scripts/validate_skills_repo.py`
   - `scripts/rebuild_all_packages.py`
+  - `scripts/sync_package_lists.py`
 
 ### Changed
 - Refreshed `README.md` to:
@@ -45,6 +46,7 @@ This update expands the repository from a subtitle/PDF-focused collection into a
   - require explicit verification/quality checks when output quality matters
 - Added package freshness validation to CI so `.skill` artifacts must stay in sync with source skill folders
 - Added package-list consistency validation so documented package lists cannot drift from the real `packages/` directory
+- Added a dedicated sync helper so maintainers can automatically rewrite package-list blocks instead of editing them by hand
 
 ### Why this matters
 - Makes the repo easier to scan for both humans and agents

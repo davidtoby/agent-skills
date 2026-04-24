@@ -11,6 +11,7 @@ SKILLS_DIR = ROOT / 'skills'
 PACKAGES_DIR = ROOT / 'packages'
 PACKAGE_SCRIPT = Path('/opt/homebrew/lib/node_modules/openclaw/skills/skill-creator/scripts/package_skill.py')
 VALIDATOR = ROOT / 'scripts' / 'validate_skills_repo.py'
+SYNCER = ROOT / 'scripts' / 'sync_package_lists.py'
 
 
 def fail(msg: str) -> None:
@@ -65,6 +66,8 @@ def main() -> None:
     args = parse_args()
     if not PACKAGE_SCRIPT.exists():
         fail(f'Packaging script not found: {PACKAGE_SCRIPT}')
+    if not SYNCER.exists():
+        fail(f'Package list sync script not found: {SYNCER}')
 
     PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
     skill_dirs = resolve_skill_dirs(args.skill)
@@ -78,6 +81,8 @@ def main() -> None:
                 [sys.executable, str(PACKAGE_SCRIPT), str(skill_dir), str(PACKAGES_DIR)],
                 check=True,
             )
+        print('[SYNC] Updating package list blocks in README files')
+        subprocess.run([sys.executable, str(SYNCER)], check=True)
     else:
         print('[CHECK-ONLY] Skipping rebuild step')
 

@@ -282,6 +282,7 @@ This flow validates the skill structure first, then emits the `.skill` bundle.
 ### Validation CI
 - Workflow: [`.github/workflows/validate-skills-repo.yml`](./.github/workflows/validate-skills-repo.yml)
 - Script: [`scripts/validate_skills_repo.py`](./scripts/validate_skills_repo.py)
+- Sync helper: [`scripts/sync_package_lists.py`](./scripts/sync_package_lists.py)
 
 Checks include:
 - every skill folder has `SKILL.md`
@@ -308,7 +309,7 @@ Checks include:
 
 ### Rebuild helper
 - Script: [`scripts/rebuild_all_packages.py`](./scripts/rebuild_all_packages.py)
-- Purpose: rebuild every `.skill` package from the current source folders, or rebuild only selected skills, then run repository validation
+- Purpose: rebuild every `.skill` package from the current source folders, or rebuild only selected skills, sync package lists in README files, then run repository validation
 
 Common usage:
 

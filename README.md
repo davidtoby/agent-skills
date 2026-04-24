@@ -1,5 +1,10 @@
 # agent-skills
 
+[![Validate skills repo](https://github.com/davidtoby/agent-skills/actions/workflows/validate-skills-repo.yml/badge.svg)](https://github.com/davidtoby/agent-skills/actions/workflows/validate-skills-repo.yml)
+[![Release skill packages](https://github.com/davidtoby/agent-skills/actions/workflows/release-skill-packages.yml/badge.svg)](https://github.com/davidtoby/agent-skills/actions/workflows/release-skill-packages.yml)
+[![Latest Release](https://img.shields.io/github/v/release/davidtoby/agent-skills)](https://github.com/davidtoby/agent-skills/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 **Build once. Ship to many agents.**  
 **一次沉淀，多个 Agent 复用。**
 
@@ -42,6 +47,36 @@ cp -R skills/consulting-pdf-from-youtube /path/to/your/skills/
 ```bash
 cp -R skills/consulting-pdf-from-youtube /path/to/your/skills/
 ```
+
+---
+
+## Choose the right skill / 如何选 Skill
+
+### English
+
+Use this quick map if you are not sure where to start:
+
+- **I have an academic paper PDF and want a Chinese insight handout**  
+  → [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/)
+- **I already have Chinese report content, but the PDF typography/font rendering is bad**  
+  → [`chinese-pdf-report`](./skills/chinese-pdf-report/)
+- **I have a YouTube link and want a polished report or consulting-style PDF**  
+  → [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/)
+- **I need bilingual English/Chinese subtitles for a video**  
+  → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
+
+### 中文
+
+如果你不确定该选哪个 Skill，可以先看这个快速决策区：
+
+- **我有一篇学术论文 PDF，想做成中文精读/洞察版讲义**  
+  → [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/)
+- **我已经有中文报告内容，但 PDF 字体/排版很差**  
+  → [`chinese-pdf-report`](./skills/chinese-pdf-report/)
+- **我有一个 YouTube 链接，想产出高质量报告或咨询风 PDF**  
+  → [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/)
+- **我需要给视频做中英双语字幕**  
+  → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
 
 ---
 
@@ -221,10 +256,13 @@ Use a packaged `.skill` artifact when your runtime supports direct import. Other
 如果你的运行环境支持直接导入 `.skill`，可以直接使用打包文件；如果不支持，最稳妥的方式仍然是直接使用源码目录。
 
 Current packaged artifacts:
+
+<!-- package-list:start -->
 - [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+<!-- package-list:end -->
 
 ### How packaging works / 打包方式
 
@@ -251,6 +289,7 @@ Checks include:
 - markdown fences are balanced
 - every skill has a matching `.skill` package
 - package contents are fresh and in sync with source files
+- package lists in `README.md` and `skills/README.md` exactly match the real `packages/` directory
 - repo-level indexes mention every skill
 
 校验内容包括：
@@ -259,6 +298,7 @@ Checks include:
 - Markdown 代码块成对闭合
 - 每个 skill 都有对应 `.skill` 包
 - `.skill` 包内容与源码目录保持同步，不允许陈旧包漂移
+- `README.md` 与 `skills/README.md` 里的 package 列表必须和真实 `packages/` 目录完全一致
 - README 与 skills/README 不漏掉任何 skill
 
 ### Release workflow
@@ -266,8 +306,21 @@ Checks include:
 - Trigger: tag push like `v0.2.0` or manual dispatch
 - Result: create a GitHub Release and upload all `packages/*.skill` as release assets
 
+### Rebuild helper
+- Script: [`scripts/rebuild_all_packages.py`](./scripts/rebuild_all_packages.py)
+- Purpose: rebuild every `.skill` package from the current source folders, then run repository validation
+
+```bash
+python scripts/rebuild_all_packages.py
+```
+
 - 触发方式：推送 `v*` tag，或手动运行 workflow
 - 结果：创建 GitHub Release，并把所有 `packages/*.skill` 作为 release assets 上传
+- 日常维护时，如果改了 skill 源码又想批量重打包，可以直接运行：
+
+```bash
+python scripts/rebuild_all_packages.py
+```
 
 ---
 

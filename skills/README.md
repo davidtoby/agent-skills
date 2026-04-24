@@ -2,6 +2,15 @@
 
 This directory contains the source-of-truth skill folders.
 
+## Package list
+
+<!-- package-list:start -->
+- `../packages/academic-paper-to-chinese-insight-pdf.skill`
+- `../packages/chinese-pdf-report.skill`
+- `../packages/consulting-pdf-from-youtube.skill`
+- `../packages/video-bilingual-subtitle-delivery.skill`
+<!-- package-list:end -->
+
 ## Current skills
 
 ### `academic-paper-to-chinese-insight-pdf`
@@ -25,6 +34,7 @@ Contains:
 - `references/troubleshooting.md`
 - `references/font-notes-macos.md`
 - `assets/examples/...`
+- packaged artifact: `../packages/chinese-pdf-report.skill`
 
 ### `consulting-pdf-from-youtube`
 Download a YouTube video, extract transcript/metadata, synthesize structured insights, and export premium PDF report variants.
@@ -33,6 +43,7 @@ Contains:
 - `SKILL.md`
 - `references/output-package.md`
 - `references/style-variants.md`
+- packaged artifact: `../packages/consulting-pdf-from-youtube.skill`
 
 ### `video-bilingual-subtitle-delivery`
 Create, repair, audit, and deliver bilingual video subtitles with English timing and Chinese aligned on the same subtitle event.
@@ -42,6 +53,7 @@ Contains:
 - multiple subtitle pipeline scripts
 - workflow and troubleshooting references
 - concrete field lessons from a real rebuild
+- packaged artifact: `../packages/video-bilingual-subtitle-delivery.skill`
 
 ## Contribution note
 

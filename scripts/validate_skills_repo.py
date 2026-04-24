@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import subprocess
 import sys
 from pathlib import Path
 import zipfile
@@ -12,6 +13,9 @@ PACKAGES_DIR = ROOT / "packages"
 README = ROOT / "README.md"
 SKILLS_README = SKILLS_DIR / "README.md"
 CHANGELOG = ROOT / "CHANGELOG.md"
+PACKAGE_SCRIPT = Path("/opt/homebrew/lib/node_modules/openclaw/skills/skill-creator/scripts/package_skill.py")
+PACKAGE_MARKER_START = "<!-- package-list:start -->"
+PACKAGE_MARKER_END = "<!-- package-list:end -->"
 
 
 def fail(msg: str) -> None:
@@ -116,6 +120,67 @@ def check_index_mentions(skill_dirs: list[Path], path: Path) -> None:
     ok(f"Index coverage OK for {path.relative_to(ROOT)}")
 
 
+def extract_marked_package_list(path: Path) -> list[str]:
+    lines = path.read_text(encoding='utf-8').splitlines()
+    try:
+        start = lines.index(PACKAGE_MARKER_START)
+        end = lines.index(PACKAGE_MARKER_END)
+    except ValueError:
+        fail(f"{path.relative_to(ROOT)} is missing package list markers")
+    if end <= start:
+        fail(f"{path.relative_to(ROOT)} package list markers are malformed")
+
+    items: list[str] = []
+    for line in lines[start + 1 : end]:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if not stripped.startswith('- '):
+            fail(f"Unexpected line inside package list block in {path.relative_to(ROOT)}: {stripped}")
+        content = stripped[2:].strip()
+        if content.startswith('[`') and '`](' in content:
+            content = content.split('`](', 1)[0][2:]
+        elif content.startswith('`') and content.endswith('`'):
+            content = content[1:-1]
+        items.append(content)
+    return items
+
+
+def check_package_lists(skill_dirs: list[Path]) -> None:
+    expected_repo = [f"packages/{d.name}.skill" for d in skill_dirs]
+    expected_skills = [f"../packages/{d.name}.skill" for d in skill_dirs]
+
+    readme_list = extract_marked_package_list(README)
+    skills_readme_list = extract_marked_package_list(SKILLS_README)
+
+    if readme_list != expected_repo:
+        fail(
+            f"README.md package list mismatch. Expected {expected_repo}, got {readme_list}"
+        )
+    if skills_readme_list != expected_skills:
+        fail(
+            f"skills/README.md package list mismatch. Expected {expected_skills}, got {skills_readme_list}"
+        )
+    ok("README package lists match packages/ directory")
+
+
+def ensure_packager_exists() -> None:
+    if not PACKAGE_SCRIPT.exists():
+        fail(f"Packaging script not found: {PACKAGE_SCRIPT}")
+
+
+def rebuild_all_packages() -> None:
+    ensure_packager_exists()
+    skill_dirs = list_skill_dirs()
+    for skill_dir in skill_dirs:
+        print(f"[REBUILD] Packaging {skill_dir.name}")
+        subprocess.run(
+            [sys.executable, str(PACKAGE_SCRIPT), str(skill_dir), str(PACKAGES_DIR)],
+            check=True,
+        )
+    print("[OK] Rebuilt all .skill packages")
+
+
 def main() -> None:
     skill_dirs = list_skill_dirs()
     if not skill_dirs:
@@ -131,6 +196,7 @@ def main() -> None:
             fail(f"Missing required repo document: {path.relative_to(ROOT)}")
     check_index_mentions(skill_dirs, README)
     check_index_mentions(skill_dirs, SKILLS_README)
+    check_package_lists(skill_dirs)
     check_markdown_fences(CHANGELOG)
     ok("CHANGELOG.md markdown structure OK")
 

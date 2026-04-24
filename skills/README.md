@@ -9,6 +9,7 @@ This directory contains the source-of-truth skill folders.
 - `../packages/chinese-pdf-report.skill`
 - `../packages/consulting-pdf-from-youtube.skill`
 - `../packages/feishu-approval-fallback.skill`
+- `../packages/feishu-websocket-stability.skill`
 - `../packages/github-auth-recovery.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
 <!-- package-list:end -->
@@ -72,6 +73,14 @@ Contains:
 - `SKILL.md`
 - `references/real-fix-pattern.md`
 - packaged artifact: `../packages/feishu-approval-fallback.skill`
+
+### `feishu-websocket-stability`
+Stabilize Hermes Feishu websocket mode when reconnects are too slow, ping timing needs tuning, or duplicate local clients compete for the same app.
+
+Contains:
+- `SKILL.md`
+- `references/real-fix-pattern.md`
+- packaged artifact: `../packages/feishu-websocket-stability.skill`
 
 ## Contribution note
 

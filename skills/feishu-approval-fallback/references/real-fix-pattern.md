@@ -86,6 +86,25 @@ Tests should verify:
 - missing approval_id does not crash
 - non-approval card actions still route through the normal synthetic-command path
 
+### Recommended commands
+
+Focused check:
+
+```bash
+pytest tests/gateway/test_feishu_approval_buttons.py -q
+pytest tests/gateway/test_approve_deny_commands.py -q
+```
+
+Broader approval regression sweep:
+
+```bash
+pytest tests/gateway/test_feishu.py \
+       tests/gateway/test_feishu_approval_buttons.py \
+       tests/gateway/test_approve_deny_commands.py \
+       tests/gateway/test_slack_approval_buttons.py \
+       tests/gateway/test_telegram_approval_buttons.py -q
+```
+
 ## Practical rule
 
 For Feishu approvals, design for degraded mode by default:

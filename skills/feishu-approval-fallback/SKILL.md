@@ -108,6 +108,33 @@ Cover these in `tests/gateway/test_feishu_approval_buttons.py`:
 - non-approval card actions still route normally
 - cached sender name fallback works
 
+## Recommended test commands
+
+Run the focused gateway tests first:
+
+```bash
+pytest tests/gateway/test_feishu_approval_buttons.py -q
+pytest tests/gateway/test_approve_deny_commands.py -q
+```
+
+Then run the broader approval-platform regression set:
+
+```bash
+pytest tests/gateway/test_feishu.py \
+       tests/gateway/test_feishu_approval_buttons.py \
+       tests/gateway/test_approve_deny_commands.py \
+       tests/gateway/test_slack_approval_buttons.py \
+       tests/gateway/test_telegram_approval_buttons.py -q
+```
+
+When touching only the fallback text behavior, ensure at minimum that:
+
+- `test_text_mode_sends_text_instructions`
+- the `_resolve_approval(...)` cases
+- the synchronous callback-card response cases
+
+still pass.
+
 ## References
 
 - Read `references/real-fix-pattern.md` for the concrete root cause, touched files, and the exact recovery pattern from the real incident.

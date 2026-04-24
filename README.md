@@ -322,6 +322,12 @@ python scripts/rebuild_all_packages.py --skill consulting-pdf-from-youtube
 
 # just run validation without rebuilding
 python scripts/rebuild_all_packages.py --check-only
+
+# sync README package lists with packages/
+python scripts/sync_package_lists.py
+
+# only check whether README package lists drifted from packages/
+python scripts/sync_package_lists.py --check-only
 ```
 
 - 触发方式：推送 `v*` tag，或手动运行 workflow

@@ -6,7 +6,8 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 
 ## [Unreleased]
 
-- No unreleased changes yet.
+- Added `--check-only` mode to `scripts/sync_package_lists.py` so maintainers can detect package-list drift without rewriting files.
+- Added unit tests for sync/check behavior in `tests/test_sync_package_lists.py`.
 
 ## [2026-04-24] - Skill catalog, packaging, and CI refresh
 

@@ -3,48 +3,103 @@
 **Build once. Ship to many agents.**  
 **一次沉淀，多个 Agent 复用。**
 
-A bilingual collection of reusable skills for **OpenClaw**, **Hermes Agent**, **Claude Code**, **Codex** and other agent runtimes. This repo is for skills that survive real work: not toy prompts, but workflows, scripts, references, examples, and battle-tested operating patterns.
+A bilingual repository of reusable skills for **OpenClaw**, **Hermes Agent**, **Claude Code**, **Codex**, and other agent runtimes.  
+This repo stores skills that survived real work: not toy prompts, but repeatable workflows, helper scripts, references, packaged artifacts, and field-tested delivery patterns.
 
-这是一个面向 **OpenClaw**、**Hermes Agent**、**Claude Code**、**Codex** 以及其他 Agent 运行时的**可复用 Skill 仓库**。这里不追求“花哨 prompt”，而是沉淀那些经得起真实任务验证的工作流、脚本、参考资料、示例产物和踩坑经验。
+这是一个面向 **OpenClaw**、**Hermes Agent**、**Claude Code**、**Codex** 以及其他 Agent 运行时的**双语 Skill 仓库**。  
+这里沉淀的是经真实任务验证后仍然值得复用的 Skill：不是一次性 prompt，而是可重复执行的工作流、脚本、参考资料、打包产物，以及踩坑之后留下来的可靠方法。
 
 ---
 
-## Why this repo / 为什么做这个仓库
+## Quick start / 快速开始
+
+### English
+
+If you only want to use a skill quickly:
+
+1. Open the target skill under [`skills/`](./skills/)
+2. Read `SKILL.md`
+3. Copy the folder into your own skill workspace
+4. If your runtime supports direct import, use the matching `.skill` file under [`packages/`](./packages/)
+
+Example:
+
+```bash
+cp -R skills/consulting-pdf-from-youtube /path/to/your/skills/
+```
+
+### 中文
+
+如果你只是想快速使用某个 Skill：
+
+1. 打开 [`skills/`](./skills/) 下对应的目录
+2. 先读 `SKILL.md`
+3. 把整个目录复制到你自己的 skill workspace
+4. 如果你的运行环境支持直接导入，可以直接使用 [`packages/`](./packages/) 下对应的 `.skill` 文件
+
+示例：
+
+```bash
+cp -R skills/consulting-pdf-from-youtube /path/to/your/skills/
+```
+
+---
+
+## Why this repo exists / 为什么做这个仓库
+
+### English
 
 Most AI workflows die after one chat. Good skills do not.  
-This repo exists to turn one-off agent heroics into repeatable, shareable, inspectable skills.
+This repo exists to turn one-off agent heroics into reusable, inspectable, shareable assets.
 
-大多数所谓“AI 工作流”都死在一次对话里。真正好的 Skill 不会。  
-这个仓库的目标，就是把一次性的 Agent 灵光乍现，沉淀成**可复用、可共享、可审阅、可迭代**的 Skill。
+### 中文
+
+大多数 AI 工作流都死在一次对话里，真正好的 Skill 不会。  
+这个仓库的目标，是把一次性的 Agent 灵光乍现，沉淀成**可复用、可审阅、可共享、可迭代**的资产。
 
 ---
 
 ## What lives here / 这里放什么
 
-**English**
-- Reusable agent skills
-- Skill source folders
-- Bundled helper scripts
-- References, troubleshooting notes, examples, and field-tested workflows
-- Optional packaged `.skill` artifacts for easier distribution
+### English
+- reusable agent skills
+- source skill folders
+- helper scripts
+- references and troubleshooting notes
+- example assets when they materially improve reuse
+- optional packaged `.skill` artifacts for distribution
 
-**中文**
+### 中文
 - 可复用的 Agent Skill
 - Skill 源码目录
 - 配套脚本
-- 参考文档、故障排查、示例产物、实战流程总结
-- 可选的 `.skill` 打包产物，方便分发
+- 参考文档与故障排查说明
+- 只有在确实提升复用价值时才保留的示例资产
+- 用于分发的可选 `.skill` 打包产物
+
+---
+
+## How to read this repo / 怎么理解这个仓库
+
+| Path | Purpose |
+|---|---|
+| [`skills/`](./skills/) | Source-of-truth skill folders / Skill 源码主目录 |
+| [`packages/`](./packages/) | Packaged `.skill` artifacts / 已打包的 `.skill` 文件 |
+| [`skills/README.md`](./skills/README.md) | Directory-level skill index / `skills/` 目录索引 |
+| [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Contribution guide / 贡献说明 |
+| [`CHANGELOG.md`](./CHANGELOG.md) | Important repository changes / 重要变更记录 |
+| [`.github/workflows/`](./.github/workflows/) | Validation and release automation / 校验与发布自动化 |
 
 ---
 
 ## Skill catalog / 技能目录
 
-| Skill | What it does | Key assets |
+| Skill | Problem it solves / 解决的问题 | Main assets / 主要内容 |
 |---|---|---|
-| [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/) | Turn an academic paper PDF into a polished Chinese insight report PDF. | Text extraction script, PDF renderer, output structure and quality-bar references |
-| [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering and stronger typography on macOS. | Renderer script, font notes, troubleshooting, example input/output |
-| [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and produce premium PDF report variants including consulting, McKinsey-style, BCG-style, and Apple-inspired personal-brand editions. | Workflow guide inside `SKILL.md`, output package reference, style-variant reference |
-| [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual video subtitles with English timing and Chinese aligned on the same subtitle event. | Multiple subtitle scripts, workflow notes, troubleshooting, real repair lessons |
+| [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/) | Turn an academic paper PDF into a readable Chinese insight report and polished Chinese PDF / 把学术论文 PDF 转成更易读的中文精读/洞察版 PDF | extraction script, PDF renderer, structure and quality references |
+| [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering on macOS / 生成中文字体更稳、排版更专业的 PDF 报告 | renderer script, troubleshooting, font notes, example assets |
+| [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and export premium PDF report variants / 下载 YouTube 视频、提取字幕与元数据，并导出高端报告风格 PDF | workflow guide, output package reference, style-variant reference |
+| [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual subtitles with shared EN/ZH timing / 创建、修复、审计并交付中英双语字幕 | subtitle scripts, workflow docs, troubleshooting, real repair lessons |
 
 More detail: see [`skills/README.md`](./skills/README.md).
 
@@ -52,121 +107,126 @@ More detail: see [`skills/README.md`](./skills/README.md).
 
 ## Featured skills / 精选技能
 
+Each featured skill follows the same reading order:
+1. what it does / 它做什么
+2. why it is useful / 为什么有用
+3. quick entry / 快速入口
+
 ### `academic-paper-to-chinese-insight-pdf`
 
-> **What it does**  
-> Turn an academic paper PDF into a readable Chinese insight report and export it as a polished Chinese PDF.
->
-> **它能做什么**  
-> 把学术论文 PDF 转成**中文精读/洞察版 PDF**，适合做论文解读、方法总结、结果提炼和更易读的说明型交付。
+**What it does / 它做什么**
+- Reads an academic paper PDF and turns it into a readable Chinese insight report
+- Exports the result as a polished Chinese PDF
+- Better suited for “understand this paper” tasks than raw page-by-page translation
 
-**Highlights / 亮点**
-- Insight edition by default when that is more useful than literal translation / 默认优先生成更有用的洞察版，而不是机械逐字翻译
-- Separate paper facts from your own analysis / 明确区分论文事实与个人分析
-- Chinese-first delivery with polished PDF export / 中文优先组织，并导出成品 PDF
-- Structured output contract for consistent reports / 有清晰的报告结构约定
+- 读取学术论文 PDF，并整理成可读性更高的中文洞察版报告
+- 输出成品级中文 PDF
+- 更适合“帮我读懂这篇论文”类任务，而不是机械逐页直译
 
-**Jump in / 快速入口**
-- Source skill folder: [`skills/academic-paper-to-chinese-insight-pdf/`](./skills/academic-paper-to-chinese-insight-pdf/)
-- Packaged artifact: [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
+**Why it is useful / 为什么有用**
+- prefers an insight edition when that is more useful than literal translation
+- keeps paper facts separate from your own commentary
+- uses a clear output structure so different reports stay consistent
+
+- 在“洞察版比直译版更有用”的情况下，默认优先洞察版
+- 明确区分论文事实与个人分析
+- 输出结构清晰，方便形成稳定交付风格
+
+**Quick entry / 快速入口**
+- Source: [`skills/academic-paper-to-chinese-insight-pdf/`](./skills/academic-paper-to-chinese-insight-pdf/)
+- Package: [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 
 ### `chinese-pdf-report`
 
-> **What it does**  
-> Create professional Chinese PDF reports with reliable font rendering on macOS.
->
-> **它能做什么**  
-> 生成或重导出**中文优先的专业 PDF 报告**，重点解决中文字体乱码、缺字、回退失控和成品排版不专业的问题。
+**What it does / 它做什么**
+- Generates professional Chinese-first PDF reports
+- Focuses on reliable Chinese font rendering and stronger typography on macOS
+- Useful when HTML-to-PDF output looks technically OK but visually weak
 
-**Highlights / 亮点**
-- Deterministic Chinese font rendering on macOS / 在 macOS 上更可控地处理中文字体渲染
-- Prefer explicit-font PDF generation over fragile HTML paths / 优先显式字体注册，而不是反复试错 HTML 渲染链路
-- Stronger typography guidance for formal reports / 更适合正式中文报告的排版原则
-- Includes real example assets / 附带真实输入与输出示例
+- 生成中文优先的专业 PDF 报告
+- 重点解决 macOS 上中文字体渲染和排版质量问题
+- 适合“HTML 转 PDF 勉强能出，但成品不够专业”的场景
 
-**Jump in / 快速入口**
-- Source skill folder: [`skills/chinese-pdf-report/`](./skills/chinese-pdf-report/)
-- Packaged artifact: [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
+**Why it is useful / 为什么有用**
+- uses explicit font control instead of fragile fallback chains
+- includes troubleshooting notes for garbling and missing glyphs
+- comes with example assets, not just abstract advice
+
+- 用显式字体控制替代脆弱的自动回退链路
+- 带有乱码、缺字、字体注册失败等问题的排查说明
+- 不只是抽象原则，还附带真实示例资产
+
+**Quick entry / 快速入口**
+- Source: [`skills/chinese-pdf-report/`](./skills/chinese-pdf-report/)
+- Package: [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 
 ### `consulting-pdf-from-youtube`
 
-> **What it does**  
-> Download a YouTube video, extract transcript/metadata, synthesize structured insights, and export premium PDF report variants.
->
-> **它能做什么**  
-> 下载 YouTube 视频、提取字幕与元数据、整理核心观点与洞察，并导出**高端报告风格 PDF**，包括咨询风、麦肯锡风、BCG 风和 Apple 风个人品牌版。
+**What it does / 它做什么**
+- Downloads a YouTube video
+- extracts transcript/subtitle + metadata
+- synthesizes viewpoints, takeaways, and insights
+- exports premium PDF report variants such as consulting, McKinsey-style, BCG-style, and Apple-inspired branding editions
 
-**Highlights / 亮点**
-- Transcript-first reporting workflow / 先拿到可分析字幕，再做报告
-- Markdown + HTML + PDF layered deliverables / Markdown、HTML、PDF 分层交付
-- Multi-style output from one content base / 一份内容母版衍生多种视觉版本
-- Explicit PDF QA with page-count and text-extraction checks / 交付前明确做页数与文本抽检
+- 下载 YouTube 视频
+- 提取字幕/转录与元数据
+- 整理核心观点、Key Takeaways 和个人洞察
+- 导出咨询风、麦肯锡风、BCG 风、Apple 风品牌版等高端 PDF 报告
 
-**Jump in / 快速入口**
-- Source skill folder: [`skills/consulting-pdf-from-youtube/`](./skills/consulting-pdf-from-youtube/)
-- Packaged artifact: [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
+**Why it is useful / 为什么有用**
+- starts from transcript reliability, not from vague summarization
+- keeps Markdown, HTML, and PDF as layered deliverables
+- includes explicit QA expectations such as page count and text extraction checks
+
+- 先保证可分析的字幕/转录，再做报告
+- Markdown、HTML、PDF 分层交付，便于修改和复用
+- 明确要求做页数、文本提取、视觉层级等 QA 验证
+
+**Quick entry / 快速入口**
+- Source: [`skills/consulting-pdf-from-youtube/`](./skills/consulting-pdf-from-youtube/)
+- Package: [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
 
 ### `video-bilingual-subtitle-delivery`
 
-> **What it does**  
-> Create, repair, audit, and deliver bilingual video subtitles with English speech timing and Chinese aligned on the same subtitle event.
->
-> **它能做什么**  
-> 创建、修复、审计并交付**中英双语视频字幕**，重点解决时间轴对齐、中文漏挂、softsub 交付和 hardcode 成片问题。
+**What it does / 它做什么**
+- Creates, repairs, audits, and delivers bilingual subtitles
+- keeps English timing as the source of truth
+- aligns Chinese to the same subtitle event
+- supports both softsub and hardcode delivery
 
-**Highlights / 亮点**
-- English timing first, then Chinese alignment / 先锁英文时间轴，再挂中文
-- Audit missing Chinese lines before final delivery / 最终交付前审计中文漏挂
-- Softsub → hardcode delivery path / 先软字幕，再硬字幕
-- Hardcode fallback when local ffmpeg lacks subtitle filters / 本地 ffmpeg 缺字幕滤镜时的 fallback 硬字幕方案
+- 创建、修复、审计并交付中英双语字幕
+- 以英文时间轴为基准
+- 把中文挂在同一字幕事件下
+- 同时支持 softsub 与 hardcode 交付
 
-**Jump in / 快速入口**
-- Source skill folder: [`skills/video-bilingual-subtitle-delivery/`](./skills/video-bilingual-subtitle-delivery/)
-- Packaged artifact: [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+**Why it is useful / 为什么有用**
+- prevents “wrong source cut” and “missing Chinese lines” from slipping into final delivery
+- includes scripts for audit and hardcode fallback
+- captures real lessons from subtitle rebuild work
+
+- 能防止“用错视频 cut”与“中文漏挂”进入最终交付
+- 自带审计脚本和硬字幕 fallback 脚本
+- 总结了真实字幕修复任务中的经验
+
+**Quick entry / 快速入口**
+- Source: [`skills/video-bilingual-subtitle-delivery/`](./skills/video-bilingual-subtitle-delivery/)
+- Package: [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
 
 ---
 
-## How to use / 如何使用
+## Packaged `.skill` artifacts / 已打包的 `.skill` 文件
 
-### Option A: Use the source skill folder / 直接使用源码目录
+Use a packaged `.skill` artifact when your runtime supports direct import. Otherwise, the source skill folder is the safest and most portable format.
 
-Copy a skill folder into your own skill workspace:
+如果你的运行环境支持直接导入 `.skill`，可以直接使用打包文件；如果不支持，最稳妥的方式仍然是直接使用源码目录。
 
-```bash
-cp -R skills/consulting-pdf-from-youtube /path/to/your/skills/
-# or
-cp -R skills/video-bilingual-subtitle-delivery /path/to/your/skills/
-```
-
-### Option B: Use the packaged artifact / 使用打包产物
-
-Use the packaged `.skill` file under `packages/` if your environment supports direct skill import.
-
-如果你的运行环境支持直接导入 Skill，也可以使用 `packages/` 下的 `.skill` 文件。
-
-Current packaged artifacts in this repo:
+Current packaged artifacts:
 - [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
 
----
-
-## About `.skill` packages / 关于 `.skill` 打包文件
-
-**English**
-- A `.skill` file is a packaged distribution artifact for a skill.
-- In practice, it is a zip-style bundle of the skill folder, including `SKILL.md`, `scripts/`, and `references/`.
-- It is useful for sharing, attaching to releases, and importing into environments that support direct skill installation.
-
-**中文**
-- `.skill` 文件可以理解为 Skill 的打包分发格式。
-- 实际上，它本质上是把 Skill 目录（包括 `SKILL.md`、`scripts/`、`references/`）打成一个可分发的包。
-- 它适合拿来分享、挂在 release 里，或者导入支持直接安装 Skill 的运行环境。
-
-### How it is packaged / 它是怎么打包的
-
-Use the OpenClaw skill packaging script:
+### How packaging works / 打包方式
 
 ```bash
 python3 /opt/homebrew/lib/node_modules/openclaw/skills/skill-creator/scripts/package_skill.py \
@@ -174,9 +234,40 @@ python3 /opt/homebrew/lib/node_modules/openclaw/skills/skill-creator/scripts/pac
   /path/to/output-dir
 ```
 
-This validator-packager flow first checks the skill structure, then emits a `.skill` artifact.
+This flow validates the skill structure first, then emits the `.skill` bundle.  
+这个流程会先校验 Skill 结构，再生成 `.skill` 打包文件。
 
-这个流程会先校验 Skill 结构是否合规，再生成 `.skill` 打包文件。
+---
+
+## Validation and release automation / 校验与发布自动化
+
+### Validation CI
+- Workflow: [`.github/workflows/validate-skills-repo.yml`](./.github/workflows/validate-skills-repo.yml)
+- Script: [`scripts/validate_skills_repo.py`](./scripts/validate_skills_repo.py)
+
+Checks include:
+- every skill folder has `SKILL.md`
+- required markers exist in `SKILL.md`
+- markdown fences are balanced
+- every skill has a matching `.skill` package
+- package contents are fresh and in sync with source files
+- repo-level indexes mention every skill
+
+校验内容包括：
+- 每个 skill 目录都有 `SKILL.md`
+- `SKILL.md` 含有必要字段标记
+- Markdown 代码块成对闭合
+- 每个 skill 都有对应 `.skill` 包
+- `.skill` 包内容与源码目录保持同步，不允许陈旧包漂移
+- README 与 skills/README 不漏掉任何 skill
+
+### Release workflow
+- Workflow: [`.github/workflows/release-skill-packages.yml`](./.github/workflows/release-skill-packages.yml)
+- Trigger: tag push like `v0.2.0` or manual dispatch
+- Result: create a GitHub Release and upload all `packages/*.skill` as release assets
+
+- 触发方式：推送 `v*` tag，或手动运行 workflow
+- 结果：创建 GitHub Release，并把所有 `packages/*.skill` 作为 release assets 上传
 
 ---
 
@@ -185,160 +276,68 @@ This validator-packager flow first checks the skill structure, then emits a `.sk
 ```text
 agent-skills/
 ├── README.md
+├── CHANGELOG.md
 ├── CONTRIBUTING.md
+├── scripts/
+│   └── validate_skills_repo.py
 ├── skills/
 │   ├── README.md
 │   ├── academic-paper-to-chinese-insight-pdf/
-│   │   ├── SKILL.md
-│   │   ├── scripts/
-│   │   └── references/
 │   ├── chinese-pdf-report/
-│   │   ├── SKILL.md
-│   │   ├── scripts/
-│   │   ├── references/
-│   │   └── assets/
 │   ├── consulting-pdf-from-youtube/
-│   │   ├── SKILL.md
-│   │   └── references/
 │   └── video-bilingual-subtitle-delivery/
-│       ├── SKILL.md
-│       ├── scripts/
-│       └── references/
-└── packages/
-    ├── academic-paper-to-chinese-insight-pdf.skill
-    ├── chinese-pdf-report.skill
-    ├── consulting-pdf-from-youtube.skill
-    └── video-bilingual-subtitle-delivery.skill
+├── packages/
+│   ├── academic-paper-to-chinese-insight-pdf.skill
+│   ├── chinese-pdf-report.skill
+│   ├── consulting-pdf-from-youtube.skill
+│   └── video-bilingual-subtitle-delivery.skill
+└── .github/workflows/
+    ├── validate-skills-repo.yml
+    └── release-skill-packages.yml
 ```
-
----
-
-## Current skills / 当前已收录 Skill
-
-### video-bilingual-subtitle-delivery
-
-Create, repair, audit, and deliver bilingual video subtitles with English speech timing and Chinese aligned on the same subtitle event.
-
-用于创建、修复、审计并交付**中英双语视频字幕**，强调：
-- 英文时间轴先对齐语音
-- 中文挂在同一字幕事件下
-- 先 softsub，再 hardcode
-- 支持缺字幕滤镜环境下的 fallback 硬字幕方案
-
-Includes / 包含：
-- `SKILL.md`
-- `scripts/audit_bilingual_srt.py`
-- `scripts/hardcode_bilingual_srt.py`
-- `references/workflow.md`
-- `references/troubleshooting.md`
-- `references/lessons-from-terafab.md`
-
-### chinese-pdf-report
-
-Create professional Chinese PDF reports with reliable font rendering on macOS, especially when HTML-to-PDF output produced garbled Chinese text or weak typography.
-
-用于生成或重导出**中文优先的专业 PDF 报告**，重点解决：
-- 中文乱码或缺字
-- 中文字体回退失控
-- HTML 转 PDF 样式看似成功但成品不专业
-- macOS 上中文字体选择与嵌入不稳定
-
-Includes / 包含：
-- `SKILL.md`
-- `scripts/render_cn_report_pdf.py`
-- `references/workflow.md`
-- `references/troubleshooting.md`
-- `references/font-notes-macos.md`
-- `assets/examples/uk-prime-ministers-report-example-input.md`
-- `assets/examples/uk-prime-ministers-report-example-output-v2.pdf`
-
-### academic-paper-to-chinese-insight-pdf
-
-Turn an academic paper PDF into a readable Chinese insight report and export it as a polished Chinese PDF.
-
-用于把**学术论文 PDF** 转成可读性更高的中文精读/洞察版 PDF，适合：
-- 论文精读版
-- 中文观点总结
-- 方法与实验提炼
-- “更容易读懂”的说明型交付
-
-Includes / 包含：
-- `SKILL.md`
-- `scripts/extract_paper_text.py`
-- `scripts/render_cn_pdf.py`
-- `references/output-structure.md`
-- `references/quality-bar.md`
-
-### consulting-pdf-from-youtube
-
-Download a YouTube video, extract transcript/metadata, synthesize structured insights, and export premium PDF report variants.
-
-用于把 **YouTube 视频** 变成高质量报告交付，支持：
-- 视频下载
-- 字幕/转录提取与清洗
-- 核心观点、Key Takeaways、个人洞察整理
-- 咨询风 / 麦肯锡风 / BCG 风 / Apple 风品牌版 PDF 导出
-
-Includes / 包含：
-- `SKILL.md`
-- `references/output-package.md`
-- `references/style-variants.md`
 
 ---
 
 ## Design principles / 设计原则
 
-1. **Real tasks first**  
-   Skills should come from real delivery work, not hypothetical demos.  
-   **先有真实任务，再有 Skill。**
+1. **Real tasks first / 先有真实任务，再有 Skill**  
+   Skills should come from real delivery work, not hypothetical demos.
 
-2. **Source over magic**  
-   Prefer auditable scripts, references, and workflows over opaque prompt tricks.  
-   **用脚本、文档、流程替代玄学提示词。**
+2. **Source over magic / 用脚本、文档、流程替代玄学提示词**  
+   Prefer auditable scripts, references, and workflows over opaque prompt tricks.
 
-3. **Progressive disclosure**  
-   Keep `SKILL.md` lean; move heavier details into `references/` and reusable logic into `scripts/`.  
-   **SKILL.md 要轻，细节放 `references/`，稳定逻辑放 `scripts/`。**
+3. **Progressive disclosure / `SKILL.md` 要轻，细节放 `references/`，稳定逻辑放 `scripts/`**  
+   Keep the entry doc readable, and move heavier detail where it belongs.
 
-4. **Failure notes matter**  
-   A good skill records not only what worked, but also what failed and why.  
-   **失败经验同样重要。**
+4. **Failure notes matter / 失败经验同样重要**  
+   A strong skill records what failed, not only what worked.
 
-5. **Deliverables matter**  
-   A strong skill should make the output package and verification standard explicit, not implicit.  
-   **交付物和验收标准要写清楚。**
+5. **Deliverables matter / 交付物和验收标准要写清楚**  
+   A reusable skill should make outputs and verification explicit.
 
 ---
 
-## How to contribute your first skill / 如何贡献你的第一个 Skill
+## Contributing / 如何贡献
 
-**Fast path / 最短路径**
-1. Pick a workflow that already survived real work.  
-   先选一个已经在真实任务里跑通过的流程。
-2. Turn it into a clean skill folder with `SKILL.md`, `scripts/`, `references/`, and optionally `assets/`.  
-   把它整理成干净的 Skill 目录：`SKILL.md`、`scripts/`、`references/`，必要时加 `assets/`。
-3. Keep the trigger clear and the workflow honest.  
-   触发条件要清楚，工作流要诚实，不要把玄学包装成方法论。
-4. Add failure notes if the task has common traps.  
-   如果这个任务有典型踩坑，最好把失败经验也写进去。
-5. Open a PR.  
-   然后直接提 PR。
+### English
 
-Need the full guide? / 想看完整说明？  
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+A good contribution usually has:
+- a real task behind it
+- a clear trigger condition
+- runnable scripts when scripts are included
+- references that help another agent succeed faster
+- explicit output naming and quality checks when output quality matters
 
----
+### 中文
 
-## Contributing / 欢迎贡献
+一个好的贡献通常具备：
+- 来自真实任务，而不是想象中的 demo
+- 触发条件清楚
+- 如果带脚本，脚本是真的能跑
+- `references/` 里的内容确实能帮另一个 Agent 少踩坑
+- 如果交付质量重要，要写清楚输出命名与验收方式
 
-If you have a skill that survived real usage, open a PR.  
-If it only worked once in one chat, keep cooking.
-
-如果你手里有一个经得起真实任务验证的 Skill，欢迎直接提 PR。  
-如果它只在某次对话里偶然成功过一次，建议先继续打磨。
-
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidelines.  
-贡献规范见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
+Read the full guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
 ---
 

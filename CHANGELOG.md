@@ -11,7 +11,7 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 ## [2026-04-24] - Skill catalog, packaging, and CI refresh
 
 ### Summary
-This update expands the repository from a subtitle/PDF-focused collection into a more coherent multi-skill catalog covering video subtitle delivery, Chinese PDF generation, academic-paper insight reporting, and YouTube-to-consulting-report workflows. It also improves README navigation, adds package-list consistency checks, and adds a rebuild helper for maintainers.
+This update expands the repository from a subtitle/PDF-focused collection into a more coherent multi-skill catalog covering video subtitle delivery, Chinese PDF generation, academic-paper insight reporting, and YouTube-to-consulting-report workflows. It also improves README navigation, adds package-list consistency checks, adds a rebuild helper for maintainers, and surfaces repository popularity with Star History in the README.
 
 ### Added
 - New skill: `skills/consulting-pdf-from-youtube/`
@@ -37,6 +37,9 @@ This update expands the repository from a subtitle/PDF-focused collection into a
   - standardize featured skill presentation
   - include all current skills in a more consistent order and format
   - update repository structure and packaged-artifact listings
+  - add a quick “Choose the right skill” decision section
+  - add badges for validation, releases, latest release, and license
+  - embed a Star History chart to make repo traction visible and encourage stars/contributions
 - Updated `CONTRIBUTING.md` to:
   - recognize optional `assets/` folders when examples materially improve reuse
   - require explicit verification/quality checks when output quality matters
@@ -50,6 +53,7 @@ This update expands the repository from a subtitle/PDF-focused collection into a
 - Raises the quality bar from “workflow exists” to “workflow plus validation standard exists”
 - Prevents stale package artifacts from silently drifting away from source skills
 - Adds a one-step GitHub Release path for publishing all packaged skills as release assets
+- Makes the repository’s popularity visible on the README so users can judge traction and are nudged to star/contribute
 
 ### PR-style notes
 **Problem solved**

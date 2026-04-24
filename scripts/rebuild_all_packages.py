@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import subprocess
 import sys
 from pathlib import Path
@@ -26,25 +27,66 @@ def list_skill_dirs() -> list[Path]:
     )
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description='Rebuild .skill packages and optionally validate the repository.'
+    )
+    parser.add_argument(
+        '--skill',
+        action='append',
+        default=[],
+        help='Only rebuild the named skill folder. Can be passed multiple times.',
+    )
+    parser.add_argument(
+        '--check-only',
+        action='store_true',
+        help='Skip rebuilding and only run repository validation.',
+    )
+    parser.add_argument(
+        '--no-validate',
+        action='store_true',
+        help='Rebuild requested packages but skip final validation.',
+    )
+    return parser.parse_args()
+
+
+def resolve_skill_dirs(requested: list[str]) -> list[Path]:
+    skill_dirs = list_skill_dirs()
+    if not requested:
+        return skill_dirs
+    by_name = {p.name: p for p in skill_dirs}
+    missing = [name for name in requested if name not in by_name]
+    if missing:
+        fail(f'Unknown skill(s): {", ".join(missing)}')
+    return [by_name[name] for name in requested]
+
+
 def main() -> None:
+    args = parse_args()
     if not PACKAGE_SCRIPT.exists():
         fail(f'Packaging script not found: {PACKAGE_SCRIPT}')
 
     PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
-    skill_dirs = list_skill_dirs()
+    skill_dirs = resolve_skill_dirs(args.skill)
     if not skill_dirs:
         fail('No skill folders found under skills/')
 
-    for skill_dir in skill_dirs:
-        print(f'[REBUILD] {skill_dir.name}')
-        subprocess.run(
-            [sys.executable, str(PACKAGE_SCRIPT), str(skill_dir), str(PACKAGES_DIR)],
-            check=True,
-        )
+    if not args.check_only:
+        for skill_dir in skill_dirs:
+            print(f'[REBUILD] {skill_dir.name}')
+            subprocess.run(
+                [sys.executable, str(PACKAGE_SCRIPT), str(skill_dir), str(PACKAGES_DIR)],
+                check=True,
+            )
+    else:
+        print('[CHECK-ONLY] Skipping rebuild step')
 
-    print('[CHECK] Running repository validation')
-    subprocess.run([sys.executable, str(VALIDATOR)], check=True)
-    print('\n[OK] Rebuilt all packages and validation passed.')
+    if not args.no_validate:
+        print('[CHECK] Running repository validation')
+        subprocess.run([sys.executable, str(VALIDATOR)], check=True)
+        print('\n[OK] Requested rebuild/check completed and validation passed.')
+    else:
+        print('\n[OK] Requested rebuild completed without validation.')
 
 
 if __name__ == '__main__':

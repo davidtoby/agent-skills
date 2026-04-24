@@ -308,19 +308,40 @@ Checks include:
 
 ### Rebuild helper
 - Script: [`scripts/rebuild_all_packages.py`](./scripts/rebuild_all_packages.py)
-- Purpose: rebuild every `.skill` package from the current source folders, then run repository validation
+- Purpose: rebuild every `.skill` package from the current source folders, or rebuild only selected skills, then run repository validation
+
+Common usage:
 
 ```bash
+# rebuild all packages, then validate
 python scripts/rebuild_all_packages.py
+
+# rebuild one skill only, then validate
+python scripts/rebuild_all_packages.py --skill consulting-pdf-from-youtube
+
+# just run validation without rebuilding
+python scripts/rebuild_all_packages.py --check-only
 ```
 
 - 触发方式：推送 `v*` tag，或手动运行 workflow
 - 结果：创建 GitHub Release，并把所有 `packages/*.skill` 作为 release assets 上传
-- 日常维护时，如果改了 skill 源码又想批量重打包，可以直接运行：
+- 日常维护时，如果改了 skill 源码又想批量重打包，可以直接运行上面的脚本
+- 如果只改了某一个 skill，也可以用 `--skill <name>` 精确重打
 
-```bash
-python scripts/rebuild_all_packages.py
-```
+---
+
+## Star History / Star 趋势
+
+If you find this repository useful, please consider starring it and contributing improvements.  
+A visible star-history chart helps maintainers and users see whether the project is gaining traction over time.
+
+如果这个仓库对你有帮助，欢迎顺手点个 Star，也欢迎提 PR 一起维护。  
+把 Star History 放到仓库首页，可以让维护者和使用者都更直观看到这个项目是否在持续获得关注。
+
+[![Star History Chart](https://api.star-history.com/svg?repos=davidtoby/agent-skills&type=Date)](https://www.star-history.com/#davidtoby/agent-skills&Date)
+
+> Like the repo? Star it, use it, and help improve it.  
+> 觉得有用的话，欢迎点 Star、用起来、顺手提改进。
 
 ---
 

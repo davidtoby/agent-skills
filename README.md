@@ -3,9 +3,9 @@
 **Build once. Ship to many agents.**  
 **一次沉淀，多个 Agent 复用。**
 
-A bilingual collection of reusable skills for **OpenClaw**, **Claude**, and other agent runtimes. This repo is for skills that survive real work: not toy prompts, but workflows, scripts, references, examples, and battle-tested operating patterns.
+A bilingual collection of reusable skills for **OpenClaw**, **Claude**, **Hermes Agent** and other agent runtimes. This repo is for skills that survive real work: not toy prompts, but workflows, scripts, references, examples, and battle-tested operating patterns.
 
-这是一个面向 **OpenClaw**、**Claude** 以及其他 Agent 运行时的**可复用 Skill 仓库**。这里不追求“花哨 prompt”，而是沉淀那些经得起真实任务验证的工作流、脚本、参考资料、示例产物和踩坑经验。
+这是一个面向 **OpenClaw**、**Claude**、**Hermes Agent** 以及其他 Agent 运行时的**可复用 Skill 仓库**。这里不追求“花哨 prompt”，而是沉淀那些经得起真实任务验证的工作流、脚本、参考资料、示例产物和踩坑经验。
 
 ---
 

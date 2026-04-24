@@ -8,6 +8,7 @@ This directory contains the source-of-truth skill folders.
 - `../packages/academic-paper-to-chinese-insight-pdf.skill`
 - `../packages/chinese-pdf-report.skill`
 - `../packages/consulting-pdf-from-youtube.skill`
+- `../packages/feishu-approval-fallback.skill`
 - `../packages/github-auth-recovery.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
 <!-- package-list:end -->
@@ -63,6 +64,14 @@ Contains:
 - `SKILL.md`
 - `references/ssh-vs-https.md`
 - packaged artifact: `../packages/github-auth-recovery.skill`
+
+### `feishu-approval-fallback`
+Recover and harden Hermes Feishu command approvals when interactive buttons fail, users see 200340, or manual text fallback becomes necessary.
+
+Contains:
+- `SKILL.md`
+- `references/real-fix-pattern.md`
+- packaged artifact: `../packages/feishu-approval-fallback.skill`
 
 ## Contribution note
 

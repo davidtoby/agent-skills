@@ -78,6 +78,104 @@ Do not trust a successful export alone. Verify:
 
 When a Chinese PDF looks wrong, the problem is often not the content. The problem is the rendering path.
 
+## Important pitfall: the bundled markdown renderer is not suitable for true one-page briefs
+
+A real-world issue encountered during an executive-brief delivery:
+
+- the bundled `render_cn_report_pdf.py` script always creates a separate title/cover page and then starts the markdown body on a new page
+- result: even a short one-page brief becomes 2–3 pages after export
+- therefore it is fine for reports, but **not** for true single-page executive briefs or board-style one-pagers
+
+Guideline:
+
+- if the user asks for a **true one-page PDF**, do **not** use the default markdown renderer unchanged
+- instead, generate a custom ReportLab layout directly on a single canvas/page, or modify the renderer to skip the cover-page behavior
+- after export, verify page count explicitly (for example with `PyPDF2`) rather than assuming the PDF stayed on one page
+
+Practical pattern for one-pagers:
+
+1. compress the content first into a real brief structure: headline, 3 key takeaways, actions, evidence/caveats, conclusion
+2. use smaller but still readable Chinese typography
+3. prefer a two-column layout or boxed sections over long narrative paragraphs
+4. render directly to one page with ReportLab canvas primitives when strict page count matters
+5. verify both:
+   - page count = 1
+   - Chinese glyphs render correctly in a preview image
+
+## Important pitfall: markdown-style content often looks unfinished in premium PDFs
+
+Observed in real usage while refining a Chinese executive brief:
+
+- raw markdown fragments like `####` can leak into the final PDF if the source text is copied too literally or the renderer does not normalize headings first
+- default bullet markers can appear oversized, heavy, or visually detached from the body text
+- a content-correct PDF can still feel amateur if hierarchy, spacing, and bullet styling are not explicitly designed
+
+Guideline:
+
+- do not trust source markdown semantics alone to create elegant typography
+- normalize section labels before rendering; never let raw markdown markers appear in the final artifact
+- use an explicit visual hierarchy:
+  - report title = largest
+  - section labels / major headers = smaller but clearly distinct
+  - body text = smallest readable size
+- for one-page briefs, prefer:
+  - small colored bullet dots instead of large default circles
+  - numbered cards for top takeaways
+  - short compare cards / stacked evidence boxes instead of dense comparison tables when space is tight
+
+## Important pitfall: dense right-column tables are often the first thing that breaks polish
+
+Observed during iterative design of a one-page bilingual health brief:
+
+- a two-column evidence table looked logically correct but became cramped in the exported PDF
+- even after line-height and padding tweaks, the right column still felt visually stressed
+- replacing the dense table with stacked compare cards (`相对更稳健` / `需要保留审慎`) improved readability and executive-brief polish substantially
+
+Guideline:
+
+- when a one-page layout feels crowded, simplify the structure before shrinking fonts
+- prefer shorter phrases and stacked comparison cards over sentence-heavy tables
+- if one column feels denser than the other, rebalance by reducing table complexity rather than compressing the whole page
+- always preview the rendered PDF as an image and inspect:
+  - heading hierarchy
+  - bullet elegance
+  - right-column density
+  - bottom-of-page spacing
+
+## Important pitfall: character-count wrapping is not safe for final PDF layout
+
+Observed during final polish of a Chinese one-page brief:
+
+- text was initially wrapped by approximate character count rather than real rendered width
+- result: right-edge clipping, labels colliding with body text, and missing characters at export time
+- this failure was especially visible in right-column sections like `我的结论` and `如果只能做三件事`
+- fixing spacing alone was not enough; the root cause was incorrect line-breaking logic
+
+Guideline:
+
+- do not rely on `textwrap.wrap(..., width=N)` or any character-count heuristic for final PDF layout when exact fit matters
+- instead, wrap lines by **measured rendered width** using the actual font and font size (for example `pdfmetrics.stringWidth(...)` in ReportLab)
+- pass an explicit **max content width in points/mm** into paragraph and bullet renderers
+- subtract indent/bullet offsets from the available text width before wrapping bullet items
+- for cards/boxes, compute content width from the actual box width rather than reusing a global heuristic
+
+Mandatory final QA for one-page PDF delivery:
+
+1. render the PDF
+2. convert at least the first page to an image preview
+3. visually inspect for:
+   - text overlap
+   - right-edge clipping / missing characters
+   - label collisions with body text
+   - bullet dot baseline alignment with first-line text
+4. only call the PDF done after those checks pass
+
+Naming standard learned from delivery feedback:
+
+- for user-facing PDFs, prefer filenames that directly match the content topic in plain Chinese
+- example: `内脏脂肪、胰岛素阻抗与心血管风险_一页纸.pdf`
+- avoid generic export names or internal workflow names when the user will read the file directly
+
 What failed in real usage:
 
 - Markdown -> HTML -> WeasyPrint produced a PDF whose typography was weak and whose stylesheet/font behavior was not reliable enough for a polished Chinese report.

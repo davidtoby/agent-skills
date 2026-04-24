@@ -68,6 +68,7 @@ More detail: see [`skills/README.md`](./skills/README.md).
 
 **Jump in / 快速入口**
 - Source skill folder: [`skills/academic-paper-to-chinese-insight-pdf/`](./skills/academic-paper-to-chinese-insight-pdf/)
+- Packaged artifact: [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 
 ### `chinese-pdf-report`
 
@@ -144,6 +145,7 @@ Use the packaged `.skill` file under `packages/` if your environment supports di
 如果你的运行环境支持直接导入 Skill，也可以使用 `packages/` 下的 `.skill` 文件。
 
 Current packaged artifacts in this repo:
+- [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
@@ -203,6 +205,7 @@ agent-skills/
 │       ├── scripts/
 │       └── references/
 └── packages/
+    ├── academic-paper-to-chinese-insight-pdf.skill
     ├── chinese-pdf-report.skill
     ├── consulting-pdf-from-youtube.skill
     └── video-bilingual-subtitle-delivery.skill

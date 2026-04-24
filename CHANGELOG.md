@@ -8,7 +8,7 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 
 - No unreleased changes yet.
 
-## [2026-04-24] - Skill catalog and packaging refresh
+## [2026-04-24] - Skill catalog, packaging, and CI refresh
 
 ### Summary
 This update expands the repository from a subtitle/PDF-focused collection into a more coherent multi-skill catalog covering video subtitle delivery, Chinese PDF generation, academic-paper insight reporting, and YouTube-to-consulting-report workflows.
@@ -18,12 +18,16 @@ This update expands the repository from a subtitle/PDF-focused collection into a
   - Added `SKILL.md`
   - Added `references/output-package.md`
   - Added `references/style-variants.md`
-- New packaged artifact:
+- New packaged artifacts:
   - `packages/consulting-pdf-from-youtube.skill`
+  - `packages/academic-paper-to-chinese-insight-pdf.skill`
 - New directory index:
   - `skills/README.md`
 - New repository changelog:
   - `CHANGELOG.md`
+- New validation CI:
+  - `.github/workflows/validate-skills-repo.yml`
+  - `scripts/validate_skills_repo.py`
 
 ### Changed
 - Refreshed `README.md` to:

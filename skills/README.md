@@ -13,6 +13,7 @@ Contains:
 - `scripts/render_cn_pdf.py`
 - `references/output-structure.md`
 - `references/quality-bar.md`
+- packaged artifact: `../packages/academic-paper-to-chinese-insight-pdf.skill`
 
 ### `chinese-pdf-report`
 Generate professional Chinese PDF reports with reliable font rendering and stronger typography on macOS.

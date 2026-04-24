@@ -1,6 +1,6 @@
 ---
 name: academic-paper-to-chinese-insight-pdf
-description: Turn an academic paper PDF into a high-quality Chinese insight report and export it as a polished Chinese PDF. Use when asked to read a paper, translate or summarize a paper into Chinese, extract the paper's core ideas, produce original insights/opinions, explain the paper in simpler language, or deliver a Chinese PDF handout from a paper PDF. Especially useful for workflows like: PDF paper -> extract text -> Chinese精读版/洞察版 -> optional 小学生也能懂 version -> polished Chinese PDF.
+description: Turn an academic paper PDF into a high-quality Chinese insight report and export it as a polished Chinese PDF. Use when asked to read a paper, translate or summarize a paper into Chinese, extract the paper's core ideas, produce original insights/opinions, explain the paper in simpler language, or deliver a Chinese PDF handout from a paper PDF. Especially useful for workflows like: PDF paper to extracted text to Chinese精读版/洞察版 to optional 小学生也能懂 version to polished Chinese PDF.
 ---
 
 # Academic Paper to Chinese Insight PDF
@@ -66,6 +66,6 @@ When you choose insight edition, say briefly that you are using a faithful Chine
 
 ## Suggested final filename pattern
 
-`<paper-topic>_论文精读_中文版_<YYYY-MM-DD>.pdf`
+`paper-topic_论文精读_中文版_YYYY-MM-DD.pdf`
 
 Avoid vague names like `final.pdf`.

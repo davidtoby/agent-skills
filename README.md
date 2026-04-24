@@ -41,16 +41,69 @@ This repo exists to turn one-off agent heroics into repeatable, shareable, inspe
 
 | Skill | What it does | Key assets |
 |---|---|---|
-| [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual video subtitles with English timing and Chinese aligned on the same subtitle event. | Multiple subtitle scripts, workflow notes, troubleshooting, real repair lessons |
-| [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering and stronger typography on macOS. | Renderer script, font notes, troubleshooting, example input/output |
 | [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/) | Turn an academic paper PDF into a polished Chinese insight report PDF. | Text extraction script, PDF renderer, output structure and quality-bar references |
+| [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering and stronger typography on macOS. | Renderer script, font notes, troubleshooting, example input/output |
 | [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and produce premium PDF report variants including consulting, McKinsey-style, BCG-style, and Apple-inspired personal-brand editions. | Workflow guide inside `SKILL.md`, output package reference, style-variant reference |
+| [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual video subtitles with English timing and Chinese aligned on the same subtitle event. | Multiple subtitle scripts, workflow notes, troubleshooting, real repair lessons |
 
 More detail: see [`skills/README.md`](./skills/README.md).
 
 ---
 
 ## Featured skills / 精选技能
+
+### `academic-paper-to-chinese-insight-pdf`
+
+> **What it does**  
+> Turn an academic paper PDF into a readable Chinese insight report and export it as a polished Chinese PDF.
+>
+> **它能做什么**  
+> 把学术论文 PDF 转成**中文精读/洞察版 PDF**，适合做论文解读、方法总结、结果提炼和更易读的说明型交付。
+
+**Highlights / 亮点**
+- Insight edition by default when that is more useful than literal translation / 默认优先生成更有用的洞察版，而不是机械逐字翻译
+- Separate paper facts from your own analysis / 明确区分论文事实与个人分析
+- Chinese-first delivery with polished PDF export / 中文优先组织，并导出成品 PDF
+- Structured output contract for consistent reports / 有清晰的报告结构约定
+
+**Jump in / 快速入口**
+- Source skill folder: [`skills/academic-paper-to-chinese-insight-pdf/`](./skills/academic-paper-to-chinese-insight-pdf/)
+
+### `chinese-pdf-report`
+
+> **What it does**  
+> Create professional Chinese PDF reports with reliable font rendering on macOS.
+>
+> **它能做什么**  
+> 生成或重导出**中文优先的专业 PDF 报告**，重点解决中文字体乱码、缺字、回退失控和成品排版不专业的问题。
+
+**Highlights / 亮点**
+- Deterministic Chinese font rendering on macOS / 在 macOS 上更可控地处理中文字体渲染
+- Prefer explicit-font PDF generation over fragile HTML paths / 优先显式字体注册，而不是反复试错 HTML 渲染链路
+- Stronger typography guidance for formal reports / 更适合正式中文报告的排版原则
+- Includes real example assets / 附带真实输入与输出示例
+
+**Jump in / 快速入口**
+- Source skill folder: [`skills/chinese-pdf-report/`](./skills/chinese-pdf-report/)
+- Packaged artifact: [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
+
+### `consulting-pdf-from-youtube`
+
+> **What it does**  
+> Download a YouTube video, extract transcript/metadata, synthesize structured insights, and export premium PDF report variants.
+>
+> **它能做什么**  
+> 下载 YouTube 视频、提取字幕与元数据、整理核心观点与洞察，并导出**高端报告风格 PDF**，包括咨询风、麦肯锡风、BCG 风和 Apple 风个人品牌版。
+
+**Highlights / 亮点**
+- Transcript-first reporting workflow / 先拿到可分析字幕，再做报告
+- Markdown + HTML + PDF layered deliverables / Markdown、HTML、PDF 分层交付
+- Multi-style output from one content base / 一份内容母版衍生多种视觉版本
+- Explicit PDF QA with page-count and text-extraction checks / 交付前明确做页数与文本抽检
+
+**Jump in / 快速入口**
+- Source skill folder: [`skills/consulting-pdf-from-youtube/`](./skills/consulting-pdf-from-youtube/)
+- Packaged artifact: [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
 
 ### `video-bilingual-subtitle-delivery`
 
@@ -66,19 +119,9 @@ More detail: see [`skills/README.md`](./skills/README.md).
 - Softsub → hardcode delivery path / 先软字幕，再硬字幕
 - Hardcode fallback when local ffmpeg lacks subtitle filters / 本地 ffmpeg 缺字幕滤镜时的 fallback 硬字幕方案
 
-### `consulting-pdf-from-youtube`
-
-> **What it does**  
-> Download a YouTube video, extract transcript/metadata, synthesize structured insights, and export premium PDF report variants.
->
-> **它能做什么**  
-> 下载 YouTube 视频、提取字幕与元数据、整理核心观点与洞察，并导出**高端报告风格 PDF**，包括咨询风、麦肯锡风、BCG 风和 Apple 风个人品牌版。
-
-**Highlights / 亮点**
-- Transcript-first reporting workflow / 先拿到可分析字幕，再做报告
-- Markdown + HTML + PDF layered deliverables / Markdown、HTML、PDF 分层交付
-- Multi-style output from one content base / 一份内容母版衍生多种视觉版本
-- Explicit PDF QA with page-count and text-extraction checks / 交付前明确做页数与文本抽检
+**Jump in / 快速入口**
+- Source skill folder: [`skills/video-bilingual-subtitle-delivery/`](./skills/video-bilingual-subtitle-delivery/)
+- Packaged artifact: [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
 
 ---
 
@@ -101,8 +144,9 @@ Use the packaged `.skill` file under `packages/` if your environment supports di
 如果你的运行环境支持直接导入 Skill，也可以使用 `packages/` 下的 `.skill` 文件。
 
 Current packaged artifacts in this repo:
-- [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
+- [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
+- [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
 
 ---
 
@@ -160,6 +204,7 @@ agent-skills/
 │       └── references/
 └── packages/
     ├── chinese-pdf-report.skill
+    ├── consulting-pdf-from-youtube.skill
     └── video-bilingual-subtitle-delivery.skill
 ```
 

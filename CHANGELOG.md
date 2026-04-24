@@ -25,8 +25,9 @@ This update expands the repository from a subtitle/PDF-focused collection into a
   - `skills/README.md`
 - New repository changelog:
   - `CHANGELOG.md`
-- New validation CI:
+- New validation and release automation:
   - `.github/workflows/validate-skills-repo.yml`
+  - `.github/workflows/release-skill-packages.yml`
   - `scripts/validate_skills_repo.py`
 
 ### Changed
@@ -38,12 +39,15 @@ This update expands the repository from a subtitle/PDF-focused collection into a
 - Updated `CONTRIBUTING.md` to:
   - recognize optional `assets/` folders when examples materially improve reuse
   - require explicit verification/quality checks when output quality matters
+- Added package freshness validation to CI so `.skill` artifacts must stay in sync with source skill folders
 
 ### Why this matters
 - Makes the repo easier to scan for both humans and agents
 - Documents a reusable workflow for turning YouTube videos into premium report deliverables
 - Keeps packaged `.skill` distribution in sync with source skill folders
 - Raises the quality bar from “workflow exists” to “workflow plus validation standard exists”
+- Prevents stale package artifacts from silently drifting away from source skills
+- Adds a one-step GitHub Release path for publishing all packaged skills as release assets
 
 ### PR-style notes
 **Problem solved**
@@ -62,6 +66,6 @@ This update expands the repository from a subtitle/PDF-focused collection into a
 - Contribution guidance around verification and example assets
 
 **Follow-up ideas**
-- Package `academic-paper-to-chinese-insight-pdf.skill`
-- Add lightweight validation CI for checking required skill files
-- Add a release process doc for publishing new skill packages
+- Add release notes conventions for major skill-catalog updates
+- Add optional schema validation for YAML frontmatter fields
+- Add a package rebuild helper command for contributors

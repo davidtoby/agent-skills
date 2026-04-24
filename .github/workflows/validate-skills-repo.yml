@@ -19,5 +19,5 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Validate skill repository structure
+      - name: Validate skill repository structure, packages, and freshness
         run: python scripts/validate_skills_repo.py

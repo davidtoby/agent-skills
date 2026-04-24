@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import sys
 from pathlib import Path
 import zipfile
@@ -64,6 +65,10 @@ def validate_skill_dir(skill_dir: Path) -> None:
     ok(f"Validated skill folder {skill_dir.name}")
 
 
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
 def validate_package(skill_dir: Path) -> None:
     pkg = PACKAGES_DIR / f"{skill_dir.name}.skill"
     if not pkg.exists():
@@ -76,6 +81,27 @@ def validate_package(skill_dir: Path) -> None:
             expected = f"{skill_dir.name}/SKILL.md"
             if expected not in names:
                 fail(f"Package {pkg.name} missing {expected}")
+
+            src_files = sorted(p for p in skill_dir.rglob('*') if p.is_file())
+            zip_files = sorted(
+                name for name in names
+                if name.startswith(f"{skill_dir.name}/") and not name.endswith('/')
+            )
+            expected_zip_files = [f"{skill_dir.name}/{p.relative_to(skill_dir).as_posix()}" for p in src_files]
+            if zip_files != expected_zip_files:
+                fail(
+                    f"Package {pkg.name} file list is stale. Expected {expected_zip_files}, got {zip_files}"
+                )
+
+            for src in src_files:
+                rel = src.relative_to(skill_dir).as_posix()
+                zip_name = f"{skill_dir.name}/{rel}"
+                disk_bytes = src.read_bytes()
+                zip_bytes = zf.read(zip_name)
+                if sha256_bytes(disk_bytes) != sha256_bytes(zip_bytes):
+                    fail(
+                        f"Package {pkg.name} is stale for {zip_name}. Rebuild the .skill artifact."
+                    )
     except zipfile.BadZipFile:
         fail(f"Packaged artifact is not a valid zip bundle: {pkg.relative_to(ROOT)}")
     ok(f"Validated package {pkg.name}")

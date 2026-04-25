@@ -64,6 +64,79 @@ Default typography pattern for professional Chinese reports:
 - Tight but breathable line spacing, usually around 1.5 to 1.65 equivalent
 - A4 page, balanced margins, restrained table colors
 
+### 4b. Proven working spec: consulting-style Chinese report (tested on macOS)
+
+The following CSS spec was validated in a real delivery (`内脏脂肪、胰岛素阻抗与心血管风险_咨询风PDF_中文版_2026-04-25.pdf`) and produced a 6-page report with clean Chinese rendering, no garbling, and no page-edge artifacts.
+
+**Font stack (in priority order — first available wins):**
+```css
+font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+```
+
+**Color palette:**
+| Variable   | Hex       | Use                          |
+|------------|-----------|------------------------------|
+| `--ink`    | `#142033` | Body text, main headings     |
+| `--muted`  | `#5f6f85` | Captions, meta, footer       |
+| `--line`   | `#d9e1ea` | Borders, dividers             |
+| `--soft`   | `#eef3f8` | Section backgrounds           |
+| `--soft2`  | `#f7f9fc` | Card backgrounds             |
+| `--brand`  | `#1f4e79` | Section/card titles, links    |
+| `--brand2` | `#406a95` | Sub-headings, quote borders   |
+| `--accent` | `#0f766e` | Accent highlights            |
+| `--warn`   | `#b45309` | Warnings, alert callouts      |
+
+**Font size scale (A4, body font ~10.4pt):**
+| Element           | Size      | Weight | Line-height |
+|-------------------|-----------|--------|-------------|
+| Page title (h1)   | 22–24 pt  | 800    | 1.25        |
+| Section title (h2)| 13.5–14pt| normal | 1.3         |
+| Sub-heading (h3)  | 11.5–12pt| normal | 1.35        |
+| Card heading (h2) | 13.5 pt  | normal | 1.3         |
+| Body text (p)    | 10.3–10.4pt| normal| 1.65        |
+| Bullets (li)      | 10.3 pt  | normal | ~1.5        |
+| Meta/caption       | 9.3–9.8pt| normal | ~1.5        |
+| Tags              | 8.8 pt   | normal | —           |
+
+**Layout constants:**
+- Page: A4 (210 mm × 297 mm)
+- Page margin: `12 mm` (via `@page { margin: 12mm; }`)
+- Inner padding: `16 mm 16 mm 18 mm` (top sides bottom)
+- Card padding: `5 mm 5.5 mm`
+- Card border-radius: `4 mm`; hero border-radius: `6 mm`
+- Grid gap (two-column): `6 mm`
+- Section gap: `7 mm`
+
+**Page element specs:**
+- Hero section: gradient background `linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%)`, `1 px solid var(--line)` border, `6 mm` border-radius
+- Quote block: `3 px` left border in `--brand2`, `#fafcff` background, `4 mm` left padding
+- Tag pills: `border-radius: 999px`, `1 px` border, `--brand2` blue background
+- Grid two-column: `display: grid; grid-template-columns: 1fr 1fr; gap: 6mm;`
+- Bullet list: `margin: 1.5mm 0 3.5mm 5mm;` (left indent for visual breathing room)
+
+**Chrome headless export command (verified working):**
+```bash
+# Step 1 — copy to clean ASCII path (required!)
+cp "/path/中文名_report.html" /tmp/report_for_pdf.html
+
+# Step 2 — export with clean path
+'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' \
+  --headless=new --disable-gpu --no-sandbox \
+  --no-pdf-header-footer \
+  --print-to-pdf='/tmp/report_output.pdf' \
+  'file:///tmp/report_for_pdf.html'
+
+# Step 3 — copy back
+cp /tmp/report_output.pdf "/path/中文名/desired_name.pdf"
+```
+
+Key QA checklist after export:
+- [ ] Page count correct (use PyPDF2 `PdfReader(p).pages`)
+- [ ] Text extractable on all pages (not just error placeholder)
+- [ ] No `file:///...` path in extracted text
+- [ ] Chinese characters present and not garbled
+- [ ] Headings readable, hierarchy visible
+
 ### 5. Verify the final artifact
 
 Do not trust a successful export alone. Verify:
@@ -81,6 +154,36 @@ For client-facing PDFs, explicitly disable browser PDF header/footer output (for
 ## Battle-tested lesson from this skill
 
 When a Chinese PDF looks wrong, the problem is often not the content. The problem is the rendering path.
+
+## Important pitfall: Chrome headless fails silently when HTML lives in a Chinese-path directory
+
+Observed in real usage when exporting a Chinese-title consulting report:
+
+- Chrome headless was given a `file://` URL pointing to an HTML file in a path containing Chinese characters
+- Chrome resolved the `%XX`-encoded URL incorrectly and produced a blank PDF with only an error message embedded
+- the error read: "Your file couldn't be accessed — it may have been moved, edited, or deleted"
+- the PDF had 1 page but zero meaningful content; PyPDF2 extraction confirmed ~93 characters of error text only
+
+Root cause: Chrome headless's URL resolution is unstable with `%XX`-encoded Chinese paths on macOS.
+
+Guideline — always use a temp-path workaround for Chrome headless PDF export:
+
+```bash
+# Step 1: copy the HTML to a clean ASCII path
+cp "/path/with/中文/chinese_report.html" /tmp/report_for_pdf.html
+
+# Step 2: export from the clean path
+'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' \
+  --headless=new --disable-gpu --no-sandbox \
+  --no-pdf-header-footer \
+  --print-to-pdf='/tmp/report_output.pdf' \
+  'file:///tmp/report_for_pdf.html'
+
+# Step 3: move the result back to the desired destination
+cp /tmp/report_output.pdf "/path/with/中文/desired_output.pdf"
+```
+
+This three-step pattern is now the **default** for any Chrome headless HTML→PDF workflow on this machine. Do not export directly from paths containing Chinese characters or spaces — even with proper URL-encoding.
 
 ## Important pitfall: browser-exported PDFs may leak local file paths and print metadata
 

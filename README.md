@@ -62,6 +62,8 @@ Use this quick map if you are not sure where to start:
   → [`chinese-pdf-report`](./skills/chinese-pdf-report/)
 - **I have a YouTube link and want a polished report or consulting-style PDF**  
   → [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/)
+- **My video has no subtitles / I want a Chinese PDF report from any video**  
+  → [`chinese-video-transcribe-pdf`](./skills/chinese-video-transcribe-pdf/)
 - **I need bilingual English/Chinese subtitles for a video**  
   → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
 - **My GitHub push/auth flow is broken and I need a reliable recovery path**  
@@ -81,6 +83,8 @@ Use this quick map if you are not sure where to start:
   → [`chinese-pdf-report`](./skills/chinese-pdf-report/)
 - **我有一个 YouTube 链接，想产出高质量报告或咨询风 PDF**  
   → [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/)
+- **视频没有字幕 / 想从任意视频生成中文 PDF 报告**  
+  → [`chinese-video-transcribe-pdf`](./skills/chinese-video-transcribe-pdf/)
 - **我需要给视频做中英双语字幕**  
   → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
 - **我的 GitHub push / 认证流程坏了，需要一条可靠恢复路径**  

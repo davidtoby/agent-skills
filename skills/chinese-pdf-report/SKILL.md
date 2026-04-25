@@ -73,10 +73,30 @@ Do not trust a successful export alone. Verify:
 - headings and body fonts are distinct
 - tables remain readable
 - no unexpected fallback font appears
+- page edges do not expose browser-print metadata such as date/time, document title, local `file:///...` paths, URLs, or page numbers unless the user explicitly asked for them
+
+If you export through Chrome or another browser from a local HTML file, treat header/footer leakage as a separate QA item.
+For client-facing PDFs, explicitly disable browser PDF header/footer output (for Chrome headless, use `--no-pdf-header-footer`) instead of assuming defaults are clean.
 
 ## Battle-tested lesson from this skill
 
 When a Chinese PDF looks wrong, the problem is often not the content. The problem is the rendering path.
+
+## Important pitfall: browser-exported PDFs may leak local file paths and print metadata
+
+Observed in real usage while re-exporting a Chinese consulting-style PDF from local HTML:
+
+- the PDF looked visually correct in the body, but the page edges exposed browser print metadata
+- the top edge showed timestamp/title-style header text
+- the bottom edge showed the local `file:///Users/...` path and page numbers
+- this happened because the PDF was exported from browser HTML without explicit header/footer suppression
+
+Guideline:
+
+- when exporting local HTML through Chrome/headless Chrome, explicitly disable browser print headers/footers with `--no-pdf-header-footer`
+- do not assume older flags or defaults are reliable across environments
+- after export, render a preview image of at least the first page and inspect the top/bottom edges for date/time, title text, local paths, URLs, and page numbers
+- if any of those appear, re-export before delivery; do not ship a PDF that leaks workstation paths or internal file locations
 
 ## Important pitfall: the bundled markdown renderer is not suitable for true one-page briefs
 

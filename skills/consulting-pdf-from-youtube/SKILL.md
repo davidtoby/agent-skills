@@ -22,7 +22,10 @@ Produce a package that typically includes:
 5. Final PDF(s)
 
 Default output directory pattern:
-- `/Users/bytedance/.Hermes/workspace/outputs/<task-subfolder>/`
+- `~/.Hermes/workspace/output/<task-subfolder>/`
+
+Use a self-descriptive task subfolder, for example:
+- `~/.Hermes/workspace/output/youtube_consulting_pdf_<video-id>/`
 
 ## Recommended workflow
 
@@ -56,6 +59,11 @@ Typical fallback pattern:
 ```bash
 yt-dlp --skip-download --write-auto-subs --sub-langs "zh-Hans.*,zh.*,en.*" --convert-subs srt -o '<output_dir>/%(title).200B [%(id)s].%(ext)s' "<youtube-url>"
 ```
+
+Real-world lesson:
+- YouTube subtitle downloads may partially fail with `HTTP 429` for some language variants even when primary subtitles succeed.
+- Do **not** fail the whole workflow just because one subtitle variant 429s.
+- If a usable primary subtitle file (for example `zh-Hans.vtt`) was downloaded successfully, continue with that file and record the partial subtitle failure in your notes.
 
 ### 4. Clean transcript for analysis
 Transform captions into readable timestamped lines.
@@ -101,9 +109,14 @@ Use headless Chrome:
 ```bash
 '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' \
   --headless=new --disable-gpu --no-sandbox \
-  --print-to-pdf-no-header --print-to-pdf='<output.pdf>' \
+  --no-pdf-header-footer --print-to-pdf='<output.pdf>' \
   'file://<absolute-html-path>'
 ```
+
+Important real-world lesson:
+- when exporting local HTML via `file://...`, Chrome may stamp default print header/footer metadata onto every page if header/footer suppression is not explicit
+- the leak is ugly and user-visible: top edge may show date/time and document title, bottom edge may show the local `file:///Users/...` path and page numbers
+- for polished client-facing PDFs, use `--no-pdf-header-footer` explicitly; do not assume `--print-to-pdf` alone will produce clean edges
 
 ### 8. Verify output
 Verify at least:
@@ -111,11 +124,23 @@ Verify at least:
 - expected page count
 - text can be extracted from PDF
 - the visual hierarchy is acceptable
+- no browser-generated header/footer metadata is visible at the page edges
+
+Targeted QA for browser-exported PDFs:
+- render a preview image of at least the first page
+- visually check the top and bottom edges for date/time, title text, `file:///` paths, URLs, or page numbers
+- if any appear, re-export with `--no-pdf-header-footer` and verify again before delivery
 
 A practical verification method:
-- inspect with `pypdf` for page count / sample text
+- inspect with `pypdf` for page count / sample text when available
+- if `pypdf` is unavailable in the active Python, fall back to platform tools such as `pdfinfo`, `mdls`, or other local PDF metadata/text tools
 - open HTML with browser tools
 - use browser vision for visual QA on spacing, density, and overall style
+
+Real-world lesson:
+- treat PDF rendering and PDF verification as separate steps
+- a missing verification dependency (for example `pypdf` absent from the active Python) should not be mistaken for PDF render failure
+- when Chrome successfully writes the PDF, continue verification via fallback tools instead of rerendering blindly
 
 ## Style guidance
 

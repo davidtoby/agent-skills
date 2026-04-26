@@ -29,6 +29,10 @@ Use a self-descriptive task subfolder, for example:
 
 ## Recommended workflow
 
+**对于中文视频 + 咨询风格 PDF 场景**：直接参考 `chinese-video-transcribe-pdf` 技能（已包含 faster-whisper 转写 → 专有名词核查 → HTML+CSS+Chrome 导出全流程），本技能提供额外的风格变体（McKinsey、BCG、Apple 等）。
+
+**通用流程：**
+
 ### 1. Prepare tools and output folder
 Check availability of:
 - `yt-dlp`
@@ -172,6 +176,7 @@ Real-world lesson:
 
 ## Common pitfalls
 - letting transcript failures stop the workflow; use subtitle fallback
+- **Whisper 转写专有名词不可靠**：faster-whisper 对历史人名、日文人名、朝代名称会系统性出错（如张献忠→张县中、山上彻也→山上彻野、明末→元末）。生成报告前必须人工核查专有名词，对涉及历史人物/地名/专业术语的内容不要直接信任转写结果。详见 `chinese-video-transcribe-pdf` 技能的故障排除表。
 - overloading pages with too many boxed modules
 - making every block look equally important
 - using colors too aggressively for “premium” styling

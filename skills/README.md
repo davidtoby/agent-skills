@@ -7,6 +7,7 @@ This directory contains the source-of-truth skill folders.
 <!-- package-list:start -->
 - `../packages/academic-paper-to-chinese-insight-pdf.skill`
 - `../packages/chinese-pdf-report.skill`
+- `../packages/chinese-video-transcribe-pdf.skill`
 - `../packages/consulting-pdf-from-youtube.skill`
 - `../packages/feishu-approval-fallback.skill`
 - `../packages/feishu-websocket-stability.skill`

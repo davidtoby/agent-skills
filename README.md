@@ -285,6 +285,7 @@ Current packaged artifacts:
 <!-- package-list:start -->
 - [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
+- [`packages/chinese-video-transcribe-pdf.skill`](./packages/chinese-video-transcribe-pdf.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
 - [`packages/feishu-approval-fallback.skill`](./packages/feishu-approval-fallback.skill)
 - [`packages/feishu-websocket-stability.skill`](./packages/feishu-websocket-stability.skill)

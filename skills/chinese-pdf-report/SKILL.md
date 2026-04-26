@@ -312,6 +312,30 @@ What worked better:
 - separate body font and heading font
 - generate the PDF from structured content instead of hoping the HTML engine guesses well
 
+## Important pitfall: Whisper 语音转写会系统性地弄错专有名词
+
+在实际交付"献忠事件"咨询风 PDF 时发现的严重问题：
+
+- Whisper（faster-whisper medium）在处理中文语音时，对**专有名词**（人名、地名、历史人物名、特定称谓）的识别准确率极低
+- 实际碰到的错误案例：
+  - **张献忠** 被转写为"张县中"
+  - **山上彻也** 被转写为"山上彻野"
+  - **明末** 被转写为"元末"（张献忠是明末人物，非元末）
+  - **如出一辙** 被转写为"如诸一辙"
+- 这些错误如果直接写入 PDF 报告，会让整份报告显得**不专业、不可信**，属于基本常识性错误
+
+**强制要求：**
+
+1. 当转写内容涉及**历史人物、公众人物、地名、组织名、专业术语**时，不要直接使用转写文字
+2. 必须对照视频标题、视频描述、已有公共知识进行**人工校对**
+3. 特别警惕同名异译（如张县中 / 张献忠）、朝代错误（元末 / 明末）
+4. 在 HTML → PDF 导出之前，对全文做一次专有名词扫描：
+   ```bash
+   # 检查转写文本中的可疑专有名词
+   grep -n "张县中\|山上彻野\|元末\|歪睿" transcript.json
+   ```
+5. 凡是不确定的专有名词，宁可回到原始音频段落手动听一遍，也不要直接使用 Whisper 的输出
+
 ## Scripts and references
 
 Use the bundled script for a reliable starting point:

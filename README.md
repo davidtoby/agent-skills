@@ -290,6 +290,7 @@ Current packaged artifacts:
 - [`packages/feishu-approval-fallback.skill`](./packages/feishu-approval-fallback.skill)
 - [`packages/feishu-websocket-stability.skill`](./packages/feishu-websocket-stability.skill)
 - [`packages/github-auth-recovery.skill`](./packages/github-auth-recovery.skill)
+- [`packages/precise-bilingual-subtitle.skill`](./packages/precise-bilingual-subtitle.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
 <!-- package-list:end -->
 

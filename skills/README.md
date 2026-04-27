@@ -12,6 +12,7 @@ This directory contains the source-of-truth skill folders.
 - `../packages/feishu-approval-fallback.skill`
 - `../packages/feishu-websocket-stability.skill`
 - `../packages/github-auth-recovery.skill`
+- `../packages/precise-bilingual-subtitle.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
 <!-- package-list:end -->
 

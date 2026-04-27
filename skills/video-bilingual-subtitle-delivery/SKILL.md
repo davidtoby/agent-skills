@@ -40,11 +40,27 @@ What this does:
 Current translation backends:
 - `manual` — no API key required; writes `【待补中文】...` placeholders under each English line so timing/editing can continue locally
 - `none` — English-only output on the grouped time axis
-- `argos` — fully local offline translation using Argos Translate (`en -> zh`) installed in the skill-local virtual environment
+- `argos` — fully local offline translation using Argos Translate (`en -> zh`)
+
+**⚠️ Argos Translate not installable on this Mac?** On macOS with Python 3.9+/3.11, `pip install argos-translate` fails (no compatible binary wheel). Workaround: use `deep-translator` (Google Translate backend — no API key needed):
+
+```python
+# translate_en_to_zh.py — works without any API key
+from deep_translator import GoogleTranslator
+zh = GoogleTranslator(source='en', target='zh-CN').translate(en_text)
+```
+
+Batch translate entire SRT:
+```python
+from deep_translator import GoogleTranslator
+results = GoogleTranslator(source='en', target='zh-CN').translate_batch(en_texts)
+```
 
 Important:
 - Local Whisper does **not** need `OPENAI_API_KEY`.
 - Chinese translation is a separate step. This skill is now structured so translation backends can be swapped in later without changing the transcription pipeline.
+- For large videos (>1GB, 4K), run the overlay MOV generation and the final ffmpeg composite as **separate steps** — do not use foreground mode for the composite, since ffmpeg encoding of 4K content takes 20+ minutes and the foreground timeout is 600s. Always use `background=true` with `notify_on_complete=true` for the final composite step.
+- For long audio transcription (>15 min), always use `background=true` with `notify_on_complete=true` — the medium whisper model on CPU can take 15-25 min for 30-min audio. Check the output JSON file afterward to confirm the write succeeded (the process may exit 0 but the file may not yet be flushed).
 
 ## Workflow
 
@@ -56,7 +72,7 @@ Read `references/lessons-from-terafab.md` when you want a concrete failure-to-fi
 
 If ffmpeg has no usable subtitle filter, use the bundled Python renderer instead of fighting the local ffmpeg build.
 
-Example:
+### Basic usage
 
 ```bash
 python scripts/hardcode_bilingual_srt.py \
@@ -65,11 +81,38 @@ python scripts/hardcode_bilingual_srt.py \
   --output /path/final_hardcode.mp4
 ```
 
+### Custom styling (color, size)
+
+The renderer supports `--text-color`, `--stroke-color`, `--font-size`, and `--bottom-margin` for visual customization. Colors are RGBA comma-separated (`R,G,B,A`).
+
+```bash
+# Yellow text with black stroke, larger font
+python scripts/hardcode_bilingual_srt.py \
+  --video input.mp4 \
+  --srt bilingual.srt \
+  --output output_yellow.mp4 \
+  --font-size 42 \
+  --text-color '255,255,0,255' \
+  --stroke-color '0,0,0,255' \
+  --bottom-margin 60
+
+# White text on dark bar (default look)
+python scripts/hardcode_bilingual_srt.py \
+  --video input.mp4 \
+  --srt bilingual.srt \
+  --output output_white.mp4 \
+  --font-size 34 \
+  --text-color '255,255,255,255' \
+  --stroke-color '0,0,0,255'
+```
+
 Defaults:
 - English on top line, Chinese on bottom line (as provided in the SRT block)
-- Semi-transparent bottom bar
-- White text with black stroke
-- Source Han Sans font path defaulted for Chinese-friendly rendering on this macOS setup
+- Semi-transparent bottom bar (`(0,0,0,128)`)
+- White text `(255,255,255,255)` with black stroke `(0,0,0,255)`
+- Font size: 34pt
+- Bottom margin: 56px
+- Font: `/Library/Fonts/Arial Unicode.ttf` (change with `--font` for CJK-optimized fonts like STHeiti)
 
 ## Audit missing Chinese
 

@@ -39,7 +39,7 @@ def load_font(font_path: str, size: int):
         return ImageFont.truetype(fallback, size=size)
 
 
-def render_subtitle_png(text: str, out_path: Path, width: int, height: int, font_path: str, font_size: int, bottom_margin: int):
+def render_subtitle_png(text: str, out_path: Path, width: int, height: int, font_path: str, font_size: int, bottom_margin: int, text_color=(255,255,255,255), stroke_color=(0,0,0,255)):
     img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     font = load_font(font_path, font_size)
@@ -77,7 +77,7 @@ def render_subtitle_png(text: str, out_path: Path, width: int, height: int, font
     draw.rounded_rectangle((box_x, box_y, box_x + box_w, box_y + box_h), radius=18, fill=(0, 0, 0, 128))
     text_x = width // 2
     text_y = box_y + pad_y - bbox[1]
-    draw.multiline_text((text_x, text_y), wrapped_text, font=font, fill=(255, 255, 255, 255), anchor='ma', align='center', spacing=max(4, font_size // 6), stroke_width=stroke, stroke_fill=(0, 0, 0, 255))
+    draw.multiline_text((text_x, text_y), wrapped_text, font=font, fill=text_color, anchor='ma', align='center', spacing=max(4, font_size // 6), stroke_width=stroke, stroke_fill=stroke_color)
     img.save(out_path)
 
 
@@ -91,6 +91,8 @@ def main():
     parser.add_argument('--bottom-margin', type=int, default=56)
     parser.add_argument('--workdir', default=None)
     parser.add_argument('--keep-workdir', action='store_true')
+    parser.add_argument('--text-color', default='255,255,255,255', help='RGBA text color (default: white)')
+    parser.add_argument('--stroke-color', default='0,0,0,255', help='RGBA stroke color (default: black)')
     parser.add_argument('--video-preset', default='veryfast')
     args = parser.parse_args()
 
@@ -102,6 +104,10 @@ def main():
     width, height, fps, duration = probe_video(video_path)
     fps_str = f'{fps:.6f}'
     subs = pysubs2.load(str(srt_path), encoding='utf-8')
+
+    # Parse color args
+    text_color = tuple(int(x) for x in args.text_color.split(','))
+    stroke_color = tuple(int(x) for x in args.stroke_color.split(','))
 
     workdir = Path(args.workdir) if args.workdir else output_path.with_suffix('')
     if workdir.exists():
@@ -127,7 +133,7 @@ def main():
                 f.write(f"file '{blank.resolve()}'\n")
                 f.write(f'duration {start - cursor:.6f}\n')
             png = overlays_dir / f'{idx:04d}.png'
-            render_subtitle_png(text, png, width, height, args.font, args.font_size, args.bottom_margin)
+            render_subtitle_png(text, png, width, height, args.font, args.font_size, args.bottom_margin, text_color, stroke_color)
             f.write(f"file '{png.resolve()}'\n")
             f.write(f'duration {end - start:.6f}\n')
             cursor = end

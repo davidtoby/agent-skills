@@ -1,6 +1,6 @@
 ---
 name: consulting-pdf-from-youtube
-description: Generate polished Chinese consulting-style PDF reports from YouTube videos. Uses a transcription priority chain -- YouTube auto-subs first, Whisper fallback second (with quality gates and proper noun verification). Use when a user shares a YouTube link and asks for a consulting-style PDF report.
+description: Generate polished Chinese consulting-style PDF reports from YouTube videos. Uses a transcription priority chain -- YouTube auto-subs first, Whisper fallback second (with quality gates and proper noun verification). Includes bot-detection bypass escalation when yt-dlp is blocked. Use when a user shares a YouTube link and asks for a consulting-style PDF report.
 ---
 
 # Consulting PDF from YouTube
@@ -56,9 +56,64 @@ yt-dlp --dump-single-json "<url>" | python3 -c "import json,sys; d=json.load(sys
 | Chinese (Mandarin) | `zh-Hans` (Chinese Simplified) | Chinese |
 | Other | `en-orig` + auto-translated `zh-Hans` | Chinese |
 
-### Step 2: Fetch metadata + download subtitles
+### Step 1b: Bot detection bypass — escalation ladder
 
-Do both in parallel for efficiency:
+Sometimes yt-dlp is blocked **before** it can even fetch metadata or subtitles. The error is:
+
+```
+ERROR: [youtube] <id>: Sign in to confirm you're not a bot.
+```
+
+When this happens, work through this escalation ladder **in order**. Stop as soon as one method succeeds.
+
+#### Ladder rung 1: Try different yt-dlp player clients
+
+YouTube serves different page variants to different client types. Try each:
+
+```bash
+# Android client (often bypasses restrictions)
+yt-dlp --extractor-args "youtube:player_client=android" --print title "<url>"
+
+# TV client (sometimes works when android fails)
+yt-dlp --extractor-args "youtube:player_client=tv" --print title "<url>"
+
+# Web client with different UA
+yt-dlp --extractor-args "youtube:player_client=web" --print title "<url>"
+```
+
+If any of these succeeds, use that `--extractor-args` flag for all subsequent yt-dlp calls (subtitle download, audio download).
+
+#### Ladder rung 2: Try Invidious/Piped mirrors (metadata only)
+
+Even if download is blocked, alternative YouTube frontends may return metadata:
+
+```bash
+curl -sL --max-time 10 "https://inv.nadeko.net/api/v1/videos/<video-id>"
+curl -sL --max-time 10 "https://pipedapi.kavin.rocks/streams/<video-id>"
+```
+
+These return JSON with title, channel, duration — enough to inform the user what the video is and decide whether to pursue manual transcript methods.
+
+#### Ladder rung 3: Browser page scrape (partial access)
+
+YouTube's bot-detection page often still renders the video title, channel, view count, and description preview below the "Sign in" wall. Use `browser_navigate` + `browser_snapshot` to extract whatever metadata is visible. This is enough to:
+
+- Confirm the video exists
+- Get the video title, channel name, subscriber count, view count
+- Read the description preview
+- Determine if it's worth pursuing further
+
+#### Ladder rung 4: Flag to user — manual intervention needed
+
+If all automated methods fail, present the user with these options:
+
+1. **Export cookies manually** — User exports YouTube cookies from their signed-in browser, and yt-dlp reuses them. This is the most reliable fix.
+2. **Copy transcript manually** — User opens the video in YouTube, clicks "...more" → "Show transcript", copies the text.
+3. **Skip this video** — move on to a different URL.
+
+**Key principle:** Do NOT silently fail. When the bot wall is hit at rung 4, explicitly tell the user which rungs were tried and what failed, then present options. A bot-blocked video is not the agent's fault — it's a known YouTube anti-automation measure.
+
+**Important:** The Chrome cookie decryption (`--cookies-from-browser chrome`) often fails on macOS because Chrome encrypts cookies with the Keychain, and `yt-dlp` may not have the decryption key. Do NOT attempt this without explicitly asking the user first — it triggers Keychain access prompts that confuse the user.
 
 ```bash
 # Metadata
@@ -497,6 +552,8 @@ This pattern was validated on 2 videos processed together (analysis: ~160s paral
 - **Whisper proper noun errors**: When Whisper is unavoidable, run the proper noun verification in Step 2c.4. Manually verify all names, places, and historical terms against the video title/description. Whisper systematically mangles Chinese proper nouns (张献忠→张县中, 明末→元末, etc.).
 - **Skipping the quality gate**: Even when auto-subs download successfully, run the Step 2b checks. A 1KB SRT file for a 60-minute video is a silent failure — the file exists but contains almost no usable content.
 - **Whisper model selection**: `medium` is the sweet spot for consulting reports. `large-v3` on a 2hr file can take 30+ minutes and cause memory pressure on M-series Macs. Start with `medium`; only escalate if proper noun accuracy is critical.
+- **yt-dlp blocked by bot detection**: Don't keep retrying the same command. Follow the Step 1b escalation ladder: try android → tv → web clients, then invidious mirrors for metadata, then browser snapshot, then flag to user. Each rung takes <15s — you can test all automated rungs in under a minute.
+- **Chrome cookie decryption**: `--cookies-from-browser chrome` triggers macOS Keychain prompts and almost always fails. Never attempt this without explicitly telling the user why and asking permission. The user will see Keychain access dialogs they don't understand.
 - **SRT vs VTT confusion**: With `--convert-subs srt`, yt-dlp deletes the `.vtt` file. Always check `ls *.srt` first; your parser must handle SRT format.
 - **Chinese-path Chrome export**: Chrome headless silently produces blank PDFs from Chinese-path `file://` URLs. Always use `/tmp/` ASCII paths.
 - **Missing `--no-pdf-header-footer`**: Chrome stamps date/time + local file paths onto page edges by default. Always explicitly suppress.

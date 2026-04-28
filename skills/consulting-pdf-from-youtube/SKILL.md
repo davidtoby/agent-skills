@@ -56,6 +56,16 @@ yt-dlp --dump-single-json "<url>" | python3 -c "import json,sys; d=json.load(sys
 | Chinese (Mandarin) | `zh-Hans` (Chinese Simplified) | Chinese |
 | Other | `en-orig` + auto-translated `zh-Hans` | Chinese |
 
+**⚠️ Always run `--list-subs` before downloading.** YouTube's language codes are not consistent. A Chinese video may use `zh` instead of `zh-Hans`, or `zh-CN` instead of `zh`. Blindly specifying `--sub-langs "zh-Hans"` will silently produce zero subtitles for a video whose captions are labeled `zh`.
+
+```bash
+# Discover exact language codes before downloading
+yt-dlp --list-subs "<url>" 2>&1 | grep -A5 "Available automatic"
+```
+
+Example mismatch encountered in real usage:
+- Expected: `zh-Hans` → Actual: `zh` → Download with `--sub-langs "zh"`
+
 ### Step 1b: Bot detection bypass — escalation ladder
 
 Sometimes yt-dlp is blocked **before** it can even fetch metadata or subtitles. The error is:
@@ -103,13 +113,29 @@ YouTube's bot-detection page often still renders the video title, channel, view 
 - Read the description preview
 - Determine if it's worth pursuing further
 
-#### Ladder rung 4: Flag to user — manual intervention needed
+#### Ladder rung 4: Try brew-installed yt-dlp with cookies
 
-If all automated methods fail, present the user with these options:
+The pip-installed `yt-dlp` often cannot decrypt Chrome cookies on macOS (Keychain encryption mismatch). The Homebrew version (`brew install yt-dlp`) includes different cookie extraction code that may succeed where pip fails.
 
-1. **Export cookies manually** — User exports YouTube cookies from their signed-in browser, and yt-dlp reuses them. This is the most reliable fix.
-2. **Copy transcript manually** — User opens the video in YouTube, clicks "...more" → "Show transcript", copies the text.
-3. **Skip this video** — move on to a different URL.
+```bash
+# Check if brew yt-dlp exists
+/opt/homebrew/bin/yt-dlp --version
+
+# If available, try with Chrome cookies
+/opt/homebrew/bin/yt-dlp --cookies-from-browser chrome \
+  --list-subs "https://youtu.be/<video-id>"
+```
+
+**Key insight from real usage:** On Toby's machine, `pip` yt-dlp (at `~/Library/Python/3.9/bin/yt-dlp`) extracted 0 cookies from Chrome, while `brew` yt-dlp (at `/opt/homebrew/bin/yt-dlp`) extracted 1403 cookies and successfully downloaded subtitles. The brew version should be tried BEFORE flagging to the user.
+
+**If brew yt-dlp isn't installed**, `brew install yt-dlp` may take 30-60s. Only initiate this if the user has already approved cookie-based approaches (don't install software without implicit consent from the workflow context).
+
+#### Ladder rung 5: Flag to user — manual intervention needed
+
+If all automated methods fail (including brew yt-dlp), present the user with these options:
+
+1. **Copy transcript manually** — User opens the video in YouTube, clicks "...more" → "Show transcript", copies the text.
+2. **Skip this video** — move on to a different URL.
 
 **Key principle:** Do NOT silently fail. When the bot wall is hit at rung 4, explicitly tell the user which rungs were tried and what failed, then present options. A bot-blocked video is not the agent's fault — it's a known YouTube anti-automation measure.
 
@@ -431,6 +457,39 @@ Writing quality bar:
 - Use tables for data-dense sections
 - Professional Chinese consulting tone — no filler, no hype
 
+### Step 4b: Optional — Critical analysis + fact verification sections
+
+When the user explicitly asks for critical thinking or fact-checking (e.g., "给出你的批判性思考" or "对观点进行验证"), add these two sections to the report:
+
+**批判性思考 (Critical Analysis):**
+Examine the video's narrative through these lenses:
+- **Survivorship bias** — Are we only hearing from winners? What about the thousands who made the same bets and failed?
+- **Hindsight rationalization** — Was the narrative constructed backwards from success, making lucky breaks look like calculated foresight?
+- **Omitted context** — What significant counter-evidence or complicating factors are excluded? (e.g., CZ's $4.3B DOJ fine and 4-month prison sentence omitted from a "success secrets" narrative)
+- **Framework limitations** — The concepts used (e.g., Taleb's Extremistan) are explanatory models, not predictive tools. They describe patterns, not guarantees.
+- **Audience applicability** — Who is this advice actually for? A narrative about "bet everything on one moment" is life-destroying advice for someone without a safety net.
+- **What the video gets right** — Credit where due. Acknowledging valid insights builds the report's credibility.
+
+**事实核查与验证 (Fact Verification):**
+Create a verification table with these columns:
+| Claim | Verdict | Evidence |
+|---|---|---|
+| ... | ✅ Verified / ⚠️ Partially accurate / ❌ Unverifiable | Source or reasoning |
+
+Verify claims against:
+- Publicly known facts (CZ founded Binance in 2017, stepped down 2023, $4.3B fine, 4-month sentence)
+- Widely reported statistics
+- Documented historical events mentioned in the video
+
+Distinguish between:
+- **Verifiable facts** — can be confirmed or denied with public sources
+- **Unverifiable anecdotes** — personal stories without independent corroboration
+- **Opinions/interpretations** — the creator's subjective framing
+
+Also include a "**视频未提及的关键背景**" (Key Context the Video Omitted) subsection — facts that are publicly known but were excluded from the narrative.
+
+These sections add ~2-4 extra pages to the report. They should be intellectually honest: neither a hatchet job nor a rubber stamp.
+
 ### Step 5: Generate consulting-style HTML (delegate)
 
 Also delegate this step to keep the parent agent's context clean:
@@ -553,7 +612,7 @@ This pattern was validated on 2 videos processed together (analysis: ~160s paral
 - **Skipping the quality gate**: Even when auto-subs download successfully, run the Step 2b checks. A 1KB SRT file for a 60-minute video is a silent failure — the file exists but contains almost no usable content.
 - **Whisper model selection**: `medium` is the sweet spot for consulting reports. `large-v3` on a 2hr file can take 30+ minutes and cause memory pressure on M-series Macs. Start with `medium`; only escalate if proper noun accuracy is critical.
 - **yt-dlp blocked by bot detection**: Don't keep retrying the same command. Follow the Step 1b escalation ladder: try android → tv → web clients, then invidious mirrors for metadata, then browser snapshot, then flag to user. Each rung takes <15s — you can test all automated rungs in under a minute.
-- **Chrome cookie decryption**: `--cookies-from-browser chrome` triggers macOS Keychain prompts and almost always fails. Never attempt this without explicitly telling the user why and asking permission. The user will see Keychain access dialogs they don't understand.
+- **Chrome cookie decryption**: `--cookies-from-browser chrome` with **pip-installed** yt-dlp triggers macOS Keychain prompts and usually extracts 0 cookies. The **brew-installed** yt-dlp (`/opt/homebrew/bin/yt-dlp`) successfully decrypts Chrome cookies on the same machine — it extracted 1403 cookies and downloaded a bot-blocked video's subtitles. Always try brew yt-dlp before flagging to the user.
 - **SRT vs VTT confusion**: With `--convert-subs srt`, yt-dlp deletes the `.vtt` file. Always check `ls *.srt` first; your parser must handle SRT format.
 - **Chinese-path Chrome export**: Chrome headless silently produces blank PDFs from Chinese-path `file://` URLs. Always use `/tmp/` ASCII paths.
 - **Missing `--no-pdf-header-footer`**: Chrome stamps date/time + local file paths onto page edges by default. Always explicitly suppress.

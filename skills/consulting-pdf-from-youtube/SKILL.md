@@ -1,15 +1,22 @@
 ---
 name: consulting-pdf-from-youtube
-description: Download YouTube subtitles (not full video), extract transcript/metadata, synthesize structured insights, and render polished Chinese consulting-style PDF reports. Subtitle-first — only fall back to Whisper after exhausting all YouTube auto-sub options. Use when a user shares a YouTube link and asks for a consulting-style PDF report.
+description: Generate polished Chinese consulting-style PDF reports from YouTube videos. Uses a transcription priority chain -- YouTube auto-subs first, Whisper fallback second (with quality gates and proper noun verification). Use when a user shares a YouTube link and asks for a consulting-style PDF report.
 ---
 
 # Consulting PDF from YouTube
 
-**Core principle: Subtitle-first, Whisper-last.**
+**Core principle: Subtitle-first, Whisper-last — with quality gates at every step.**
 
-YouTube auto-generated subtitles (via `yt-dlp --write-auto-subs`) are available for the vast majority of videos. They download in seconds and avoid the 30–90+ minute Whisper transcription pipeline with its systematic proper-noun errors. Only fall back to Whisper/faster-whisper when:
+YouTube auto-generated subtitles (via `yt-dlp --write-auto-subs`) are available for the vast majority of videos. They download in seconds and avoid the 30–90+ minute Whisper transcription pipeline with its systematic proper-noun errors.
+
+**Transcription priority chain:**
+1. 🥇 **YouTube auto-subs** — download with `yt-dlp --write-auto-subs --sub-langs` (seconds)
+2. 🥈 **Whisper fallback** — if auto-subs fail the quality gate (too sparse, garbled, or absent): download audio → transcribe with faster-whisper → verify quality → verify proper nouns (minutes to hours)
+3. 🥉 **Flag to user** — if Whisper output also fails quality check, inform the user and ask whether to proceed with lower-quality output or try alternatives (OpenAI Whisper API, different model size)
+
+Only fall back to Whisper/faster-whisper when:
 - The video has zero auto-subs in any language
-- The auto-subs are too garbled to be usable
+- The auto-subs fail the quality gate (Step 2b: file size <1KB/min, entries <2/min, or garbled content)
 - The user explicitly wants higher transcription accuracy than auto-subs can provide
 
 Use this skill when the user shares a YouTube link and wants:
@@ -70,7 +77,217 @@ yt-dlp --skip-download --write-auto-subs --sub-langs "zh-Hans" --convert-subs sr
 
 **Partial subtitle failures (HTTP 429):** YouTube may return 429 for some language variants. If the primary language (`en-orig` or `zh-Hans`) downloaded successfully, proceed — do not fail the workflow for secondary language failures.
 
-### Step 3: Clean transcript
+### Step 2b: Subtitle quality gate — pass or fall back to Whisper
+
+Before investing time in the full pipeline, verify the downloaded subtitles are usable. Run a quick quality check:
+
+```python
+import os
+
+srt_path = "<downloaded .srt file>"
+size = os.path.getsize(srt_path)
+
+# Heuristic: <1KB for a video over 5 minutes = likely failed/empty subs
+duration_seconds = <video duration in seconds>
+expected_min_kb = max(1, duration_seconds / 60)  # ~1KB per minute minimum
+
+if size < expected_min_kb * 1024:
+    print(f"⚠️ Subtitle file too small ({size}B for {duration_seconds}s video) — likely unusable")
+    print("→ Fall back to Whisper (Step 2c)")
+else:
+    # Quick spot-check: read first 20 text entries
+    ...
+    print("✅ Subtitle quality gate passed")
+```
+
+**Quality gate thresholds (validated):**
+
+| Check | Pass | Fail → action |
+|---|---|---|
+| File size | ≥1 KB per minute of video | Audio too quiet or auto-subs not generated → Whisper |
+| Entry count | ≥2 entries per minute (after `[::3]`) | Sparse captions → Whisper |
+| Text density | ≥5 words or ≥15 chars per entry (avg) | Too fragmented → Whisper |
+| Garbled check | No sustained blocks of `[Music]`, `[Applause]`, or repeated single characters | Poor auto-transcription → Whisper |
+
+If **any** check fails, proceed to Step 2c (Whisper fallback). If all pass, skip to Step 3.
+
+### Step 2c: Whisper fallback — download audio + transcribe
+
+Use this when auto-subs are unavailable, too sparse, or fail the quality gate.
+
+**Priority chain (recap):**
+1. 🥇 YouTube auto-subs via `yt-dlp --write-auto-subs` (seconds, preferred)
+2. 🥈 If auto-subs fail quality gate → download audio → Whisper transcription (minutes to hours)
+3. 🥉 If Whisper output fails quality check → flag to user, ask whether to proceed
+
+**2c.1 — Download audio only (not full video):**
+
+```bash
+# Extract best audio, convert to 16kHz mono WAV (Whisper's native format)
+yt-dlp -f 'bestaudio' --extract-audio --audio-format wav \
+  --postprocessor-args "ffmpeg:-ar 16000 -ac 1" \
+  -o '<dir>/%(title).200B [%(id)s].%(ext)s' "<url>"
+
+# Find the downloaded WAV
+WAV_FILE=$(ls <dir>/*.wav)
+echo "Audio: $WAV_FILE ($(du -h "$WAV_FILE" | cut -f1))"
+```
+
+**2c.2 — Transcribe with faster-whisper:**
+
+Choose model size based on video length and quality needs:
+
+| Model | Speed | Accuracy | Best for |
+|---|---|---|---|
+| `tiny` | Fastest | Lowest | Quick draft, <10min videos |
+| `base` | Fast | Basic | <30min, clear speech |
+| `small` | Moderate | Good | <1hr, general use |
+| `medium` | Slow | Better | 1–2hr, important content |
+| `large-v3` | Slowest | Best | 2hr+, critical proper nouns |
+
+For consulting reports, **prefer `medium`** — it balances speed (~5–10× real-time on M-series Macs) with acceptable accuracy. Only use `large-v3` when the content involves heavy proper nouns (Chinese names, historical terms, technical jargon).
+
+```bash
+# Transcribe with faster-whisper medium
+python3 << 'PYEOF'
+from faster_whisper import WhisperModel
+import json, sys
+
+model = WhisperModel("medium", device="cpu", compute_type="int8")
+# Use "auto" for M-series Macs: WhisperModel("medium", device="auto", compute_type="auto")
+
+segments, info = model.transcribe(
+    "<wav_file>",
+    language=None,          # auto-detect; or force "en" / "zh"
+    beam_size=5,
+    vad_filter=True,        # filter out silence
+    vad_parameters=dict(min_silence_duration_ms=500),
+)
+
+results = []
+for seg in segments:
+    results.append({
+        "start": round(seg.start, 3),
+        "end": round(seg.end, 3),
+        "text": seg.text.strip()
+    })
+
+with open("<dir>/transcript_whisper.json", "w") as f:
+    json.dump(results, f, ensure_ascii=False, indent=2)
+
+total_text = " ".join([s["text"] for s in results])
+print(f"Segments: {len(results)}")
+print(f"Total chars: {len(total_text)}")
+print(f"Language: {info.language} (probability: {info.language_probability:.2f})")
+print(f"Duration: {info.duration:.0f}s")
+PYEOF
+```
+
+**Why `device="cpu"` with `compute_type="int8"` on macOS:**
+M-series Macs with `device="auto"` can hit memory pressure issues with medium/large models on long audio. The `cpu` + `int8` combination is slower but reliable. If the machine has ≥32GB RAM, `device="auto"` + `compute_type="auto"` is safe for medium models on <2hr audio.
+
+**2c.3 — Whisper quality assessment:**
+
+```python
+import json
+
+with open("<dir>/transcript_whisper.json") as f:
+    segments = json.load(f)
+
+total_chars = sum(len(s["text"]) for s in segments)
+duration_min = segments[-1]["end"] / 60 if segments else 0
+
+# Expected: ~800–1500 Chinese chars per minute or ~100–180 English words per minute
+chars_per_min = total_chars / duration_min if duration_min > 0 else 0
+
+print(f"Duration: {duration_min:.0f} min")
+print(f"Total chars: {total_chars}")
+print(f"Chars/min: {chars_per_min:.0f}")
+
+if chars_per_min < 300:
+    print("❌ FAIL: Transcription too sparse — likely audio quality issue")
+elif chars_per_min < 600:
+    print("⚠️ MARGINAL: Usable but thin — flag to user")
+else:
+    print("✅ PASS: Adequate transcription density")
+
+# Spot-check first 10 segments for garbled output
+garbled = 0
+for s in segments[:50]:
+    text = s["text"]
+    # Repeated single chars or very short fragments may indicate audio issues
+    if len(text) < 2 or (len(set(text)) < 4 and len(text) > 5):
+        garbled += 1
+
+if garbled > 5:
+    print(f"❌ FAIL: {garbled}/50 segments appear garbled")
+else:
+    print(f"✅ PASS: {garbled}/50 segments flagged (acceptable)")
+```
+
+**2c.4 — Proper noun verification (mandatory for Whisper output):**
+
+Whisper systematically mangles proper nouns. Before using the transcript for report generation:
+
+1. **Extract key terms** from the video title and description
+2. **Scan the transcript** for suspicious renderings of known names/places/terms
+3. **Cross-reference** against public knowledge
+
+```bash
+# Extract names from metadata for verification
+python3 -c "
+import json
+with open('video_metadata.json') as f:
+    d = json.load(f)
+# Known entities from title + description
+title = d.get('title', '')
+desc = d.get('description', '')
+print('Known names to verify:', title[:200])
+" > /tmp/known_terms.txt
+
+# Scan for suspicious patterns in Whisper output
+python3 -c "
+import json, re
+with open('transcript_whisper.json') as f:
+    segs = json.load(f)
+# Flag segments with potential proper noun issues:
+# - Very short segments (often mistranscribed names)
+# - Segments with unusual character combinations
+for s in segs:
+    text = s['text']
+    if len(text) < 4 and any('\u4e00' <= c <= '\u9fff' for c in text):
+        print(f'⚠️ Short name fragment at {s[\"start\"]:.0f}s: {text}')
+"
+```
+
+**If Whisper quality check fails:**
+- Flag the issue to the user before proceeding
+- Offer options: try a larger model, try OpenAI Whisper API, or accept lower quality
+- Do NOT silently generate a report from garbled transcription
+
+**2c.5 — Convert Whisper output to cleaned transcript format:**
+
+After quality checks pass, convert the JSON to the same `[timestamp] text` format used by the SRT pipeline:
+
+```python
+import json
+
+with open("<dir>/transcript_whisper.json") as f:
+    segments = json.load(f)
+
+with open("<dir>/transcript_clean.txt", "w") as f:
+    for s in segments:
+        ts = s["start"]
+        h = int(ts // 3600)
+        m = int((ts % 3600) // 60)
+        sec = ts % 60
+        timestamp = f"{h:02d}:{m:02d}:{sec:05.2f}"
+        f.write(f"[{timestamp}] {s['text']}\n")
+
+print(f"Written: {len(segments)} segments")
+```
+
+This produces a file that's compatible with the same downstream pipeline (Step 4+).
 
 Use the SRT cleaner pattern (proven on 7+ transcripts, from 13min talks to 2.5hr podcasts):
 
@@ -276,8 +493,10 @@ This pattern was validated on 2 videos processed together (analysis: ~160s paral
 
 ## Common pitfalls
 
-- **Whisper as first resort**: Don't. YouTube auto-subs are available for >95% of videos and download in seconds. Only use Whisper after confirming no usable auto-subs exist.
-- **Whisper proper noun errors**: When Whisper is unavoidable, manually verify all proper nouns (names, places, historical terms) against the video title/description. Whisper systematically mangles Chinese proper nouns.
+- **Whisper as first resort**: Don't. YouTube auto-subs are available for >95% of videos and download in seconds. Only use Whisper after the quality gate (Step 2b) confirms auto-subs are unusable.
+- **Whisper proper noun errors**: When Whisper is unavoidable, run the proper noun verification in Step 2c.4. Manually verify all names, places, and historical terms against the video title/description. Whisper systematically mangles Chinese proper nouns (张献忠→张县中, 明末→元末, etc.).
+- **Skipping the quality gate**: Even when auto-subs download successfully, run the Step 2b checks. A 1KB SRT file for a 60-minute video is a silent failure — the file exists but contains almost no usable content.
+- **Whisper model selection**: `medium` is the sweet spot for consulting reports. `large-v3` on a 2hr file can take 30+ minutes and cause memory pressure on M-series Macs. Start with `medium`; only escalate if proper noun accuracy is critical.
 - **SRT vs VTT confusion**: With `--convert-subs srt`, yt-dlp deletes the `.vtt` file. Always check `ls *.srt` first; your parser must handle SRT format.
 - **Chinese-path Chrome export**: Chrome headless silently produces blank PDFs from Chinese-path `file://` URLs. Always use `/tmp/` ASCII paths.
 - **Missing `--no-pdf-header-footer`**: Chrome stamps date/time + local file paths onto page edges by default. Always explicitly suppress.

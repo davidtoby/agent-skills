@@ -1,290 +1,304 @@
 ---
 name: consulting-pdf-from-youtube
-description: Download a YouTube video, extract transcript/metadata, synthesize structured insights, and render multiple high-end PDF report variants (consulting-style, McKinsey-style, BCG-style, and Apple-inspired personal-brand editions). Use when a user shares a YouTube link and asks for a polished report package instead of a plain summary.
+description: Download YouTube subtitles (not full video), extract transcript/metadata, synthesize structured insights, and render polished Chinese consulting-style PDF reports. Subtitle-first — only fall back to Whisper after exhausting all YouTube auto-sub options. Use when a user shares a YouTube link and asks for a consulting-style PDF report.
 ---
 
 # Consulting PDF from YouTube
 
-Use this when the user shares a YouTube link and wants more than a plain summary — especially when they ask for:
-- video download
+**Core principle: Subtitle-first, Whisper-last.**
+
+YouTube auto-generated subtitles (via `yt-dlp --write-auto-subs`) are available for the vast majority of videos. They download in seconds and avoid the 30–90+ minute Whisper transcription pipeline with its systematic proper-noun errors. Only fall back to Whisper/faster-whisper when:
+- The video has zero auto-subs in any language
+- The auto-subs are too garbled to be usable
+- The user explicitly wants higher transcription accuracy than auto-subs can provide
+
+Use this skill when the user shares a YouTube link and wants:
+- consulting-style PDF report (Chinese or English source → Chinese output)
 - transcript-based analysis
 - key takeaways / insights
-- PDF output
-- premium visual styles such as consulting-firm, board-deck, or Apple-like personal branding
+- professional visual styling
+
+**Video download is optional.** For report generation, only metadata + subtitles are needed. Skip the full video download unless the user explicitly asks for the video file.
 
 ## Output goals
 
-Produce a package that typically includes:
-1. Downloaded video file
-2. Transcript or subtitle artifact
-3. Markdown source summary
-4. HTML source(s) for styled layouts
-5. Final PDF(s)
+Produce a package that includes:
+1. Transcript/subtitle artifact (`transcript_en_clean.txt` or `transcript_zh_clean.txt`)
+2. Markdown source summary (`report_content_cn.md`)
+3. HTML source for styled layout (`report_consulting_cn.html`)
+4. Final PDF
+5. Video metadata (`video_metadata.json`)
 
 Default output directory pattern:
-- `~/.Hermes/workspace/output/<task-subfolder>/`
-
-Use a self-descriptive task subfolder, for example:
 - `~/.Hermes/workspace/output/youtube_consulting_pdf_<video-id>/`
 
-## Recommended workflow
+## Proven workflow (validated on 7+ reports across 5 sessions)
 
-**对于中文视频 + 咨询风格 PDF 场景**：直接参考 `chinese-video-transcribe-pdf` 技能（已包含 faster-whisper 转写 → 专有名词核查 → HTML+CSS+Chrome 导出全流程），本技能提供额外的风格变体（McKinsey、BCG、Apple 等）。
+### Step 1: Language detection
 
-**通用流程：**
+Determine the video's primary language before downloading subs:
 
-### 1. Prepare tools and output folder
-Check availability of:
-- `yt-dlp`
-- `ffmpeg`
-- Chrome/Chromium for HTML→PDF printing
-- Python venv for transcript or PDF dependencies when needed
-
-Create a dedicated output subfolder under the outputs directory.
-
-### 2. Fetch metadata and download the video
-Use `yt-dlp`:
-- dump single JSON metadata first
-- then download the best practical format
-
-Suggested commands:
 ```bash
-yt-dlp --dump-single-json "<youtube-url>" > video_metadata.json
-yt-dlp -f 'bv*+ba/b' -o '<output_dir>/%(title).200B [%(id)s].%(ext)s' "<youtube-url>"
+yt-dlp --dump-single-json "<url>" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('title',''), d.get('description','')[:200])"
 ```
 
-### 3. Retrieve transcript/subtitles
-Preferred order:
-1. Use the `youtube-content` skill helper script if available
-2. If transcript API fails, use `yt-dlp --write-auto-subs --sub-langs ...`
-3. Clean VTT/SRT into timestamped plain text
+**Language → subtitle strategy:**
+| Video language | Download | Report output |
+|---|---|---|
+| English | `en-orig` (English Original) | Chinese |
+| Chinese (Mandarin) | `zh-Hans` (Chinese Simplified) | Chinese |
+| Other | `en-orig` + auto-translated `zh-Hans` | Chinese |
 
-Typical fallback pattern:
+### Step 2: Fetch metadata + download subtitles
+
+Do both in parallel for efficiency:
+
 ```bash
-yt-dlp --skip-download --write-auto-subs --sub-langs "zh-Hans.*,zh.*,en.*" --convert-subs srt -o '<output_dir>/%(title).200B [%(id)s].%(ext)s' "<youtube-url>"
+# Metadata
+yt-dlp --dump-single-json "<url>" > video_metadata.json
+
+# Subtitles (English video)
+yt-dlp --skip-download --write-auto-subs --sub-langs "en-orig" --convert-subs srt \
+  -o '<dir>/%(title).200B [%(id)s].%(ext)s' "<url>"
+
+# Subtitles (Chinese video)
+yt-dlp --skip-download --write-auto-subs --sub-langs "zh-Hans" --convert-subs srt \
+  -o '<dir>/%(title).200B [%(id)s].%(ext)s' "<url>"
 ```
 
-Real-world lesson:
-- YouTube subtitle downloads may partially fail with `HTTP 429` for some language variants even when primary subtitles succeed.
-- Do **not** fail the whole workflow just because one subtitle variant 429s.
-- If a usable primary subtitle file (for example `zh-Hans.vtt`) was downloaded successfully, continue with that file and record the partial subtitle failure in your notes.
+**Important:** When using `--convert-subs srt`, yt-dlp downloads the `.vtt`, converts to `.srt`, and **deletes** the original `.vtt`. Your cleaning script must handle SRT format.
 
-### 4. Clean transcript for analysis
-Transform captions into readable timestamped lines.
-Goals:
-- remove VTT/SRT markers and HTML tags
-- remove duplicate adjacent fragments (YouTube triplicates every entry)
-- preserve timestamps when useful
-- save a `transcript_clean.txt`
+**Partial subtitle failures (HTTP 429):** YouTube may return 429 for some language variants. If the primary language (`en-orig` or `zh-Hans`) downloaded successfully, proceed — do not fail the workflow for secondary language failures.
 
-**Which format will you get?**
+### Step 3: Clean transcript
 
-When using `--convert-subs srt` (the recommended command), yt-dlp:
-1. Downloads the raw `.en-orig.vtt` from YouTube
-2. Converts it to `.en-orig.srt`
-3. **Deletes** the original `.vtt`
+Use the SRT cleaner pattern (proven on 7+ transcripts, from 13min talks to 2.5hr podcasts):
 
-The final artifact is always `.srt` — your cleaning script must handle SRT format, not VTT.
-
-**SRT parsing pattern** (use when the final file is `.srt`):
 ```python
 import re
 
-# SRT format: blocks separated by double newlines
-# Block structure:
-#   1              ← index (skip)
-#   00:00:01,990 --> 00:00:03,879  ← timestamp line
-#   cancer is very preventable when the  ← text
+with open(srt_path) as f:
+    content = f.read()
+
 blocks = re.split(r'\n\n+', content.strip())
+entries = []
 
 for block in blocks:
     lines = block.strip().split('\n')
-    # Skip index line, extract timestamp from line with '-->'
-    # Remaining lines are subtitle text — strip HTML tags
+    if len(lines) < 2:
+        continue
+    text_lines = []
+    for l in lines[1:]:
+        if '-->' in l:
+            timestamp = l.strip().split(' -->')[0]
+        else:
+            clean = re.sub(r'<[^>]+>', '', l).strip()
+            clean = clean.replace('&gt;&gt;', '')
+            if clean:
+                text_lines.append(clean)
+    if text_lines:
+        entries.append({"time": timestamp, "text": ' '.join(text_lines)})
+
+# YouTube auto-captions repeat every block 3× — take every 3rd
+entries = entries[::3]
+
+# Write with timestamps
+with open(out_path, 'w') as f:
+    for e in entries:
+        f.write(f"[{e['time']}] {e['text']}\n")
 ```
 
-**VTT parsing pattern** (use only if you explicitly skipped `--convert-subs srt` or the conversion failed):
-```python
-# VTT format: blocks separated by double newlines, starts with WEBVTT header
-# Each block has: timestamp line + text lines with <c> tags
+**Key points:**
+- `entries[::3]` — YouTube triplicates every caption block; taking every 3rd removes duplicates
+- SRT timestamps use commas (`00:00:01,990`), VTT uses dots (`00:00:01.990`) — the `-->` split works for both
+- Do NOT aggressively merge sentences — the analysis subagent handles fragment-level text
+- Chinese auto-subs may have fewer duplicates than English; `[::3]` is still safe
+
+A working copy of this script lives at `/tmp/clean_srt3.py` (created during pipeline runs).
+
+**Expected output sizes (validated):**
+
+| Video duration | Entries (after [::3]) | Words/chars | File size |
+|---|---|---|---|
+| 13 min (Chinese) | ~160 | ~1,800 chars | ~7 KB |
+| 37 min (Chinese) | ~380 | ~4,500 chars | ~17 KB |
+| 97 min (English) | ~1,700 | ~19K words | ~125 KB |
+| 126 min (English) | ~2,200 | ~23K words | ~140 KB |
+| 159 min (English) | ~3,200 | ~32K words | ~180 KB |
+
+### Step 4: Synthesize report content (delegate for long videos)
+
+**Decision rule:**
+- Videos <30 min: you can process the transcript inline
+- Videos ≥30 min: **delegate to a subagent** — the transcript alone can be 20K–100K words and will flood your context
+
+Delegation pattern:
+```
+delegate_task(goal="Analyze transcript and produce Chinese consulting markdown...")
+toolsets: ["file", "terminal"]
 ```
 
-**For both formats — the same `[::3]` dedup applies:**
-YouTube auto-captions repeat every text block 3 times with slightly different timestamps. Take every 3rd entry:
+Provide the subagent with:
+- Full cleaned transcript path
+- Video metadata (title, channel, guest, duration, upload date, views)
+- Target report structure:
+  - 封面信息
+  - 执行摘要
+  - 核心观点 (4–6 themes)
+  - 关键数据与研究发现
+  - 行动建议 (priority-tiered)
+  - 专家洞见
+  - 结论
+- Output path: `<dir>/report_content_cn.md`
 
-```python
-entries = entries[::3]  # take every 3rd, discarding the other 2 copies
+The subagent reads the transcript in chunks with `read_file(offset=..., limit=...)` and writes the complete report. This was validated on a 2.5hr / 32K-word podcast that produced a 35KB, 459-line Chinese markdown in one delegation call.
+
+Writing quality bar:
+- Distinguish guest claims from host observations
+- Keep takeaways crisp and scannable
+- Use tables for data-dense sections
+- Professional Chinese consulting tone — no filler, no hype
+
+### Step 5: Generate consulting-style HTML (delegate)
+
+Also delegate this step to keep the parent agent's context clean:
+
+```
+delegate_task(goal="Convert markdown to consulting HTML with exact CSS spec...")
+toolsets: ["file", "terminal"]
 ```
 
-This reduces 5,000–9,000+ raw entries down to ~1,700–3,000 unique entries. For SRT transcripts, skip sentence-merging if it produces giant blocks (sentence-ending punctuation may be sparse in auto-captions) — the subagent can handle the raw `[::3]` entries directly.
+**CSS spec (proven on 7+ reports, 0 rendering failures):**
 
-A working SRT cleaning script pattern:
-1. Parse SRT: split on `\n\n+`, extract timestamp from `-->` line, collect text lines
-2. `entries = entries[::3]` — drop YouTube's 2 duplicate copies
-3. Write with timestamps as `[HH:MM:SS,mmm] text` (note comma in SRT vs dot in VTT)
-4. No aggressive sentence-merging — let the analysis subagent handle the fragment-level text
+Font stack: `"PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif`
 
-### 5. Synthesize report content
-Write a markdown report that includes, as appropriate:
-- video info
-- one-sentence summary
-- core viewpoints
-- key takeaways
-- your insights
-- practical next steps / action plan
-- conclusion
+Colors:
+```
+--ink: #142033    --muted: #5f6f85    --line: #d9e1ea
+--soft: #eef3f8   --soft2: #f7f9fc    --brand: #1f4e79
+--brand2: #406a95 --accent: #0f766e   --warn: #b45309
+```
 
-Important quality bar:
-- distinguish creator claims from your own insights
-- keep takeaways crisp and scannable
-- adapt tone to the requested audience
+Typography:
+- h1: 24pt / weight 800 / line-height 1.25
+- h2: 13.8pt / line-height 1.3
+- h3: 11.8pt / line-height 1.35
+- body: 10.35pt / line-height 1.65
 
-**For long-form content (2+ hours, 30K+ words):**
-Use `delegate_task` to offload the transcript analysis to a subagent. The cleaned transcript alone can be 30K–100K words — processing it inline will flood your context window. Delegate with `toolsets: ["file", "terminal"]` and provide:
-- the full cleaned transcript path
-- video metadata
-- the target report structure (sections, tone, language)
-- the output markdown path
+Layout:
+- A4 (210mm × 297mm), @page margin: 12mm
+- Inner padding: 16mm 16mm 18mm
+- Hero: gradient `linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%)`, 1px solid var(--line), 6mm border-radius
+- Card: 5mm padding, 4mm border-radius
+- Quote: 3px left border in --brand2, #fafcff background
 
-The subagent can read the transcript in chunks with `read_file(offset=..., limit=...)` and produce the complete report. This pattern was validated on a 2.5-hour / 31K-word podcast analysis that produced a 35KB, 459-line Chinese markdown report in one delegation call.
+Requirements: Valid HTML5, self-contained (all CSS inline in `<style>`), no JavaScript, `page-break-inside: avoid` on cards, `print-color-adjust: exact`.
 
-### 6. Render styled HTML variants
-For premium output, generate HTML first, then print to PDF.
-This gives much better control over:
-- typography
-- spacing
-- page rhythm
-- headers/footers
-- color systems
-- brand variations
+### Step 6: Export PDF via Chrome headless
 
-**Preferred CSS template (proven on macOS):**
-Use the CSS spec from `chinese-pdf-report` (the "Proven working spec" section) as the base template. It provides a battle-tested font stack (`PingFang SC → Hiragino Sans GB → Noto Sans CJK SC → Microsoft YaHei`), a restrained blue-gray consulting palette, A4-tuned font sizes (h1: 22–24pt, body: 10.3pt, line-height: 1.65), and mm-based card/hero/grid layouts. This spec was validated to produce clean 16-page reports with no garbling, no browser artifacts, and professional visual hierarchy.
+**Always use the 3-step temp-path pattern** (Chinese paths break Chrome headless):
 
-**HTML generation can also be delegated** for complex reports: use a second `delegate_task` with `toolsets: ["file", "terminal"]` that reads the completed markdown and writes the HTML using the exact CSS spec. This keeps the parent agent's context clean and allows parallel work (analysis + HTML generation if the structure is predefined).
-
-Useful variants:
-- **Consulting / executive summary**: blue-gray, restrained, high information hierarchy
-- **McKinsey-style**: colder, more minimal, board-brief feel
-- **BCG-style**: slightly more modern/strategic, subtle teal-green option
-- **Apple-inspired personal brand**: lighter, cleaner, airy layout with restrained blue gradients and personal/company attribution
-
-### 7. Convert HTML to PDF
-Use headless Chrome:
 ```bash
+# Step 1: Copy to ASCII path
+cp "/path/中文/report.html" /tmp/report_temp.html
+
+# Step 2: Export
 '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' \
   --headless=new --disable-gpu --no-sandbox \
-  --no-pdf-header-footer --print-to-pdf='<output.pdf>' \
-  'file://<absolute-html-path>'
+  --no-pdf-header-footer \
+  --print-to-pdf='/tmp/report_output.pdf' \
+  'file:///tmp/report_temp.html'
+
+# Step 3: Copy back with proper name
+cp /tmp/report_output.pdf "/path/中文/GuestName_主题_咨询报告_日期.pdf"
 ```
 
-Important real-world lesson:
-- when exporting local HTML via `file://...`, Chrome may stamp default print header/footer metadata onto every page if header/footer suppression is not explicit
-- the leak is ugly and user-visible: top edge may show date/time and document title, bottom edge may show the local `file:///Users/...` path and page numbers
-- for polished client-facing PDFs, use `--no-pdf-header-footer` explicitly; do not assume `--print-to-pdf` alone will produce clean edges
+Critical flags:
+- `--no-pdf-header-footer` — prevents browser metadata (date/time, file:// paths, page numbers) from leaking onto page edges
+- `--headless=new` — required for modern Chrome; the old `--headless` flag may fail
 
-### 8. Verify output
-Verify at least:
-- file exists
-- expected page count
-- text can be extracted from PDF
-- the visual hierarchy is acceptable
-- no browser-generated header/footer metadata is visible at the page edges
+**Expected page counts (validated):**
 
-Targeted QA for browser-exported PDFs:
-- render a preview image of at least the first page
-- visually check the top and bottom edges for date/time, title text, `file:///` paths, URLs, or page numbers
-- if any appear, re-export with `--no-pdf-header-footer` and verify again before delivery
+| Video duration | Report pages |
+|---|---|
+| 13 min | ~7 pp |
+| 37 min | ~7 pp |
+| 97 min | ~8 pp |
+| 126 min | ~12 pp |
+| 159 min | ~16 pp |
 
-A practical verification method:
-- inspect with `pypdf` for page count / sample text when available
-- if `pypdf` is unavailable in the active Python, fall back to platform tools such as `pdfinfo`, `mdls`, or other local PDF metadata/text tools
-- open HTML with browser tools
-- use browser vision for visual QA on spacing, density, and overall style
+### Step 7: QA the PDF
 
-Real-world lesson:
-- treat PDF rendering and PDF verification as separate steps
-- a missing verification dependency (for example `pypdf` absent from the active Python) should not be mistaken for PDF render failure
-- when Chrome successfully writes the PDF, continue verification via fallback tools instead of rerendering blindly
+Run this verification script:
 
-## Style guidance
+```python
+from PyPDF2 import PdfReader
 
-### Consulting-firm baseline
-- restrained blue / gray palette
-- strong headline and section hierarchy
-- minimal decorative elements
-- executive-summary framing
-- avoid heavy card clutter
+reader = PdfReader(pdf_path)
+pages = len(reader.pages)
 
-### McKinsey-style tendency
-- cooler, more austere palette
-- more whitespace discipline
-- fewer emphasis containers
-- stronger board-brief tone
+for i in range(pages):
+    text = reader.pages[i].extract_text()
+    has_cn = any('\u4e00' <= c <= '\u9fff' for c in text)
+    if 'file:///' in text:
+        print(f"❌ Page {i+1}: leaked file path")
+    if not has_cn and i > 0:
+        print(f"❌ Page {i+1}: no Chinese characters")
+```
 
-### BCG-style tendency
-- slightly more contemporary strategy feel
-- clean modular structure
-- subtle green/teal is acceptable
-- still restrained, not startup-gimmicky
+QA checklist:
+- [ ] Page count within expected range
+- [ ] Chinese characters present and not garbled
+- [ ] No `file:///...` paths in extracted text
+- [ ] Text extractable from all pages
+- [ ] No browser-generated header/footer metadata
 
-### Apple-inspired personal brand
-- light, airy whitespace
-- muted grays and Apple-like blues
-- softer gradients used sparingly
-- personal attribution and company branding on cover/footer
-- avoid over-decoration and heavy shadows
+## Batch processing (multiple URLs)
+
+When the user provides 2+ YouTube URLs at once, process in parallel:
+
+**Phase 1 — Metadata + Subtitles (sequential, fast, ~15s each):**
+Fetch metadata and download subtitles for each video.
+
+**Phase 2 — Transcript Analysis (parallel delegation, ~2–5 min):**
+Use `delegate_task` with `tasks` array to analyze all transcripts simultaneously.
+
+**Phase 3 — HTML Generation (parallel delegation, ~3–6 min):**
+Same pattern — delegate all HTML conversions in one `tasks` array.
+
+**Phase 4 — PDF Export (sequential, ~10s each):**
+Export each HTML to PDF via Chrome headless sequentially.
+
+**Phase 5 — QA (batch, ~5s):**
+Verify all PDFs in one PyPDF2 script.
+
+This pattern was validated on 2 videos processed together (analysis: ~160s parallel vs ~320s sequential, HTML: ~340s parallel vs ~680s sequential).
 
 ## Common pitfalls
-- **SRT vs VTT confusion**: When using `--convert-subs srt`, yt-dlp deletes the original `.vtt` file after conversion. Your cleaning script must handle `.srt` format (blocks separated by `\n\n+`, index/timestamp/text structure) — a VTT-specific parser will fail silently or produce garbled output. If you're unsure which format exists, `ls *.srt *.vtt` in the output directory first.
-- **Chinese auto-subs may not triplicate**: Unlike English YouTube auto-captions (which repeat every block 3×), Chinese (`zh-Hans`) auto-subs sometimes produce fewer duplicates. The `[::3]` dedup is still safe to apply (the content loss is small) but be aware that Chinese transcript entries are already close to unique — a 37-minute video may produce only ~377 entries after `[::3]`, which is the correct count.
-- **Reusable SRT cleaner**: A working SRT-cleaning script is at `/tmp/clean_srt3.py` (created during pipeline runs). It handles SRT block parsing, `[::3]` dedup, HTML-tag stripping, and writes `[timestamp] text` format. Reuse or recreate it as needed — the algorithm is also documented in the "Clean transcript" section above.
-- letting transcript failures stop the workflow; use subtitle fallback
-- **Whisper 转写专有名词不可靠**：faster-whisper 对历史人名、日文人名、朝代名称会系统性出错（如张献忠→张县中、山上彻也→山上彻野、明末→元末）。生成报告前必须人工核查专有名词，对涉及历史人物/地名/专业术语的内容不要直接信任转写结果。详见 `chinese-video-transcribe-pdf` 技能的故障排除表。
-- overloading pages with too many boxed modules
-- making every block look equally important
-- using colors too aggressively for “premium” styling
-- generating PDF without verifying extraction/page count
-- saving outputs directly in the outputs root instead of a dedicated subfolder
 
-## References
-- `references/output-package.md`
-- `references/style-variants.md`
+- **Whisper as first resort**: Don't. YouTube auto-subs are available for >95% of videos and download in seconds. Only use Whisper after confirming no usable auto-subs exist.
+- **Whisper proper noun errors**: When Whisper is unavoidable, manually verify all proper nouns (names, places, historical terms) against the video title/description. Whisper systematically mangles Chinese proper nouns.
+- **SRT vs VTT confusion**: With `--convert-subs srt`, yt-dlp deletes the `.vtt` file. Always check `ls *.srt` first; your parser must handle SRT format.
+- **Chinese-path Chrome export**: Chrome headless silently produces blank PDFs from Chinese-path `file://` URLs. Always use `/tmp/` ASCII paths.
+- **Missing `--no-pdf-header-footer`**: Chrome stamps date/time + local file paths onto page edges by default. Always explicitly suppress.
+- **Delegation token limits**: The subagent reading a 32K-word transcript may consume ~250K input tokens. This is normal and within limits — don't try to inline-process it.
+- **Saving outputs in root**: Always use a dedicated subfolder per video under `~/.Hermes/workspace/output/`.
 
 ## Deliverable checklist
-- [ ] video downloaded
-- [ ] metadata saved
-- [ ] transcript/subtitle artifact saved
-- [ ] markdown summary saved
-- [ ] styled HTML saved
-- [ ] PDF saved
-- [ ] page count checked
-- [ ] visual style checked
 
-## Batch processing (multiple video URLs)
+- [ ] Transcript cleaned and saved
+- [ ] Markdown report saved
+- [ ] Styled HTML saved
+- [ ] PDF exported via Chrome headless
+- [ ] Page count verified with PyPDF2
+- [ ] Chinese rendering verified (no garbling)
+- [ ] No browser artifacts (`--no-pdf-header-footer` confirmed working)
+- [ ] All artifacts in a self-descriptive subfolder
 
-When the user provides 2+ YouTube URLs at once, process them in parallel:
+## Suggested final response
 
-**Phase 1 — Metadata + Subtitles (sequential, fast):**
-Fetch metadata and download subtitles for each video individually. These are quick yt-dlp calls that complete in seconds.
-
-**Phase 2 — Transcript Analysis (parallel delegation):**
-Use `delegate_task` with `tasks` array to analyze all transcripts simultaneously. Each task gets its own transcript path, metadata, and output path. This cuts total analysis time from N×T to roughly T.
-
-**Phase 3 — HTML Generation (parallel delegation):**
-Same pattern — delegate all HTML conversions in one `tasks` array. Each task reads its markdown and writes its HTML using the exact same CSS spec.
-
-**Phase 4 — PDF Export (sequential, fast):**
-Export each HTML to PDF via Chrome headless sequentially (temp-path workaround applies per-file).
-
-**Phase 5 — QA (batch):**
-Verify all PDFs in one PyPDF2 script — page counts, Chinese rendering, browser artifact checks.
-
-This pattern was validated on 2 videos processed together (analysis: ~160s parallel vs ~320s sequential, HTML: ~340s parallel vs ~680s sequential). It scales to 3–4 videos within `delegate_task` limits.
-
-## Suggested final response pattern
 Tell the user:
-- exact file paths
-- which version is recommended for what audience
-- whether you verified page count and rendering
-- optional next-step enhancements (e.g. PPT cover, compressed share version, branded final polish)
+- Exact PDF file path (with MEDIA: prefix for inline delivery)
+- Report structure summary (sections, page count, file size)
+- Key topics covered
+- QA results (page count, Chinese rendering, artifact check)

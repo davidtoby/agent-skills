@@ -66,7 +66,9 @@ Default typography pattern for professional Chinese reports:
 
 ### 4b. Proven working spec: consulting-style Chinese report (tested on macOS)
 
-The following CSS spec was validated in a real delivery (`内脏脂肪、胰岛素阻抗与心血管风险_咨询风PDF_中文版_2026-04-25.pdf`) and produced a 6-page report with clean Chinese rendering, no garbling, and no page-edge artifacts.
+The following CSS spec has been validated across **7+ reports** (ranging from 7 to 16 pages) with zero rendering failures — no garbling, no font fallback issues, and no page-edge artifacts on any delivery.
+
+**Validated reports include:** health science (Dr. Rhonda Patrick, Dr. William Li), oncology (Dr. Thomas Seyfried), AI/technology (郭宇 × 2), and more — covering English→Chinese transcript translation and native Chinese source content.
 
 **Font stack (in priority order — first available wins):**
 ```css

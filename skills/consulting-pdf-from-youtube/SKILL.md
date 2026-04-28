@@ -77,6 +77,22 @@ Goals:
 - preserve timestamps when useful
 - save a `transcript_clean.txt`
 
+**For YouTube auto-generated VTT captions (en-orig):**
+YouTube's auto-caption VTT repeats every text block 3 times with slightly different timestamps — this triplication is structural, not a bug. The most reliable cleaning method is to take every 3rd entry after parsing:
+
+```python
+# Parse VTT entries →
+entries = entries[::3]  # take every 3rd, discarding the other 2 copies
+```
+
+This reduces 9,000+ raw entries down to ~3,000 unique entries in one step. After the `[::3]` decimation, apply sentence-merging (join continuation lines that don't end in `[.!?]`). This yields clean, readable paragraphs with roughly 30% of the original line count.
+
+A working cleaning script pattern:
+1. Parse VTT: collect entries grouped by timestamp blocks, stripping `<c>` tags and HTML entities
+2. `entries = entries[::3]` — drop YouTube's 2 duplicate copies
+3. Merge continuation lines (previous line doesn't end with sentence-ending punctuation → append)
+4. Write with timestamps as `[HH:MM:SS.mmm] text`
+
 ### 5. Synthesize report content
 Write a markdown report that includes, as appropriate:
 - video info
@@ -92,6 +108,15 @@ Important quality bar:
 - keep takeaways crisp and scannable
 - adapt tone to the requested audience
 
+**For long-form content (2+ hours, 30K+ words):**
+Use `delegate_task` to offload the transcript analysis to a subagent. The cleaned transcript alone can be 30K–100K words — processing it inline will flood your context window. Delegate with `toolsets: ["file", "terminal"]` and provide:
+- the full cleaned transcript path
+- video metadata
+- the target report structure (sections, tone, language)
+- the output markdown path
+
+The subagent can read the transcript in chunks with `read_file(offset=..., limit=...)` and produce the complete report. This pattern was validated on a 2.5-hour / 31K-word podcast analysis that produced a 35KB, 459-line Chinese markdown report in one delegation call.
+
 ### 6. Render styled HTML variants
 For premium output, generate HTML first, then print to PDF.
 This gives much better control over:
@@ -101,6 +126,11 @@ This gives much better control over:
 - headers/footers
 - color systems
 - brand variations
+
+**Preferred CSS template (proven on macOS):**
+Use the CSS spec from `chinese-pdf-report` (the "Proven working spec" section) as the base template. It provides a battle-tested font stack (`PingFang SC → Hiragino Sans GB → Noto Sans CJK SC → Microsoft YaHei`), a restrained blue-gray consulting palette, A4-tuned font sizes (h1: 22–24pt, body: 10.3pt, line-height: 1.65), and mm-based card/hero/grid layouts. This spec was validated to produce clean 16-page reports with no garbling, no browser artifacts, and professional visual hierarchy.
+
+**HTML generation can also be delegated** for complex reports: use a second `delegate_task` with `toolsets: ["file", "terminal"]` that reads the completed markdown and writes the HTML using the exact CSS spec. This keeps the parent agent's context clean and allows parallel work (analysis + HTML generation if the structure is predefined).
 
 Useful variants:
 - **Consulting / executive summary**: blue-gray, restrained, high information hierarchy

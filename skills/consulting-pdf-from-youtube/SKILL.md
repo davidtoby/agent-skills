@@ -72,26 +72,57 @@ Real-world lesson:
 ### 4. Clean transcript for analysis
 Transform captions into readable timestamped lines.
 Goals:
-- remove WEBVTT markers
-- remove duplicate adjacent fragments
+- remove VTT/SRT markers and HTML tags
+- remove duplicate adjacent fragments (YouTube triplicates every entry)
 - preserve timestamps when useful
 - save a `transcript_clean.txt`
 
-**For YouTube auto-generated VTT captions (en-orig):**
-YouTube's auto-caption VTT repeats every text block 3 times with slightly different timestamps — this triplication is structural, not a bug. The most reliable cleaning method is to take every 3rd entry after parsing:
+**Which format will you get?**
+
+When using `--convert-subs srt` (the recommended command), yt-dlp:
+1. Downloads the raw `.en-orig.vtt` from YouTube
+2. Converts it to `.en-orig.srt`
+3. **Deletes** the original `.vtt`
+
+The final artifact is always `.srt` — your cleaning script must handle SRT format, not VTT.
+
+**SRT parsing pattern** (use when the final file is `.srt`):
+```python
+import re
+
+# SRT format: blocks separated by double newlines
+# Block structure:
+#   1              ← index (skip)
+#   00:00:01,990 --> 00:00:03,879  ← timestamp line
+#   cancer is very preventable when the  ← text
+blocks = re.split(r'\n\n+', content.strip())
+
+for block in blocks:
+    lines = block.strip().split('\n')
+    # Skip index line, extract timestamp from line with '-->'
+    # Remaining lines are subtitle text — strip HTML tags
+```
+
+**VTT parsing pattern** (use only if you explicitly skipped `--convert-subs srt` or the conversion failed):
+```python
+# VTT format: blocks separated by double newlines, starts with WEBVTT header
+# Each block has: timestamp line + text lines with <c> tags
+```
+
+**For both formats — the same `[::3]` dedup applies:**
+YouTube auto-captions repeat every text block 3 times with slightly different timestamps. Take every 3rd entry:
 
 ```python
-# Parse VTT entries →
 entries = entries[::3]  # take every 3rd, discarding the other 2 copies
 ```
 
-This reduces 9,000+ raw entries down to ~3,000 unique entries in one step. After the `[::3]` decimation, apply sentence-merging (join continuation lines that don't end in `[.!?]`). This yields clean, readable paragraphs with roughly 30% of the original line count.
+This reduces 5,000–9,000+ raw entries down to ~1,700–3,000 unique entries. For SRT transcripts, skip sentence-merging if it produces giant blocks (sentence-ending punctuation may be sparse in auto-captions) — the subagent can handle the raw `[::3]` entries directly.
 
-A working cleaning script pattern:
-1. Parse VTT: collect entries grouped by timestamp blocks, stripping `<c>` tags and HTML entities
+A working SRT cleaning script pattern:
+1. Parse SRT: split on `\n\n+`, extract timestamp from `-->` line, collect text lines
 2. `entries = entries[::3]` — drop YouTube's 2 duplicate copies
-3. Merge continuation lines (previous line doesn't end with sentence-ending punctuation → append)
-4. Write with timestamps as `[HH:MM:SS.mmm] text`
+3. Write with timestamps as `[HH:MM:SS,mmm] text` (note comma in SRT vs dot in VTT)
+4. No aggressive sentence-merging — let the analysis subagent handle the fragment-level text
 
 ### 5. Synthesize report content
 Write a markdown report that includes, as appropriate:
@@ -205,6 +236,9 @@ Real-world lesson:
 - avoid over-decoration and heavy shadows
 
 ## Common pitfalls
+- **SRT vs VTT confusion**: When using `--convert-subs srt`, yt-dlp deletes the original `.vtt` file after conversion. Your cleaning script must handle `.srt` format (blocks separated by `\n\n+`, index/timestamp/text structure) — a VTT-specific parser will fail silently or produce garbled output. If you're unsure which format exists, `ls *.srt *.vtt` in the output directory first.
+- **Chinese auto-subs may not triplicate**: Unlike English YouTube auto-captions (which repeat every block 3×), Chinese (`zh-Hans`) auto-subs sometimes produce fewer duplicates. The `[::3]` dedup is still safe to apply (the content loss is small) but be aware that Chinese transcript entries are already close to unique — a 37-minute video may produce only ~377 entries after `[::3]`, which is the correct count.
+- **Reusable SRT cleaner**: A working SRT-cleaning script is at `/tmp/clean_srt3.py` (created during pipeline runs). It handles SRT block parsing, `[::3]` dedup, HTML-tag stripping, and writes `[timestamp] text` format. Reuse or recreate it as needed — the algorithm is also documented in the "Clean transcript" section above.
 - letting transcript failures stop the workflow; use subtitle fallback
 - **Whisper 转写专有名词不可靠**：faster-whisper 对历史人名、日文人名、朝代名称会系统性出错（如张献忠→张县中、山上彻也→山上彻野、明末→元末）。生成报告前必须人工核查专有名词，对涉及历史人物/地名/专业术语的内容不要直接信任转写结果。详见 `chinese-video-transcribe-pdf` 技能的故障排除表。
 - overloading pages with too many boxed modules
@@ -226,6 +260,27 @@ Real-world lesson:
 - [ ] PDF saved
 - [ ] page count checked
 - [ ] visual style checked
+
+## Batch processing (multiple video URLs)
+
+When the user provides 2+ YouTube URLs at once, process them in parallel:
+
+**Phase 1 — Metadata + Subtitles (sequential, fast):**
+Fetch metadata and download subtitles for each video individually. These are quick yt-dlp calls that complete in seconds.
+
+**Phase 2 — Transcript Analysis (parallel delegation):**
+Use `delegate_task` with `tasks` array to analyze all transcripts simultaneously. Each task gets its own transcript path, metadata, and output path. This cuts total analysis time from N×T to roughly T.
+
+**Phase 3 — HTML Generation (parallel delegation):**
+Same pattern — delegate all HTML conversions in one `tasks` array. Each task reads its markdown and writes its HTML using the exact same CSS spec.
+
+**Phase 4 — PDF Export (sequential, fast):**
+Export each HTML to PDF via Chrome headless sequentially (temp-path workaround applies per-file).
+
+**Phase 5 — QA (batch):**
+Verify all PDFs in one PyPDF2 script — page counts, Chinese rendering, browser artifact checks.
+
+This pattern was validated on 2 videos processed together (analysis: ~160s parallel vs ~320s sequential, HTML: ~340s parallel vs ~680s sequential). It scales to 3–4 videos within `delegate_task` limits.
 
 ## Suggested final response pattern
 Tell the user:

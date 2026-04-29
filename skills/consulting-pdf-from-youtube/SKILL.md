@@ -228,6 +228,14 @@ Choose model size based on video length and quality needs:
 
 For consulting reports, **prefer `medium`** — it balances speed (~5–10× real-time on M-series Macs) with acceptable accuracy. Only use `large-v3` when the content involves heavy proper nouns (Chinese names, historical terms, technical jargon).
 
+**⚠️ Execution method**: Do NOT use `execute_code` for Whisper transcription — it has a ~300s hard timeout that `medium`/`small` models on >15min audio routinely exceed. Use **background terminal with `notify_on_complete=true`** instead. Write the transcription script to a file first (`/tmp/whisper_transcribe.py`) and run with `python3 -u` — a heredoc-inline approach in background mode produces zero stdout output. Example:
+
+```bash
+python3 -u /tmp/whisper_transcribe.py 2>&1
+```
+
+**⚠️ First-time model download**: The first run of any model size downloads from Hugging Face Hub (~1-3 GB). `base` model took 105s to download on first run. Subsequent runs use the cached model and load in seconds. Don't mistake first-run download time for transcription slowness.
+
 ```bash
 # Transcribe with faster-whisper medium
 python3 << 'PYEOF'
@@ -550,13 +558,16 @@ Critical flags:
 
 **Expected page counts (validated):**
 
-| Video duration | Report pages |
-|---|---|
-| 13 min | ~7 pp |
-| 37 min | ~7 pp |
-| 97 min | ~8 pp |
-| 126 min | ~12 pp |
-| 159 min | ~16 pp |
+| Video duration | Standard report | +批判性思考+事实核查 |
+|---|---|---|
+| 13 min | ~7 pp | ~11-13 pp |
+| 27 min | ~10 pp | ~18-20 pp |
+| 37 min | ~7 pp | ~11-14 pp |
+| 97 min | ~8 pp | ~12-15 pp |
+| 126 min | ~12 pp | ~16-19 pp |
+| 159 min | ~16 pp | ~20-23 pp |
+
+When the user asks for 批判性思考 + 事实核查, the page count inflation is larger than the +2–4 stated in Step 4b — real usage shows **+4–7 extra pages** for these sections together, especially when the fact-checking table is dense.
 
 ### Step 7: QA the PDF
 
@@ -608,11 +619,16 @@ This pattern was validated on 2 videos processed together (analysis: ~160s paral
 ## Common pitfalls
 
 - **Whisper as first resort**: Don't. YouTube auto-subs are available for >95% of videos and download in seconds. Only use Whisper after the quality gate (Step 2b) confirms auto-subs are unusable.
-- **Whisper proper noun errors**: When Whisper is unavoidable, run the proper noun verification in Step 2c.4. Manually verify all names, places, and historical terms against the video title/description. Whisper systematically mangles Chinese proper nouns (张献忠→张县中, 明末→元末, etc.).
+- **Whisper proper noun errors**: When Whisper is unavoidable, run the proper noun verification in Step 2c.4. Manually verify all names, places, and historical terms against the video title/description. Whisper systematically mangles Chinese proper nouns (张献忠→张县中, 明末→元末, etc.). When using `small` model, proper noun accuracy is worse — the verification step is doubly critical.
+- **Whisper timeout in execute_code**: The `execute_code` tool has a ~300s hard timeout. For `medium` or `small` model transcription of >15min audio, this is often too short. Use **background terminal with `notify_on_complete=true`** instead of `execute_code` for the Whisper transcription step.
+- **Background Whisper with heredoc produces zero output**: When running Whisper in a background terminal with a heredoc (`python3 << 'PYEOF'`), stdout output may never appear in `process poll/log` even after the script completes — the transcript JSON may still be written to disk, but real-time progress reporting is lost. **Workaround**: write the transcription script to a file (`/tmp/whisper_transcribe.py`) and run `python3 -u /tmp/whisper_transcribe.py` — the `-u` flag unbuffers stdout and makes progress visible.
+- **First-time model download is slow**: The first run of `faster-whisper` with a given model size downloads the model from Hugging Face Hub. `base` took 105s on first load in real usage. Factor this into timing expectations; subsequent runs use the cached model and load in seconds.
 - **Skipping the quality gate**: Even when auto-subs download successfully, run the Step 2b checks. A 1KB SRT file for a 60-minute video is a silent failure — the file exists but contains almost no usable content.
-- **Whisper model selection**: `medium` is the sweet spot for consulting reports. `large-v3` on a 2hr file can take 30+ minutes and cause memory pressure on M-series Macs. Start with `medium`; only escalate if proper noun accuracy is critical.
+- **Whisper model selection**: `medium` is the sweet spot for consulting reports. `large-v3` on a 2hr file can take 30+ minutes and cause memory pressure on M-series Macs. Start with `medium`; only escalate if proper noun accuracy is critical. `small` is acceptable for <1hr videos when time is tight, but expect ~250-400 chars/min for Chinese and more proper-noun errors.
 - **yt-dlp blocked by bot detection**: Don't keep retrying the same command. Follow the Step 1b escalation ladder: try android → tv → web clients, then invidious mirrors for metadata, then browser snapshot, then flag to user. Each rung takes <15s — you can test all automated rungs in under a minute.
 - **Chrome cookie decryption**: `--cookies-from-browser chrome` with **pip-installed** yt-dlp triggers macOS Keychain prompts and usually extracts 0 cookies. The **brew-installed** yt-dlp (`/opt/homebrew/bin/yt-dlp`) successfully decrypts Chrome cookies on the same machine — it extracted 1403 cookies and downloaded a bot-blocked video's subtitles. Always try brew yt-dlp before flagging to the user.
+- **HTML generation subagent timeout**: For reports with extensive extra sections (批判性思考+事实核查), the resulting markdown can be 30-50KB. The HTML generation subagent may time out at the default 600s limit — but the HTML file may still be partially or fully generated. Check for the `.html` file after a timeout before retrying. For very large reports, consider generating HTML directly via Python script instead of delegating.
+- **Page count inflation with extra sections**: The expected page counts table assumes a standard report (封面+摘要+观点+数据+建议+洞见+结论). When 批判性思考 and 事实核查 sections are added, expect **+4–7 extra pages**, not just the +2–4 stated in Step 4b. A 27-min video that would normally be ~10pp can reach 20pp with both sections.
 - **SRT vs VTT confusion**: With `--convert-subs srt`, yt-dlp deletes the `.vtt` file. Always check `ls *.srt` first; your parser must handle SRT format.
 - **Chinese-path Chrome export**: Chrome headless silently produces blank PDFs from Chinese-path `file://` URLs. Always use `/tmp/` ASCII paths.
 - **Missing `--no-pdf-header-footer`**: Chrome stamps date/time + local file paths onto page edges by default. Always explicitly suppress.

@@ -6,6 +6,7 @@ This directory contains the source-of-truth skill folders.
 
 <!-- package-list:start -->
 - `../packages/academic-paper-to-chinese-insight-pdf.skill`
+- `../packages/agent-skills-repo-publishing.skill`
 - `../packages/chinese-pdf-report.skill`
 - `../packages/chinese-video-transcribe-pdf.skill`
 - `../packages/consulting-pdf-from-youtube.skill`
@@ -91,3 +92,5 @@ Keep each skill folder focused. Prefer:
 - reusable logic in `scripts/`
 - supporting details in `references/`
 - example assets only when they materially improve reuse
+
+- `agent-skills-repo-publishing` — Publish or update skills in Toby's `davidtoby/agent-skills` repository, rebuild packages, validate, sync local Hermes copies, and push via SSH.

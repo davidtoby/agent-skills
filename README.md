@@ -284,6 +284,7 @@ Current packaged artifacts:
 
 <!-- package-list:start -->
 - [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
+- [`packages/agent-skills-repo-publishing.skill`](./packages/agent-skills-repo-publishing.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/chinese-video-transcribe-pdf.skill`](./packages/chinese-video-transcribe-pdf.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
@@ -455,3 +456,5 @@ Read the full guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 ## License / 许可证
 
 MIT
+
+- `agent-skills-repo-publishing` — Publish or update skills in Toby's `davidtoby/agent-skills` repository, rebuild packages, validate, sync local Hermes copies, and push via SSH.

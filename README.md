@@ -72,6 +72,8 @@ Use this quick map if you are not sure where to start:
   → [`feishu-approval-fallback`](./skills/feishu-approval-fallback/)
 - **Feishu websocket mode reconnects too slowly or seems unstable**  
   → [`feishu-websocket-stability`](./skills/feishu-websocket-stability/)
+- **My OpenClaw Feishu bot stops replying, or agent prep is extremely slow after migration**  
+  → [`openclaw-feishu-bot-troubleshooting`](./skills/openclaw-feishu-bot-troubleshooting/)
 
 ### 中文
 
@@ -93,6 +95,8 @@ Use this quick map if you are not sure where to start:
   → [`feishu-approval-fallback`](./skills/feishu-approval-fallback/)
 - **Feishu websocket 模式重连太慢，或连接稳定性可疑**  
   → [`feishu-websocket-stability`](./skills/feishu-websocket-stability/)
+- **OpenClaw 飞书 Bot 不回复消息，或迁移后 agent 处理极慢**  
+  → [`openclaw-feishu-bot-troubleshooting`](./skills/openclaw-feishu-bot-troubleshooting/)
 
 ---
 

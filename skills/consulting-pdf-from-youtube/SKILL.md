@@ -25,7 +25,11 @@ Use this skill when the user shares a YouTube link and wants:
 - key takeaways / insights
 - professional visual styling
 
-**Video download is optional.** For report generation, only metadata + subtitles are needed. Skip the full video download unless the user explicitly asks for the video file.
+Also use this skill for **social-video consulting reports beyond YouTube** (especially X/Twitter videos) when the requested deliverable is still a polished Chinese consulting-style PDF with transcript-based analysis, critical thinking, and/or fact verification. For X/Twitter sources, combine this workflow with `x-video-download-normalization`: download and verify the MP4 first, then extract audio/keyframes and continue with the report pipeline below.
+
+Also use it for **multi-platform public-video evidence reports**: when the user asks to research people/topics across YouTube, Bilibili, Douyin/TikTok, Reddit, X, etc.; extract influential quotes/highlights; preserve timestamps/source links; analyze influence/controversy/bans; and deliver a Chinese PDF. In this class of task, treat each quoted item as evidence with an explicit status: `字幕直引` / `章节标题` / `标题或描述定位` / `二级解读` / `未验证，不作证据`. Do not invent quotes to fill platform coverage gaps.
+
+**Video download is optional for YouTube** because metadata + subtitles may be enough. For Bilibili/search-result-only sources, browser DOM extraction of titles, URLs, view counts, durations, and publish dates may be sufficient for a source table, but avoid claiming exact quotes unless subtitles/video content were directly inspected. For Douyin/Reddit or other blocked platforms, record the access limitation and exclude unverifiable claims from the evidence table. For X/Twitter and other social videos without caption APIs, full video download is usually required so you can extract audio and frames.
 
 ## Output goals
 
@@ -65,6 +69,35 @@ yt-dlp --list-subs "<url>" 2>&1 | grep -A5 "Available automatic"
 
 Example mismatch encountered in real usage:
 - Expected: `zh-Hans` → Actual: `zh` → Download with `--sub-langs "zh"`
+
+### Step 1a-X: X/Twitter video branch — download, keyframes, and transcript scaffold
+
+Use this branch when the source URL is an X/Twitter status/video and the user asks for a consulting-style PDF report rather than just a download.
+
+1. **Download and normalize the video first** using `x-video-download-normalization` conventions:
+   - shared directory: `~/.Hermes/workspace/output/x_videos/`
+   - stable filename: `x_video_<handle>_<statusid>.mp4`
+   - report workspace: `~/.Hermes/workspace/output/x_video_<statusid>_consulting_report/`
+   - copy the downloaded MP4 into the report workspace as `source_video.mp4`
+2. **Fetch X metadata** when possible:
+   ```bash
+   yt-dlp --dump-single-json --no-playlist '<x-url>' > x_metadata.json
+   ```
+   Preserve the user-facing status ID in filenames even if yt-dlp resolves the underlying media ID differently.
+3. **Extract audio for Whisper**:
+   ```bash
+   ffmpeg -y -i source_video.mp4 -vn -ac 1 -ar 16000 audio_16k.wav
+   ```
+4. **Extract sparse keyframes for visual/OCR context**:
+   ```bash
+   mkdir -p frames
+   ffmpeg -y -i source_video.mp4 -vf fps=1/10 frames/frame_%03d.jpg
+   ```
+   Build a contact sheet from the frames and run vision/OCR over it when the video has burned-in subtitles, slides, labels, or visual claims. This is especially useful for short Chinese social videos where Whisper mishears terms but subtitles are visible.
+5. **Transcribe short Chinese social videos pragmatically**:
+   - `openai-whisper` CLI with `--model base --language zh --task transcribe --output_format txt` is acceptable for short clips (<5 min) after extracting WAV.
+   - Expect obvious Chinese ASR errors and correct them against context/keyframes before using the transcript in a user-facing report. Common errors in one X-video case included `真体→真题`, `被考→备考`, `负习→复习`, `体人→出题人`.
+6. **Then continue with Step 4+** to synthesize the report. For short social clips (<5 min), inline processing is usually enough; no subagent is necessary unless the user asks for a very deep report.
 
 ### Step 1b: Bot detection bypass — escalation ladder
 
@@ -415,12 +448,13 @@ with open(out_path, 'w') as f:
 ```
 
 **Key points:**
-- `entries[::3]` — YouTube triplicates every caption block; taking every 3rd removes duplicates
-- SRT timestamps use commas (`00:00:01,990`), VTT uses dots (`00:00:01.990`) — the `-->` split works for both
-- Do NOT aggressively merge sentences — the analysis subagent handles fragment-level text
-- Chinese auto-subs may have fewer duplicates than English; `[::3]` is still safe
+- `entries[::3]` is only safe when duplicate detection confirms YouTube auto-caption triplication. Do **not** blindly apply it to official/creator subtitles: a 3h35m Luo Fuli interview had `zh-Hans` official/creator subtitles with 6,221 entries and no triplication; applying `[::3]` would have discarded two-thirds of valid content.
+- Before deduping, inspect the first 9–15 entries and compute adjacent/periodic duplicate rates. If entries/min is already plausible (e.g., ~20–35 entries/min for dense Chinese subtitles) and text is not repeated, keep all entries.
+- SRT timestamps use commas (`00:00:01,990`), VTT uses dots (`00:00:01.990`) — the `-->` split works for both.
+- Do NOT aggressively merge sentences — the analysis subagent handles fragment-level text.
+- Chinese auto-subs may have fewer duplicates than English; prefer duplicate detection over hard-coded `[::3]`.
 
-A working copy of this script lives at `/tmp/clean_srt3.py` (created during pipeline runs).
+A working copy of the older fixed-step cleaner may live at `/tmp/clean_srt3.py`, but update it or bypass `[::3]` for official/non-duplicated subtitles.
 
 **Expected output sizes (validated):**
 
@@ -478,16 +512,62 @@ Examine the video's narrative through these lenses:
 - **Audience applicability** — Who is this advice actually for? A narrative about "bet everything on one moment" is life-destroying advice for someone without a safety net.
 - **What the video gets right** — Credit where due. Acknowledging valid insights builds the report's credibility.
 
+For technical/industry interviews where the user wants help separating useful signal from “场面话/叙事包装”, add an explicit **judgment taxonomy** before the critique:
+
+| Layer | Meaning | How to use it |
+|---|---|---|
+| A. 高置信事实/技术洞见 | Verifiable facts or claims inside the speaker's demonstrated competence zone | Treat as report backbone |
+| B. 有价值但需打折的经验判断 | Plausible practitioner heuristics with limited sample size or survivorship bias | Use as hypotheses; state boundaries |
+| C. 尚未充分验证的趋势叙事 | Future-facing claims, paradigm narratives, AGI/timeline/market inevitability claims | Keep as scenario assumptions, not conclusions |
+| D. 可能误导的口号/场面话 | Slogans, institutional positioning, claims with weak falsifiability or strong incentive bias | Quote sparingly; warn readers not to operationalize |
+
+Evaluate each major claim by: **可验证性**, **专业域匹配**, **操作性**, **反证压力**, **激励结构**, and **时效性**. This prevents a report from laundering a speaker's true domain expertise into unsupported macro or trend conclusions.
+
 **事实核查与验证 (Fact Verification):**
 Create a verification table with these columns:
 | Claim | Verdict | Evidence |
 |---|---|---|
 | ... | ✅ Verified / ⚠️ Partially accurate / ❌ Unverifiable | Source or reasoning |
 
+For **public-incident / breaking-news /现场事故 videos** (traffic crashes, public safety incidents, violence, disasters), use a stricter evidence hierarchy:
+
+1. **官方或权威媒体已证实** — police/municipal notices, Xinhua/People's Daily/CCTV, reputable wire-service republishes.
+2. **视频画面可支持但不能完全验证** — keyframes, burned-in text, visible police/ambulance/vehicles/location clues. Phrase as “画面显示/支持”, not “事实证明”.
+3. **第三方标题、社媒叙事或评论推测** — label as unverified unless independently corroborated. Do not upgrade words such as “蓄意/恶意/狂徒” into findings when official language only says “涉嫌交通肇事逃逸/进一步调查”.
+4. **低置信 ASR** — for noisy现场原声, dialect, screams, music, or crowd chatter, treat Whisper/SRT output as context only; do not quote or build factual claims from garbled phrases unless the audio is manually checked.
+
+Recommended verification workflow for this class:
+- Extract a sparse keyframe contact sheet and run visual/OCR analysis; note what is readable and what is not.
+- Search authoritative sources with concrete terms from the video card or keyframes (e.g., casualties, location, official wording), using Google News RSS/DuckDuckGo plus direct publisher fetches.
+- Prefer canonical publisher pages over Google News redirect URLs; save fetched source snippets/JSON for audit.
+- Add a report table separating: `官方已证实`, `视频画面支持`, `未验证/需谨慎`, and `待后续通报`.
+- Avoid graphic detail in the report; describe public-safety relevance without reproducing trauma.
+- Include media-ethics critique when relevant: secondary harm to victims/families, overuse of “惨烈” framing, and platform amplification of traumatic footage.
+
+**Source-provenance check for third-party reposts / SEO-tagged videos (mandatory when the uploader is not an official channel):**
+- Treat the target URL as the analysis object, but do not assume its title, hashtags, or guest tags are accurate source attribution.
+- Compare the video's duration, title, description, and transcript opening/ending against official uploads/playlists. If duration ≈ sum of official episodes, state that it is likely a compilation/repackage and cite the official episode URLs.
+- Verify whether named programs/guests in hashtags actually appear in the content. If not found, label them as `未验证/疑似 SEO 标签`, not as part of the source.
+- Add a provenance row/table before the main analysis: `target video identity`, `official source relationship`, `program/episode match`, `unverified tags`, `confidence`.
+- For documentary/commentary videos, distinguish: official episode title, third-party editorial title, transcript-supported claim, and external fact.
+
 Verify claims against:
 - Publicly known facts (CZ founded Binance in 2017, stepped down 2023, $4.3B fine, 4-month sentence)
 - Widely reported statistics
 - Documented historical events mentioned in the video
+- Academic or technical evidence when the video makes method, health, education, science, or productivity claims
+
+For **learning-method / exam-prep / education-advice videos**, useful evidence anchors include:
+- Dunlosky et al. (2013), *Improving Students’ Learning With Effective Learning Techniques*, DOI `10.1177/1529100612453266` — practice testing and distributed practice are high-utility techniques.
+- Roediger & Karpicke (2006), *Test-Enhanced Learning*, DOI `10.1111/j.1467-9280.2006.01693.x` — retrieval/testing can improve long-term retention versus restudying.
+- Adesope et al. (2017), *Rethinking the Use of Tests: A Meta-Analysis of Practice Testing*, DOI `10.3102/0034654316689306` — meta-analysis support for practice testing.
+- Cepeda et al. (2008), *Spacing Effects in Learning*, DOI `10.1111/j.1467-9280.2008.02209.x` — spacing effects in retention.
+
+For these videos, explicitly distinguish:
+- evidence-backed principles (e.g., retrieval practice, feedback, spacing, exam-simulation)
+- plausible but context-dependent tactics (e.g., past-paper prioritization, score-targeted preparation)
+- unverifiable personal anecdotes (e.g., “one vacation from last to first”, “three months to top score” without documents)
+- overbroad marketing claims (e.g., “pass any exam in a short time”, “guaranteed”).
 
 Distinguish between:
 - **Verifiable facts** — can be confirmed or denied with public sources
@@ -592,8 +672,12 @@ QA checklist:
 - [ ] Page count within expected range
 - [ ] Chinese characters present and not garbled
 - [ ] No `file:///...` paths in extracted text
+- [ ] No local workstation paths such as `/Users/<name>` or `/Users/toby` leaked from markdown source tables, footer notes, or generated metadata
+- [ ] No raw Markdown heading markers such as `####` leaked into the PDF (common when using a quick custom Markdown→HTML renderer without h4 support)
 - [ ] Text extractable from all pages
 - [ ] No browser-generated header/footer metadata
+
+If QA finds local path leakage, sanitize the markdown/HTML before re-exporting rather than accepting it as harmless. For user-facing reports, replace absolute internal paths with a neutral label such as `[本地工作区路径]` or omit the row entirely.
 
 ## Batch processing (multiple URLs)
 
@@ -626,6 +710,9 @@ This pattern was validated on 2 videos processed together (analysis: ~160s paral
 - **Skipping the quality gate**: Even when auto-subs download successfully, run the Step 2b checks. A 1KB SRT file for a 60-minute video is a silent failure — the file exists but contains almost no usable content.
 - **Whisper model selection**: `medium` is the sweet spot for consulting reports. `large-v3` on a 2hr file can take 30+ minutes and cause memory pressure on M-series Macs. Start with `medium`; only escalate if proper noun accuracy is critical. `small` is acceptable for <1hr videos when time is tight, but expect ~250-400 chars/min for Chinese and more proper-noun errors.
 - **yt-dlp blocked by bot detection**: Don't keep retrying the same command. Follow the Step 1b escalation ladder: try android → tv → web clients, then invidious mirrors for metadata, then browser snapshot, then flag to user. Each rung takes <15s — you can test all automated rungs in under a minute.
+- **yt-dlp search can hang or lose partial results**: `yt-dlp ytsearchN:<query>` may stall for broad Chinese queries. Prefer browser search pages for discovery when search hangs: YouTube `/results?search_query=...` plus `browser_console` DOM extraction for `a[href^="/watch"], a[href^="/shorts"]`; then run `yt-dlp --dump-json` and `--write-subs/--write-auto-subs` only on selected URLs.
+- **Bilibili search is useful as an evidence index, not a transcript source**: `search.bilibili.com/all?keyword=...` often exposes titles, BV IDs, view counts, durations, uploaders, and dates in the DOM. Use it to preserve platform coverage and identify high-impact clips, but label source rows as title/search-result evidence unless the video content or subtitles are directly inspected.
+- **Blocked Reddit/Douyin pages**: If Reddit returns a network-security block or Douyin requires login/region access, state the limitation in the report and exclude unverifiable quotes from the evidence table. Do not use search snippets as direct quotes unless the underlying page can be opened or independently corroborated.
 - **Chrome cookie decryption**: `--cookies-from-browser chrome` with **pip-installed** yt-dlp triggers macOS Keychain prompts and usually extracts 0 cookies. The **brew-installed** yt-dlp (`/opt/homebrew/bin/yt-dlp`) successfully decrypts Chrome cookies on the same machine — it extracted 1403 cookies and downloaded a bot-blocked video's subtitles. Always try brew yt-dlp before flagging to the user.
 - **HTML generation subagent timeout**: For reports with extensive extra sections (批判性思考+事实核查), the resulting markdown can be 30-50KB. The HTML generation subagent may time out at the default 600s limit — but the HTML file may still be partially or fully generated. Check for the `.html` file after a timeout before retrying. For very large reports, consider generating HTML directly via Python script instead of delegating.
 - **Page count inflation with extra sections**: The expected page counts table assumes a standard report (封面+摘要+观点+数据+建议+洞见+结论). When 批判性思考 and 事实核查 sections are added, expect **+4–7 extra pages**, not just the +2–4 stated in Step 4b. A 27-min video that would normally be ~10pp can reach 20pp with both sections.

@@ -39,45 +39,60 @@ def load_font(font_path: str, size: int):
         return ImageFont.truetype(fallback, size=size)
 
 
-def render_subtitle_png(text: str, out_path: Path, width: int, height: int, font_path: str, font_size: int, bottom_margin: int, text_color=(255,255,255,255), stroke_color=(0,0,0,255)):
+def has_cjk(text: str) -> bool:
+    return any('\u4e00' <= ch <= '\u9fff' for ch in text)
+
+
+def render_subtitle_png(text: str, out_path: Path, width: int, height: int, font_path: str, font_size: int, bottom_margin: int, text_color=(255,255,255,255), stroke_color=(0,0,0,255), zh_text_color=None, box_fill=(0,0,0,128)):
     img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     font = load_font(font_path, font_size)
+    zh_text_color = zh_text_color or text_color
 
     max_text_width = int(width * 0.86)
+    stroke = max(1, font_size // 18)
+    line_spacing = max(4, font_size // 6)
+
     # PIL doesn't auto-wrap multiline captions, so wrap each paragraph greedily.
-    wrapped_lines = []
+    # Preserve per-line language metadata so English and Chinese can use different colors.
+    wrapped = []
     for raw_line in text.splitlines():
+        is_zh = has_cjk(raw_line)
         words = raw_line.split(' ')
         if not words:
-            wrapped_lines.append('')
+            wrapped.append(('', is_zh))
             continue
         line = words[0]
         for word in words[1:]:
             test = line + ' ' + word
-            bbox = draw.textbbox((0, 0), test, font=font, stroke_width=max(1, font_size // 18))
+            bbox = draw.textbbox((0, 0), test, font=font, stroke_width=stroke)
             if bbox[2] - bbox[0] <= max_text_width:
                 line = test
             else:
-                wrapped_lines.append(line)
+                wrapped.append((line, is_zh))
                 line = word
-        wrapped_lines.append(line)
-    wrapped_text = '\n'.join(wrapped_lines)
+        wrapped.append((line, is_zh))
 
-    stroke = max(1, font_size // 18)
-    bbox = draw.multiline_textbbox((0, 0), wrapped_text, font=font, align='center', spacing=max(4, font_size // 6), stroke_width=stroke)
-    text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
+    if not wrapped:
+        img.save(out_path)
+        return
+
+    line_bboxes = [draw.textbbox((0, 0), line or ' ', font=font, stroke_width=stroke) for line, _ in wrapped]
+    text_w = max(b[2] - b[0] for b in line_bboxes)
+    text_h = sum(b[3] - b[1] for b in line_bboxes) + line_spacing * (len(line_bboxes) - 1)
     pad_x, pad_y = 28, 14
     box_w = min(width - 40, text_w + pad_x * 2)
     box_h = text_h + pad_y * 2
     box_x = (width - box_w) // 2
     box_y = max(0, height - bottom_margin - box_h)
 
-    draw.rounded_rectangle((box_x, box_y, box_x + box_w, box_y + box_h), radius=18, fill=(0, 0, 0, 128))
-    text_x = width // 2
-    text_y = box_y + pad_y - bbox[1]
-    draw.multiline_text((text_x, text_y), wrapped_text, font=font, fill=text_color, anchor='ma', align='center', spacing=max(4, font_size // 6), stroke_width=stroke, stroke_fill=stroke_color)
+    draw.rounded_rectangle((box_x, box_y, box_x + box_w, box_y + box_h), radius=18, fill=box_fill)
+    y = box_y + pad_y
+    for (line, is_zh), bbox in zip(wrapped, line_bboxes):
+        line_h = bbox[3] - bbox[1]
+        fill = zh_text_color if is_zh else text_color
+        draw.text((width // 2, y - bbox[1]), line, font=font, fill=fill, anchor='ma', stroke_width=stroke, stroke_fill=stroke_color)
+        y += line_h + line_spacing
     img.save(out_path)
 
 
@@ -91,8 +106,10 @@ def main():
     parser.add_argument('--bottom-margin', type=int, default=56)
     parser.add_argument('--workdir', default=None)
     parser.add_argument('--keep-workdir', action='store_true')
-    parser.add_argument('--text-color', default='255,255,255,255', help='RGBA text color (default: white)')
+    parser.add_argument('--text-color', default='255,255,255,255', help='RGBA English/default text color (default: white)')
+    parser.add_argument('--zh-text-color', default=None, help='RGBA Chinese text color; defaults to --text-color')
     parser.add_argument('--stroke-color', default='0,0,0,255', help='RGBA stroke color (default: black)')
+    parser.add_argument('--box-fill', default='0,0,0,128', help='RGBA subtitle box fill (default: semi-transparent black)')
     parser.add_argument('--video-preset', default='veryfast')
     args = parser.parse_args()
 
@@ -107,7 +124,9 @@ def main():
 
     # Parse color args
     text_color = tuple(int(x) for x in args.text_color.split(','))
+    zh_text_color = tuple(int(x) for x in args.zh_text_color.split(',')) if args.zh_text_color else text_color
     stroke_color = tuple(int(x) for x in args.stroke_color.split(','))
+    box_fill = tuple(int(x) for x in args.box_fill.split(','))
 
     workdir = Path(args.workdir) if args.workdir else output_path.with_suffix('')
     if workdir.exists():
@@ -133,7 +152,7 @@ def main():
                 f.write(f"file '{blank.resolve()}'\n")
                 f.write(f'duration {start - cursor:.6f}\n')
             png = overlays_dir / f'{idx:04d}.png'
-            render_subtitle_png(text, png, width, height, args.font, args.font_size, args.bottom_margin, text_color, stroke_color)
+            render_subtitle_png(text, png, width, height, args.font, args.font_size, args.bottom_margin, text_color, stroke_color, zh_text_color, box_fill)
             f.write(f"file '{png.resolve()}'\n")
             f.write(f'duration {end - start:.6f}\n')
             cursor = end

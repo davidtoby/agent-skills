@@ -114,6 +114,89 @@ Defaults:
 - Bottom margin: 56px
 - Font: `/Library/Fonts/Arial Unicode.ttf` (change with `--font` for CJK-optimized fonts like STHeiti)
 
+### Visual style and collision QA for cinematic / music / credit-roll clips
+
+When the source is a movie clip, music video, lyric scene, or any visually sensitive footage, do not choose subtitle styling blindly:
+
+1. Extract sparse keyframes/contact sheet before final hardcode:
+   ```bash
+   mkdir -p frames
+   ffmpeg -y -i source.mp4 -vf fps=1/20 frames/frame_%03d.jpg
+   ```
+   Use visual inspection/vision analysis to choose a style that matches the footage. For cold, low-saturation film scenes, prefer restrained off-white or light-gray text, thin black stroke, CJK-capable sans font such as `STHeiti Light.ttc`, and lower black-bar placement when available. Avoid saturated yellow/red unless the user explicitly asks.
+2. Check for built-in captions, credits, or lower-third graphics. If the video enters a black credit-roll or already has dense on-screen text, hardcoded subtitles may collide even if they are readable.
+3. If a collision is detected, create a hardcode-specific SRT variant that stops, moves, or shrinks subtitles during that region. Preserve the complete transcript/lyrics in the master SRT and softsub MP4, but make the recommended hardcoded MP4 respect the original credits/graphics.
+4. QA at least two hardcoded frames: one with subtitles over normal footage, and one in the visually risky region (credits/lower-third/on-screen text). Re-render if subtitles obscure important source text.
+
+If local ffmpeg lacks `ass`/`subtitles` filters (`ffmpeg -filters | grep -E 'subtitles|ass'` returns nothing), skip filter-based burning and use the Python PNG-overlay renderer directly.
+
+
+### Precision timing repair for music / lyric clips
+
+When a user says subtitles do not precisely match the picture/audio, do **not** keep nudging a coarse SRT by a global offset. Rebuild a finer English timing axis first, then reattach Chinese.
+
+Battle-tested case: a 3:31 movie clip had no YouTube captions. The first draft used 10–17 second lyric blocks starting around `00:00:55`, but word-level ASR showed the first clear vocal line actually started around `00:01:14.920`. The fix was to replace 11 coarse blocks with 28 short phrase blocks.
+
+Use this repair workflow:
+
+1. Re-run Whisper with word timestamps when captions feel early/late:
+   ```bash
+   ffmpeg -y -i source.mp4 -vn -ac 1 -ar 16000 source_audio_16k.wav
+   whisper source_audio_16k.wav --model small --language en --task transcribe \
+     --word_timestamps True --output_format json --output_dir whisper_word_out
+   ```
+   Use `small` when `medium` would trigger a large model re-download or exceed foreground timeout. For short music clips, `small` word timestamps are often enough for alignment even when lyrics need manual correction.
+2. Inspect word timestamps, not just segment timestamps. In music/lyrics, Whisper may hallucinate or mishear repeated hooks (`Go west` may become `Go ahead`), but the word start/end times are still useful anchors.
+3. Build SRT events around short sung phrases, normally 2–5 seconds each. Avoid 10–20 second lyric blocks unless the line is genuinely sustained.
+4. Ensure the first visible subtitle starts at the first clear vocal phrase, not at instrumental music or low-confidence ASR noise. Add a QA frame before the first vocal; it should show no subtitle.
+5. Keep two SRT variants when the video has credits or dense on-screen text:
+   - **master/full SRT**: complete lyrics/transcript for softsub and external subtitle use
+   - **hardcode-safe SRT**: stops, moves, or shrinks subtitles before credits/lower-thirds so the burned-in version does not cover source text
+6. QA with extracted frames at minimum:
+   ```bash
+   ffmpeg -y -ss 00:01:10 -i hardcoded.mp4 -frames:v 1 qa_pre_vocal.jpg
+   ffmpeg -y -ss 00:01:16 -i hardcoded.mp4 -frames:v 1 qa_first_vocal.jpg
+   ffmpeg -y -ss 00:01:48 -i hardcoded.mp4 -frames:v 1 qa_chorus.jpg
+   ffmpeg -y -ss 00:03:05 -i hardcoded.mp4 -frames:v 1 qa_credits.jpg
+   ```
+   Verify: pre-vocal frame has no subtitle; first-vocal frame shows the first line; chorus frame shows the right hook; credit/lower-third frames are not obscured.
+
+### Recommended cinematic bilingual hardcode style
+
+For cold, low-saturation film footage or wide-screen clips with a lower black bar, use restrained movie-style subtitles:
+
+```bash
+python scripts/hardcode_bilingual_srt.py \
+  --video source.mp4 \
+  --srt hardcode_safe_bilingual.srt \
+  --output output_cinematic_hardcode.mp4 \
+  --font '/System/Library/Fonts/STHeiti Light.ttc' \
+  --font-size 36 \
+  --bottom-margin 22 \
+  --text-color '232,226,214,255' \
+  --zh-text-color '242,242,242,255' \
+  --stroke-color '0,0,0,220' \
+  --box-fill '0,0,0,92' \
+  --video-preset veryfast
+```
+
+Style rationale:
+- English line on top, Chinese line below, as provided by the SRT event.
+- `STHeiti Light.ttc` gives clean CJK-capable sans rendering on macOS; fall back to Arial Unicode only if needed.
+- Font size `36` works well for ~1080p wide-screen film clips; increase for mobile-first delivery, decrease if source credits/lower-thirds are dense.
+- Off-white English `(232,226,214)` plus light-gray Chinese `(242,242,242)` reads clearly without the harshness of pure white.
+- Black stroke alpha around `220` preserves readability on snow/gray footage.
+- Semi-transparent black box alpha around `92` is subtler than the default `128` and feels less like short-video captions.
+- `bottom-margin 22` places subtitles low enough to use a lower black bar when present; raise it when the source has logos or important text at the bottom.
+
+Always trim and verify hardcoded outputs produced by the PNG-overlay renderer, because concat/overlay generation can leave a small tail:
+
+```bash
+SRC_DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 source.mp4)
+ffmpeg -y -i hardcode_raw.mp4 -t "$SRC_DUR" -c copy -movflags +faststart hardcode_trimmed.mp4
+ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 hardcode_trimmed.mp4
+```
+
 ## Audit missing Chinese
 
 Run this before calling a file “final bilingual”:

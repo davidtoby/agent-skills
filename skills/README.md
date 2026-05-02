@@ -13,6 +13,7 @@ This directory contains the source-of-truth skill folders.
 - `../packages/feishu-approval-fallback.skill`
 - `../packages/feishu-websocket-stability.skill`
 - `../packages/github-auth-recovery.skill`
+- `../packages/openclaw-feishu-bot-troubleshooting.skill`
 - `../packages/precise-bilingual-subtitle.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
 <!-- package-list:end -->
@@ -84,6 +85,16 @@ Contains:
 - `SKILL.md`
 - `references/real-fix-pattern.md`
 - packaged artifact: `../packages/feishu-websocket-stability.skill`
+
+### `openclaw-feishu-bot-troubleshooting`
+Diagnose and fix OpenClaw Feishu bot no-response issues after migration or configuration changes. Covers pairing loss, session bloat, missing SDK packages, disabled plugins, and Gateway event-loop blocking.
+
+Contains:
+- `SKILL.md`
+- `scripts/inspect-feishu-channel.sh`
+- `scripts/clean-session-bloat.sh`
+- `references/common-error-patterns.md`
+- packaged artifact: `../packages/openclaw-feishu-bot-troubleshooting.skill`
 
 ## Contribution note
 

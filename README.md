@@ -295,8 +295,10 @@ Current packaged artifacts:
 - [`packages/feishu-approval-fallback.skill`](./packages/feishu-approval-fallback.skill)
 - [`packages/feishu-websocket-stability.skill`](./packages/feishu-websocket-stability.skill)
 - [`packages/github-auth-recovery.skill`](./packages/github-auth-recovery.skill)
+- [`packages/output-workspace-cleanup.skill`](./packages/output-workspace-cleanup.skill)
 - [`packages/precise-bilingual-subtitle.skill`](./packages/precise-bilingual-subtitle.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+- [`packages/youtube-bilingual-subtitle-delivery.skill`](./packages/youtube-bilingual-subtitle-delivery.skill)
 <!-- package-list:end -->
 
 ### How packaging works / 打包方式

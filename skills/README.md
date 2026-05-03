@@ -14,8 +14,10 @@ This directory contains the source-of-truth skill folders.
 - `../packages/feishu-websocket-stability.skill`
 - `../packages/github-auth-recovery.skill`
 - `../packages/openclaw-feishu-bot-troubleshooting.skill`
+- `../packages/output-workspace-cleanup.skill`
 - `../packages/precise-bilingual-subtitle.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
+- `../packages/youtube-bilingual-subtitle-delivery.skill`
 <!-- package-list:end -->
 
 ## Current skills

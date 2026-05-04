@@ -1,0 +1,103 @@
+# Demoted legacy skill: `openclaw-imports/markdown-converter`
+
+This file was copied during an umbrella-building consolidation pass. The original skill directory was archived, not deleted.
+
+
+## `.clawhub/origin.json`
+
+```
+{
+  "version": 1,
+  "registry": "https://clawhub.ai",
+  "slug": "markdown-converter",
+  "installedVersion": "1.0.0",
+  "installedAt": 1772269130187
+}
+
+```
+
+
+## `SKILL.md`
+
+````
+---
+name: markdown-converter
+description: Convert documents and files to Markdown using markitdown. Use when converting PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx, .xls), HTML, CSV, JSON, XML, images (with EXIF/OCR), audio (with transcription), ZIP archives, YouTube URLs, or EPubs to Markdown format for LLM processing or text analysis.
+---
+
+# Markdown Converter
+
+Convert files to Markdown using `uvx markitdown` — no installation required.
+
+## Basic Usage
+
+```bash
+# Convert to stdout
+uvx markitdown input.pdf
+
+# Save to file
+uvx markitdown input.pdf -o output.md
+uvx markitdown input.docx > output.md
+
+# From stdin
+cat input.pdf | uvx markitdown
+```
+
+## Supported Formats
+
+- **Documents**: PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx, .xls)
+- **Web/Data**: HTML, CSV, JSON, XML
+- **Media**: Images (EXIF + OCR), Audio (EXIF + transcription)
+- **Other**: ZIP (iterates contents), YouTube URLs, EPub
+
+## Options
+
+```bash
+-o OUTPUT      # Output file
+-x EXTENSION   # Hint file extension (for stdin)
+-m MIME_TYPE   # Hint MIME type
+-c CHARSET     # Hint charset (e.g., UTF-8)
+-d             # Use Azure Document Intelligence
+-e ENDPOINT    # Document Intelligence endpoint
+--use-plugins  # Enable 3rd-party plugins
+--list-plugins # Show installed plugins
+```
+
+## Examples
+
+```bash
+# Convert Word document
+uvx markitdown report.docx -o report.md
+
+# Convert Excel spreadsheet
+uvx markitdown data.xlsx > data.md
+
+# Convert PowerPoint presentation
+uvx markitdown slides.pptx -o slides.md
+
+# Convert with file type hint (for stdin)
+cat document | uvx markitdown -x .pdf > output.md
+
+# Use Azure Document Intelligence for better PDF extraction
+uvx markitdown scan.pdf -d -e "https://your-resource.cognitiveservices.azure.com/"
+```
+
+## Notes
+
+- Output preserves document structure: headings, tables, lists, links
+- First run caches dependencies; subsequent runs are faster
+- For complex PDFs with poor extraction, use `-d` with Azure Document Intelligence
+
+````
+
+
+## `_meta.json`
+
+```
+{
+  "ownerId": "kn70pywhg0fyz996kpa8xj89s57yhv26",
+  "slug": "markdown-converter",
+  "version": "1.0.0",
+  "publishedAt": 1767651965151
+}
+```

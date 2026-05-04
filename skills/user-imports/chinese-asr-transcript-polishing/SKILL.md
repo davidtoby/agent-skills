@@ -9,8 +9,9 @@ Bridge the gap between raw Chinese ASR output (Whisper, faster-whisper, etc.) an
 
 ## When to use
 
-- User provides a long Chinese speech transcript (lecture, keynote, interview) and asks for a **polished, corrected article**
+- User provides a long speech transcript (Chinese or English) and asks for a **polished, corrected article PDF**
 - User asks to "correct typos and errors in the transcript" and "output a polished speech article"
+- User shares a YouTube video URL and asks for a **polished Chinese article with critical analysis and fact-checking**
 - User asks for a PDF that faithfully preserves the original speech while fixing transcription mistakes
 - The transcript contains proper nouns (names of people, places, organizations), historical references (dates, events), or domain-specific terminology (economic terms, financial concepts, academic jargon) that ASR handles poorly
 
@@ -19,12 +20,142 @@ Bridge the gap between raw Chinese ASR output (Whisper, faster-whisper, etc.) an
 - The transcript comes from a professionally produced source (subtitles, published text, official transcript) — minimal errors
 - The user only wants a **summary or analysis** of the speech, not the full article — use consulting-pdf-from-youtube instead
 - The user specifically wants the raw transcript preserved without corrections
+- The user wants bilingual subtitles (EN+ZH) embedded into a video — use video-transcription-subtitle-workflows instead
+- The user wants a literal verbatim transcript without restructuring into article format
 
 ## Workflow
 
 ### Step 0: Prerequisites
 
 You need the `chinese-pdf-report` skill loaded for the PDF export step. This skill covers the proofreading and article writing; `chinese-pdf-report` covers the rendering.
+
+### Step 0a: GPU detection — Whisper model selection constraint
+
+On this machine, Whisper runs **CPU-only** (no GPU/CUDA). This has two consequences:
+
+1. **Model size matters critically.** Tiny (~75MB) completes in seconds to minutes. Small (~1.5GB) regularly times out at the default 120s terminal timeout.
+2. **FP16 warning is expected and ignorable** — Whisper prints `UserWarning: FP16 is not supported on CPU; using FP32 instead`. This is normal for CPU inference.
+
+**Rule:** Always use `--model tiny` by default. Only use `--model small` if the user explicitly asks for higher accuracy and you have time to wait. Never use `--model medium` or `--model large` on this machine.
+
+**If the timeout fires:** Kill the hanging process with `process(action="kill")`, switch to `--model tiny`, and retry. The tiny model produces ~the same output quality for Chinese speech on this machine — the difference is in the number of homophone errors that will need manual correction in Step 2.
+
+**Long-form audio (15+ minutes):** Use `whisper /path/audio.wav --model tiny --language zh --output_dir /tmp --output_format txt` directly with a generous timeout (300-600s). The tiny model processes ~25 min of audio in about 1-2 min on CPU.
+
+### Step 0a.5: When YouTube has NO auto-captions — Whisper fallback workflow
+
+This scenario is especially common for:
+- YouTube Shorts (rarely have auto-captions)
+- Chinese-language videos from smaller channels
+- Livestream archives
+- Videos with disabled captions
+
+**Trigger:** When `yt-dlp --write-auto-subs --sub-langs zh,en` returns "There are no subtitles for the requested languages".
+
+**Fallback workflow:**
+
+```bash
+# Step 1: Download the video (MP4)
+mkdir -p ~/.Hermes/workspace/output/video_downloads/<topic_name>
+yt-dlp --cookies-from-browser chrome -S 'res:1080' --merge-output-format mp4 -o '<path>/%(id)s.%(ext)s' 'URL'
+
+# Step 2: Extract audio to WAV (16kHz mono — Whisper's preferred format)
+ffmpeg -y -i <video.mp4> -vn -ar 16000 -ac 1 <audio.wav>
+
+# Step 3: Transcribe with Whisper tiny
+whisper <audio.wav> --model tiny --language zh --output_dir /tmp --output_format txt
+
+# Step 4: Read the Whisper output carefully — it will have MORE errors than
+# YouTube auto-captions. Every category in Step 2 applies doubly.
+```
+
+**Important distinction:** Whisper output for Chinese direct transcription vs. YouTube auto-captions for English:
+- **Whisper output** = full text but noisy (lots of homophones, garbled names). Every error category in Step 2 applies at higher frequency. Requires more manual proofreading.
+- **YouTube auto-captions (English VTT)** = accurate text but fragmented (30% filler, overlapping cues). Requires VTT dedup + translation, but fewer name errors.
+
+**Video info for directory naming:** Before creating the download folder, check the video title and channel with:
+```bash
+yt-dlp --cookies-from-browser chrome --print '%(title)s\\n%(channel)s\\n%(duration_string)s' 'URL'
+```
+Name the download directory after the content topic.
+
+### Step 0c: Duration-based strategy — short-form vs. long-form
+
+Video duration determines the restructuring approach:
+
+**Short-form (< 3 min, including YouTube Shorts):**
+- Minimal restructuring — the entire video is one core message
+- No need for chapter/section breakdown
+- Structure: single narrative flow, a few quote blocks, insights section
+- The challenge is accuracy, not structure — Whisper errors are more visible in short content
+- Adding a transcription error correction appendix (before/after table) adds value
+
+**Long-form (> 15 min, lectures, interviews, podcasts):**
+- Full restructuring into sections/chapters
+- Each topic transition in the speech becomes a section heading
+- Dialogue format for conversations, thematic sections for monologues
+- The challenge is organization, not accuracy — the long-form has more redundancy to survive errors
+
+### Step 0d: Source type identification — beyond Chinese ASR vs. English VTT
+
+New scenarios discovered in real usage:
+
+**Scenario C: Chinese audio + bilingual sub availability**
+Some Chinese-language podcasts have both zh-CN auto-captions (YouTube ASR) and English auto-translate captions. The Chinese VTT may be short/truncated while the English has more content. Strategy:
+1. Download BOTH zh-CN and en VTT files
+2. Extract the zh-CN first for the original Chinese text (more accurate for names/places)
+3. Use the English VTT to fill gaps where Chinese VTT is sparse
+4. Cross-reference: Chinese text for proper nouns, English for completeness
+5. This happened with 不明白播客 EP-209 (Xu Chenggang): zh-CN had 16K chars vs English 52K chars
+
+**Scenario D: Heavy dialect (北方方言 / 东北话)**
+Whisper performs significantly worse on Chinese regional dialects, especially:
+- 东北话 (Northeastern dialect, 二人转 style) — homophone rate doubles
+- 四川话 (Sichuan dialect)
+- Any dialect with non-standard pronunciation
+
+Signs of dialect-induced errors:
+- Words that are clearly phonetic approximations but not real words
+- Multiple consecutive characters that don't form any known phrase
+- The same spoken word transcribed differently at different timestamps
+
+Strategy for dialect videos:
+1. After Whisper output, do a full pass looking for "impossible" character sequences
+2. Read each garbled segment aloud (mentally) in the approximate dialect — does it sound right?
+3. Use context (topic, typical phrasing of the speaker) to infer the correct words
+4. Expect 2-3× more manual corrections than standard Mandarin ASR
+5. The 花哥 "开皮爱国赛道" video (25 min, 东北二人转 style) needed corrections on nearly every sentence
+
+**Scenario E: Political/sensitive content**
+Some videos contain politically charged content. This requires additional care:
+1. Include an explicit content notice at the top of the PDF (e.g. "本文仅为内容实录与文本分析，不代表整理者立场")
+2. Frame the critical analysis section around media analysis and rhetorical strategy, NOT political endorsement
+3. Focus insights on the structural/linguistic aspects of the content, not the political views
+4. Fact-check claims as you would any other content — don't adjust standards based on sensitivity
+
+### Step 0b: Source identification — Chinese ASR vs. English YouTube VTT
+
+Before reading, identify the source format — the cleanup strategy differs fundamentally:
+
+**Scenario A: Chinese ASR transcript** (Whisper, native Chinese speech)
+- Errors are homophone substitutions, garbled proper nouns, wrong dates
+- Fix strategy: read for semantic errors, check proper nouns against known references
+- Proceed to Step 1 directly
+
+**Scenario B: English YouTube auto-captions (VTT format)**
+- The VTT format has CHARACTERISTIC redundancy issues that must be cleaned first
+- Each timed cue appears multiple times (incremental build: short → medium → full), creating 3x–4x duplication
+- Overlapping cues where the end of one cue and start of another share text
+- The raw file may be 12,000+ lines for a 64-minute video, yielding ~3,000+ cues
+- Fix strategy: write a Python script to:
+  1. Extract unique text per timestamp (take the longest version per cue)
+  2. Walk sequentially and deduplicate (if text A is a prefix of text B, replace A with B)
+  3. Check for suffix-prefix overlap between consecutive cues and merge
+  4. Group resulting clean segments into paragraphs (~5-8 segments per paragraph, at sentence boundaries)
+- After VTT cleanup, the transcript may still have 90+ usable paragraphs
+- Once cleaned, you need to translate/transform the English content into natural Chinese
+
+After VTT cleanup (Scenario B), proceed with the same steps below — the error categories shift from "ASR homophones" to "translation naturalness" and "cultural adaptation."
 
 ### Step 1: Read and scan the full transcript
 
@@ -34,6 +165,7 @@ Read the entire transcript before making any changes. Note the following charact
 - **Topic area** — finance, history, technology, medicine? This determines technical term expectations
 - **Speech length** — a 500-line transcript vs. a 4000-line transcript requires different levels of restructuring
 - **Timestamp format** — note if timestamps are present, as they'll need to be stripped
+- **Dialogue vs. monologue** — is this a conversation (two+ speakers, Q&A format) or a single speaker lecturing?
 - **Language mixing** — does the speaker code-switch between Chinese and English? ASR often garbles English terms
 
 ### Step 2: Systematic error scan — check these categories
@@ -141,7 +273,38 @@ Raw ASR transcripts have these characteristics that need fixing:
 6. **Quote formatting** — use blockquotes for key statements the speaker emphasizes
 7. **Fill in implicit references** — "these problems" → what problems? Provide context where the speaker's gesture or slide reference is lost in text
 
-Structural pattern for a long-form speech article:
+**Dialogue format (for interviews/conversations):**
+- When the source is a conversation (two+ speakers), preserve the dialogue structure — it's essential to the content
+- Mark speakers clearly with labels (e.g. `**Speaker A:**` or role-based labels like `**Host:**`, `**Guest:**`)
+- Group short back-and-forth exchanges into logical blocks rather than splitting every line
+- When one speaker tells a personal story, keep it as a continuous narrative block, not interrupted by the other speaker's interjections
+- The host/guest dynamic is part of the content — preserve moments where one speaker's question shapes the direction
+
+**Structural pattern for a monologue speech article:**
+```
+# Title (Speaker Name: Speech Topic)
+## — Subtitle (Event context, date)
+
+## Opening remarks / context-setting
+
+## Section 1: [Topic One]
+### Sub-section
+### Sub-section
+
+## Section 2: [Topic Two]
+...
+```
+
+**Structural pattern for a dialogue/interview article:**\n```\n# Title (Topic between Speaker A & Speaker B)\n## — Podcast/Event name, episode number\n\n## Section 1: [Opening — context, trigger]\n**Host:** ...  \n**Guest:** ...\n\n## Section 2: [First key topic]\n...\n```
+
+**Structural pattern for a narrative/storytelling article:**
+When the content is a personal narrative ("我今天讲一个经历"), the structure follows the story's chronology, not thematic topics. Common for livestream stories, vlogs, and 讲述类 content:
+- The core narrative IS the structure — don't force thematic categories
+- Break at natural story beats: setup → encounter → discovery → emotion → reflection
+- Keep the storyteller's voice and pacing — don't over-edit for conciseness
+- Use quote blocks for key emotional moments or the storyteller's direct reflections
+- The insights section becomes: why this story resonates, what it reveals, how it's told
+- Example: 户晨风 "南京街头随机一千元" (15 min narrative) — structured as: 缘起 → 相遇 → 聊天 → 超市 → 梦想 → 镜头后
 
 ```
 # Title (Speaker Name: Speech Topic)
@@ -211,6 +374,8 @@ Delegate to `chinese-pdf-report` for the final PDF generation. Specifically:
 
 ## Real-world error catalog
 
+### Chinese ASR transcript errors
+
 The following errors were observed in a real 3757-line Chinese speech transcript (Li Lu lecture on value investing, ~2 hours):
 
 | Error Type | Count | Example | Fix |
@@ -221,6 +386,39 @@ The following errors were observed in a real 3757-line Chinese speech transcript
 | Technical terms garbled | 15+ | 累尽→复利, 安全编辑→安全边际 | Domain knowledge check |
 | English loanwords garbled | 8+ | Fashion Guide→Fishing Guide, Murder of Equals→Merger of Equals | Context + English knowledge check |
 | Homophone substitutions | 10+ | 制泄→致谢, 苦惊中外→古今中外 | Read aloud test |
+
+### Chinese dialect (东北话) — extreme case
+Observed in 花哥 "开皮爱国赛道背后丑态" (25 min, 东北二人转 style, Whisper tiny):
+
+| Error Type | Example | Fix Strategy |
+|-----------|---------|--------------|
+| Function words garbled | 啥的 → 傻的, 俩 → 了, 咋 → 怎么 | Read in dialect context; the ASR conflates similar-sounding particles |
+| Negation confusion | 不 → 没, 别 → 不要 | Negation particles are especially fragile in non-standard Mandarin |
+| Prosody-based errors | Rising intonation transcribed as questions that weren't questions | Check against the speaker's known rhetorical patterns |
+| Name errors doubled | 沙格 (someone called "Sage") + 司马南 (Sima Nan) both garbled | Cross-reference with internet search |
+
+The fix rate for dialect content is ~2-3× higher than standard Mandarin ASR. Budget accordingly.
+
+### Bilingual source transcript (Chinese audio + English subs)
+Observed in 不明白播客 EP-209 with Xu Chenggang (62 min):
+
+The YouTube page had both zh-CN auto-captions (Chinese ASR) and en auto-captions (translated). The Chinese VTT was significantly shorter (16K chars vs 52K for English). Strategy used:
+1. Downloaded both zh-CN and en VTT files
+2. The zh-CN captured original speaker phrasing but was fragmented/abbreviated
+3. The en VTT was more complete (had all the speaker's words) but was machine-translated
+4. Worked from the English VTT as primary source for completeness
+5. Cross-referenced with zh-CN for original Chinese phrasing of key terms
+6. Result: a polished English article that preserved the speaker's meaning and the Chinese flavor of the original dialogue
+
+A separate class of errors observed when processing an English YouTube interview (Jordan Peterson on The Diary Of A CEO, 64 min, 3,170 raw VTT cues → 92 paragraphs):
+
+| Issue Type | Detail | Fix |
+|-----------|--------|-----|
+| VTT redundancy | YouTube captions emit each cue 3-4× (incremental build), causing 3,170 raw cues for 64 min | Write Python dedup script: longest text per cue → sequential merge → suffix-prefix overlap resolution |
+| Naturalness in translation | Direct translation of English idioms ("happy is elevator music", "tectonic") sounds flat in Chinese | Adapt to Chinese register — use natural analogies, not literal translations |
+| Cultural references | "Hank Williams", "Cochrane review", "YouGov/IPSOS" — mean nothing to Chinese readers | Keep name but add brief context: "美国50年代的蓝调歌手" |
+| Political sensitivity | Vaccine mandates, mask efficacy, "totalitarian" reactions — these are flagged topics in Chinese internet | Present as the speaker's viewpoint with explicit fact-check cards, not as established fact |
+| Fact-check source availability | Peterson cites "50% of Democrats believe 50% COVID hospitalization" — US-specific polling | Note that follow-up queries on Chinese equivalents would need separate research |
 
 ## Output standard
 

@@ -1,0 +1,22 @@
+{
+  "id": "openclaw-memory-docs",
+  "name": "OpenClaw Memory (Docs)",
+  "version": "0.1.1",
+  "description": "Documentation-focused memory: explicit capture + searchable store.",
+  "configSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": { "type": "boolean", "default": true },
+      "storePath": {
+        "type": "string",
+        "description": "JSONL file path for docs memory",
+        "default": "~/.openclaw/workspace/memory/docs-memory.jsonl"
+      },
+      "dims": { "type": "number", "default": 256, "minimum": 32, "maximum": 2048 },
+      "redactSecrets": { "type": "boolean", "default": true },
+      "defaultTags": { "type": "array", "items": { "type": "string" }, "default": ["docs"] }
+    }
+  }
+}

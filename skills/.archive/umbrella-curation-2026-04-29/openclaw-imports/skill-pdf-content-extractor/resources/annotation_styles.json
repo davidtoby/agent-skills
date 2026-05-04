@@ -1,0 +1,202 @@
+{
+  "annotation_styles": {
+    "highlight": {
+      "default": {
+        "color": [1, 1, 0],
+        "opacity": 0.3,
+        "border_color": null,
+        "border_width": 0,
+        "description": "默认高亮样式 - 黄色"
+      },
+      "important": {
+        "color": [1, 0.5, 0],
+        "opacity": 0.4,
+        "border_color": [1, 0.3, 0],
+        "border_width": 1,
+        "description": "重要内容高亮 - 橙色"
+      },
+      "critical": {
+        "color": [1, 0, 0],
+        "opacity": 0.3,
+        "border_color": [0.8, 0, 0],
+        "border_width": 1,
+        "description": "关键内容高亮 - 红色"
+      },
+      "note": {
+        "color": [0.8, 0.9, 1],
+        "opacity": 0.4,
+        "border_color": [0.6, 0.8, 1],
+        "border_width": 1,
+        "description": "笔记高亮 - 浅蓝色"
+      }
+    },
+    "underline": {
+      "default": {
+        "color": [0, 0, 1],
+        "opacity": 1.0,
+        "border_color": [0, 0, 1],
+        "border_width": 1,
+        "description": "默认下划线 - 蓝色"
+      },
+      "emphasis": {
+        "color": [0.5, 0, 0.5],
+        "opacity": 1.0,
+        "border_color": [0.5, 0, 0.5],
+        "border_width": 2,
+        "description": "强调下划线 - 紫色"
+      },
+      "question": {
+        "color": [1, 0.5, 0],
+        "opacity": 1.0,
+        "border_color": [1, 0.5, 0],
+        "border_width": 1,
+        "description": "疑问下划线 - 橙色"
+      }
+    },
+    "strikethrough": {
+      "default": {
+        "color": [1, 0, 0],
+        "opacity": 1.0,
+        "border_color": [1, 0, 0],
+        "border_width": 1,
+        "description": "默认删除线 - 红色"
+      },
+      "obsolete": {
+        "color": [0.5, 0.5, 0.5],
+        "opacity": 0.8,
+        "border_color": [0.5, 0.5, 0.5],
+        "border_width": 1,
+        "description": "过时内容删除线 - 灰色"
+      }
+    },
+    "comment": {
+      "default": {
+        "color": [0, 1, 0],
+        "opacity": 0.8,
+        "border_color": [0, 0.8, 0],
+        "border_width": 1,
+        "font_size": 10,
+        "font_color": [0, 0.5, 0],
+        "description": "默认注释 - 绿色"
+      },
+      "suggestion": {
+        "color": [0.9, 0.9, 0],
+        "opacity": 0.8,
+        "border_color": [0.8, 0.8, 0],
+        "border_width": 1,
+        "font_size": 10,
+        "font_color": [0.6, 0.6, 0],
+        "description": "建议注释 - 黄色"
+      },
+      "correction": {
+        "color": [1, 0.7, 0.7],
+        "opacity": 0.8,
+        "border_color": [1, 0.5, 0.5],
+        "border_width": 1,
+        "font_size": 10,
+        "font_color": [0.8, 0.2, 0.2],
+        "description": "修正注释 - 浅红色"
+      }
+    },
+    "stamp": {
+      "approved": {
+        "color": [0, 1, 0],
+        "opacity": 0.8,
+        "border_color": [0, 0.8, 0],
+        "border_width": 2,
+        "font_size": 12,
+        "font_color": [0, 0.5, 0],
+        "stamp_text": "APPROVED",
+        "description": "已批准图章 - 绿色"
+      },
+      "rejected": {
+        "color": [1, 0, 0],
+        "opacity": 0.8,
+        "border_color": [0.8, 0, 0],
+        "border_width": 2,
+        "font_size": 12,
+        "font_color": [0.8, 0, 0],
+        "stamp_text": "REJECTED",
+        "description": "已拒绝图章 - 红色"
+      },
+      "draft": {
+        "color": [0.8, 0.8, 0.8],
+        "opacity": 0.6,
+        "border_color": [0.6, 0.6, 0.6],
+        "border_width": 2,
+        "font_size": 12,
+        "font_color": [0.5, 0.5, 0.5],
+        "stamp_text": "DRAFT",
+        "description": "草稿图章 - 灰色"
+      },
+      "confidential": {
+        "color": [1, 0.5, 0],
+        "opacity": 0.8,
+        "border_color": [0.8, 0.3, 0],
+        "border_width": 2,
+        "font_size": 12,
+        "font_color": [0.8, 0.4, 0],
+        "stamp_text": "CONFIDENTIAL",
+        "description": "机密图章 - 橙色"
+      }
+    },
+    "link": {
+      "default": {
+        "color": [0, 0, 1],
+        "opacity": 0.2,
+        "border_color": [0, 0, 1],
+        "border_width": 1,
+        "description": "默认链接 - 蓝色"
+      },
+      "external": {
+        "color": [0.5, 0, 0.5],
+        "opacity": 0.3,
+        "border_color": [0.5, 0, 0.5],
+        "border_width": 1,
+        "description": "外部链接 - 紫色"
+      },
+      "internal": {
+        "color": [0, 0.5, 0],
+        "opacity": 0.2,
+        "border_color": [0, 0.5, 0],
+        "border_width": 1,
+        "description": "内部链接 - 绿色"
+      }
+    }
+  },
+  "default_settings": {
+    "author": "PDF Annotator",
+    "creation_date": "auto",
+    "opacity_range": [0.1, 0.9],
+    "border_width_range": [0, 3],
+    "font_size_range": [8, 24],
+    "coordinate_system": "pdf",
+    "color_space": "rgb"
+  },
+  "presets": {
+    "review": {
+      "description": "文档审阅预设",
+      "annotations": [
+        {"type": "highlight", "style": "important", "description": "重要内容"},
+        {"type": "comment", "style": "suggestion", "description": "修改建议"},
+        {"type": "underline", "style": "question", "description": "疑问标记"}
+      ]
+    },
+    "approval": {
+      "description": "文档审批预设",
+      "annotations": [
+        {"type": "stamp", "style": "approved", "description": "批准"},
+        {"type": "stamp", "style": "rejected", "description": "拒绝"},
+        {"type": "stamp", "style": "draft", "description": "草稿"}
+      ]
+    },
+    "editing": {
+      "description": "文档编辑预设",
+      "annotations": [
+        {"type": "highlight", "style": "note", "description": "编辑笔记"},
+        {"type": "strikethrough", "style": "obsolete", "description": "删除内容"},
+        {"type": "comment", "style": "correction", "description": "修正建议"}
+      ]
+    }
+  }
+}

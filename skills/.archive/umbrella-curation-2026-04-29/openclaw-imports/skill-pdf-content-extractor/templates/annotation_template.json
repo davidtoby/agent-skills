@@ -1,0 +1,52 @@
+[
+  {
+    "type": "highlight",
+    "page": 1,
+    "coordinates": [100, 100, 200, 120],
+    "content": "重要内容高亮",
+    "author": "PDF Annotator",
+    "color": "yellow",
+    "opacity": 0.3
+  },
+  {
+    "type": "underline",
+    "page": 1,
+    "coordinates": [100, 140, 200, 160],
+    "content": "需要关注的文本",
+    "author": "PDF Annotator",
+    "color": "blue"
+  },
+  {
+    "type": "comment",
+    "page": 2,
+    "coordinates": [50, 50, 70, 70],
+    "content": "这是一个重要的注释，用于说明相关内容",
+    "author": "Reviewer",
+    "color": "green"
+  },
+  {
+    "type": "stamp",
+    "page": 3,
+    "coordinates": [400, 700, 500, 750],
+    "stamp_text": "APPROVED",
+    "content": "此部分已审核通过",
+    "author": "Manager",
+    "color": "orange"
+  },
+  {
+    "type": "link",
+    "page": 4,
+    "coordinates": [100, 200, 150, 220],
+    "url": "https://example.com",
+    "content": "相关参考资料",
+    "color": "blue"
+  },
+  {
+    "type": "strikethrough",
+    "page": 5,
+    "coordinates": [100, 300, 200, 320],
+    "content": "此内容已过时",
+    "author": "Editor",
+    "color": "red"
+  }
+]

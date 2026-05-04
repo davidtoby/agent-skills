@@ -1,0 +1,34 @@
+{
+  "text_patterns": [
+    { "pattern": "(?i)confidential|internal use|draft|sample", "type": "regex" },
+    { "pattern": "仅供内部使用", "type": "contains" },
+    { "pattern": "机密", "type": "contains" },
+    { "pattern": "保密", "type": "contains" },
+    { "pattern": "水印", "type": "contains" },
+    { "pattern": "严禁复制", "type": "contains" }
+  ],
+  "heuristics": {
+    "min_font_size": 30,
+    "repeat_threshold_percent": 50.0,
+    "min_text_length": 3,
+    "max_bbox_width_ratio": 0.7,
+    "max_bbox_height_ratio": 0.7,
+    "bbox_shrink_ratio": 0.0,
+    "image_min_repeat_percent": 60.0,
+    "vector_min_repeat_percent": 40.0,
+    "enable_inpaint": true,
+    "inpaint_dpi": 300,
+    "inpaint_radius": 8,
+    "inpaint_method": "telea",
+    "inpaint_dilate_kernel": 11,
+    "inpaint_dilate_iters": 3,
+    "enable_ocr": true,
+    "ocr_lang": "chi_sim",
+    "enable_diagonal_band": true,
+    "diagonal_band_mode": "both",
+    "diagonal_band_width_ratio": 0.14,
+    "diagonal_angle_deg": 35.0
+  },
+  "remove_annotations": true,
+  "annotation_types": ["Stamp", "FreeText"]
+}

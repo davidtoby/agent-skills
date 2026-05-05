@@ -4,6 +4,9 @@ Thanks for contributing skills to `agent-skills`.
 
 感谢你为 `agent-skills` 贡献 Skill。
 
+Before changing repository structure or doing a local↔remote merge, also read [`SYNC.md`](./SYNC.md).
+在修改仓库结构或执行本地↔远端合并前，也请先读 [`SYNC.md`](./SYNC.md)。
+
 ## What we want / 我们欢迎什么
 
 We want skills that are:

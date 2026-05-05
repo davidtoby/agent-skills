@@ -120,6 +120,8 @@ Default merge policy:
 
 For local multi-agent usage, the operational entry point is `~/.agents/skills/README.md`.
 
+Detailed sync policy: [`SYNC.md`](./SYNC.md)
+
 ---
 
 ## Why this repo exists / 为什么做这个仓库

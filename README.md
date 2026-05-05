@@ -106,6 +106,22 @@ Use this quick map if you are not sure where to start:
 
 ---
 
+## Local shared library sync / 本地共享技能库同步
+
+This repository is the **publish/share/backup companion** to the local shared skill library:
+
+- Local canonical library: `~/.agents/skills/`
+- Public/shared repository: `https://github.com/davidtoby/agent-skills`
+
+Default merge policy:
+- **Remote wins on conflicts**: if the same skill path diverges both locally and on GitHub, sync the GitHub version back to local.
+- **Local new active skills publish upstream**: validated local skills that are new in `~/.agents/skills/` should be copied into this repo, indexed, packaged, and pushed upstream.
+- `openclaw-imports/` is an explicit imported/compatibility namespace. Those skills are allowed in this repo when they are part of the shared local library snapshot.
+
+For local multi-agent usage, the operational entry point is `~/.agents/skills/README.md`.
+
+---
+
 ## Why this repo exists / 为什么做这个仓库
 
 ### English
@@ -289,16 +305,38 @@ Current packaged artifacts:
 <!-- package-list:start -->
 - [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
 - [`packages/agent-skills-repo-publishing.skill`](./packages/agent-skills-repo-publishing.skill)
+- [`packages/andrej-karpathy-perspective.skill`](./packages/andrej-karpathy-perspective.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/chinese-video-transcribe-pdf.skill`](./packages/chinese-video-transcribe-pdf.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
+- [`packages/dogfood.skill`](./packages/dogfood.skill)
+- [`packages/elon-musk-perspective.skill`](./packages/elon-musk-perspective.skill)
 - [`packages/feishu-approval-fallback.skill`](./packages/feishu-approval-fallback.skill)
 - [`packages/feishu-websocket-stability.skill`](./packages/feishu-websocket-stability.skill)
+- [`packages/feynman-perspective.skill`](./packages/feynman-perspective.skill)
+- [`packages/find-skills.skill`](./packages/find-skills.skill)
 - [`packages/github-auth-recovery.skill`](./packages/github-auth-recovery.skill)
+- [`packages/huashu-design.skill`](./packages/huashu-design.skill)
+- [`packages/huashu-nuwa.skill`](./packages/huashu-nuwa.skill)
+- [`packages/ilya-sutskever-perspective.skill`](./packages/ilya-sutskever-perspective.skill)
+- [`packages/mrbeast-perspective.skill`](./packages/mrbeast-perspective.skill)
+- [`packages/munger-perspective.skill`](./packages/munger-perspective.skill)
+- [`packages/naval-perspective.skill`](./packages/naval-perspective.skill)
+- [`packages/openclaw-feishu-bot-troubleshooting.skill`](./packages/openclaw-feishu-bot-troubleshooting.skill)
 - [`packages/output-workspace-cleanup.skill`](./packages/output-workspace-cleanup.skill)
+- [`packages/paul-graham-perspective.skill`](./packages/paul-graham-perspective.skill)
 - [`packages/precise-bilingual-subtitle.skill`](./packages/precise-bilingual-subtitle.skill)
+- [`packages/steve-jobs-perspective.skill`](./packages/steve-jobs-perspective.skill)
+- [`packages/steve-jobs-skill.skill`](./packages/steve-jobs-skill.skill)
+- [`packages/sun-yuchen-perspective.skill`](./packages/sun-yuchen-perspective.skill)
+- [`packages/taleb-perspective.skill`](./packages/taleb-perspective.skill)
+- [`packages/trump-perspective.skill`](./packages/trump-perspective.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+- [`packages/x-mastery-mentor.skill`](./packages/x-mastery-mentor.skill)
 - [`packages/youtube-bilingual-subtitle-delivery.skill`](./packages/youtube-bilingual-subtitle-delivery.skill)
+- [`packages/yuanbao.skill`](./packages/yuanbao.skill)
+- [`packages/zhang-yiming-perspective.skill`](./packages/zhang-yiming-perspective.skill)
+- [`packages/zhangxuefeng-perspective.skill`](./packages/zhangxuefeng-perspective.skill)
 <!-- package-list:end -->
 
 ### How packaging works / 打包方式
@@ -413,6 +451,219 @@ agent-skills/
     ├── validate-skills-repo.yml
     └── release-skill-packages.yml
 ```
+
+---
+
+## Complete active skill names / 完整技能名快照
+
+This generated block helps humans and validators confirm repository coverage.
+
+<details>
+<summary>Active skill names</summary>
+
+- `1password`
+- `academic-paper-to-chinese-insight-pdf`
+- `agent-browser`
+- `agent-platform-operations`
+- `agent-skill-lifecycle`
+- `agent-skills-repo-publishing`
+- `airtable`
+- `andrej-karpathy-perspective`
+- `api-learner`
+- `apple-notes`
+- `apple-reminders`
+- `architecture-diagram`
+- `arxiv`
+- `ascii-art`
+- `ascii-video`
+- `audiocraft`
+- `auto-updater`
+- `automation-browser-api-workflows`
+- `axolotl`
+- `baoyu-comic`
+- `baoyu-infographic`
+- `bear-notes`
+- `blogwatcher`
+- `blucli`
+- `bluebubbles`
+- `brave-search`
+- `caldav-calendar`
+- `camsnap`
+- `canvas`
+- `chinese-asr-transcript-polishing`
+- `chinese-pdf-document-workflows`
+- `chinese-pdf-report`
+- `chinese-video-transcribe-pdf`
+- `claude-code`
+- `claude-design`
+- `clawddocs`
+- `clawhub`
+- `clawk`
+- `codebase-inspection`
+- `codex`
+- `coding-agent`
+- `comfyui`
+- `communications-productivity-integrations`
+- `consulting-pdf-from-youtube`
+- `creative-ideation`
+- `debugging-hermes-tui-commands`
+- `design-md`
+- `discord`
+- `dogfood`
+- `dspy`
+- `eightctl`
+- `elon-musk-perspective`
+- `excalidraw`
+- `feishu-approval-fallback`
+- `feishu-websocket-stability`
+- `feynman-perspective`
+- `find-skills`
+- `findmy`
+- `gemini`
+- `gh-issues`
+- `gif-search`
+- `gifgrep`
+- `github`
+- `github-auth`
+- `github-auth-recovery`
+- `github-code-review`
+- `github-issues`
+- `github-operations`
+- `github-pr-workflow`
+- `github-repo-management`
+- `gmail`
+- `godmode`
+- `gog`
+- `google-workspace`
+- `goplaces`
+- `healthcheck`
+- `heartmula`
+- `hermes-agent`
+- `hermes-agent-skill-authoring`
+- `himalaya`
+- `huashu-design`
+- `huashu-nuwa`
+- `huggingface-hub`
+- `humanizer`
+- `ilya-sutskever-perspective`
+- `imessage`
+- `imsg`
+- `jupyter-live-kernel`
+- `kanban-orchestrator`
+- `kanban-worker`
+- `linear`
+- `llama-cpp`
+- `llm-wiki`
+- `lm-evaluation-harness`
+- `local-media-smart-device-workflows`
+- `local-places`
+- `manim-video`
+- `maps`
+- `markdown-converter`
+- `mcporter`
+- `minecraft-modpack-server`
+- `model-cli-and-review-workflows`
+- `model-usage`
+- `mrbeast-perspective`
+- `multi-search-engine`
+- `munger-perspective`
+- `nano-banana-pro`
+- `nano-pdf`
+- `native-mcp`
+- `naval-perspective`
+- `node-connect`
+- `node-inspect-debugger`
+- `notion`
+- `obliteratus`
+- `obsidian`
+- `ocr-and-documents`
+- `ontology`
+- `openai-image-gen`
+- `openai-whisper`
+- `openai-whisper-api`
+- `openclaw-backup`
+- `openclaw-browser-auto`
+- `openclaw-cheatsheet`
+- `openclaw-cost-auditor`
+- `openclaw-feishu-bot-troubleshooting`
+- `openclaw-memory-docs`
+- `openclaw-shield`
+- `opencode`
+- `openhue`
+- `oracle`
+- `ordercli`
+- `outlines`
+- `output-workspace-cleanup`
+- `p5js`
+- `paul-graham-perspective`
+- `peekaboo`
+- `pixel-art`
+- `plan`
+- `pokemon-player`
+- `polymarket`
+- `popular-web-designs`
+- `powerpoint`
+- `precise-bilingual-subtitle`
+- `pretext`
+- `proactive-agent`
+- `python-debugpy`
+- `qmd`
+- `requesting-code-review`
+- `research-paper-writing`
+- `sag`
+- `segment-anything`
+- `self-improving-agent`
+- `session-logs`
+- `sherpa-onnx-tts`
+- `sketch`
+- `skill-creator`
+- `skill-pdf-content-extractor`
+- `slack`
+- `songsee`
+- `songwriting-and-ai-music`
+- `sonoscli`
+- `spike`
+- `spotify`
+- `spotify-player`
+- `steve-jobs-perspective`
+- `steve-jobs-skill`
+- `subagent-driven-development`
+- `summarize`
+- `sun-yuchen-perspective`
+- `systematic-debugging`
+- `taleb-perspective`
+- `taskflow`
+- `taskflow-inbox-triage`
+- `tavily-search`
+- `test-driven-development`
+- `things-mac`
+- `tmux`
+- `touchdesigner-mcp`
+- `trello`
+- `trl-fine-tuning`
+- `trump-perspective`
+- `unsloth`
+- `video-bilingual-subtitle-delivery`
+- `video-frames`
+- `video-transcription-subtitle-workflows`
+- `vllm`
+- `voice-call`
+- `wacli`
+- `weather`
+- `web-research-monitoring-workflows`
+- `webhook-subscriptions`
+- `weights-and-biases`
+- `writing-plans`
+- `x-mastery-mentor`
+- `xurl`
+- `youtube-bilingual-subtitle-delivery`
+- `youtube-content`
+- `youtube-watcher`
+- `yuanbao`
+- `zhang-yiming-perspective`
+- `zhangxuefeng-perspective`
+
+</details>
 
 ---
 

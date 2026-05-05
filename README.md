@@ -331,6 +331,7 @@ Current packaged artifacts:
 - [`packages/steve-jobs-perspective.skill`](./packages/steve-jobs-perspective.skill)
 - [`packages/steve-jobs-skill.skill`](./packages/steve-jobs-skill.skill)
 - [`packages/sun-yuchen-perspective.skill`](./packages/sun-yuchen-perspective.skill)
+- [`packages/sync-shared-skills-repo.skill`](./packages/sync-shared-skills-repo.skill)
 - [`packages/taleb-perspective.skill`](./packages/taleb-perspective.skill)
 - [`packages/trump-perspective.skill`](./packages/trump-perspective.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
@@ -632,6 +633,7 @@ This generated block helps humans and validators confirm repository coverage.
 - `subagent-driven-development`
 - `summarize`
 - `sun-yuchen-perspective`
+- `sync-shared-skills-repo`
 - `systematic-debugging`
 - `taleb-perspective`
 - `taskflow`

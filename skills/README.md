@@ -38,6 +38,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/steve-jobs-perspective.skill`
 - `../packages/steve-jobs-skill.skill`
 - `../packages/sun-yuchen-perspective.skill`
+- `../packages/sync-shared-skills-repo.skill`
 - `../packages/taleb-perspective.skill`
 - `../packages/trump-perspective.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
@@ -50,7 +51,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (34)
+### root (35)
 - `academic-paper-to-chinese-insight-pdf`
 - `agent-skills-repo-publishing`
 - `andrej-karpathy-perspective`
@@ -77,6 +78,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `steve-jobs-perspective`
 - `steve-jobs-skill`
 - `sun-yuchen-perspective`
+- `sync-shared-skills-repo`
 - `taleb-perspective`
 - `trump-perspective`
 - `video-bilingual-subtitle-delivery`
@@ -492,6 +494,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `subagent-driven-development`
 - `summarize`
 - `sun-yuchen-perspective`
+- `sync-shared-skills-repo`
 - `systematic-debugging`
 - `taleb-perspective`
 - `taskflow`

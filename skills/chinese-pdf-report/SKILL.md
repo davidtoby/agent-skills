@@ -115,6 +115,10 @@ font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft Y
 - Tag pills: `border-radius: 999px`, `1 px` border, `--brand2` blue background
 - Grid two-column: `display: grid; grid-template-columns: 1fr 1fr; gap: 6mm;`
 - Bullet list: `margin: 1.5mm 0 3.5mm 5mm;` (left indent for visual breathing room)
+- **Transcript Appendix (逐字稿附录) Styling:**
+  - Container: background `var(--soft2)`, padding `15pt`, border `1px solid var(--line)`, `border-radius: 6px`.
+  - Timestamp `[MM:SS]`: font `Monaco, Consolas, monospace`, size `9pt`, color `var(--brand2)`, with a white background badge `padding: 2px 6px; border-radius: 4px; border: 1px solid var(--line)`.
+  - Transcript text: **Switch to `Songti SC`** (`font-family: "Songti SC", "PingFang SC", serif;`) with `1.6` line-height to create visual distinction from the sans-serif analysis body and provide long-form reading breathing room.
 
 **Chrome headless export command (verified working):**
 ```bash

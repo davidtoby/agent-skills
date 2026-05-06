@@ -610,6 +610,7 @@ Layout:
 - Hero: gradient `linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%)`, 1px solid var(--line), 6mm border-radius
 - Card: 5mm padding, 4mm border-radius
 - Quote: 3px left border in --brand2, #fafcff background
+- Transcript Appendix (逐字稿附录): Container background `var(--soft2)`, 1px border. Timestamps `[MM:SS]` in `Monaco/Consolas` inside a white background badge. Transcript body uses `Songti SC` (serif) with 1.6 line-height for a premium long-form reading experience.
 
 Requirements: Valid HTML5, self-contained (all CSS inline in `<style>`), no JavaScript, `page-break-inside: avoid` on cards, `print-color-adjust: exact`.
 

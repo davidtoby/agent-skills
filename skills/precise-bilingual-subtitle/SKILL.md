@@ -116,10 +116,11 @@ python3 hardcode_bilingual_srt.py \
   --video source.mp4 \
   --srt bilingual.srt \
   --output final_output.mp4 \
-  --font-size 21 \
-  --text-color '255,255,0,255' \
+  --font-size 34 \
+  --zh-text-color '255,235,59,255' \
+  --text-color '255,255,255,255' \
   --stroke-color '0,0,0,255' \
-  --bottom-margin 40 \
+  --bottom-margin 56 \
   --font '/System/Library/Fonts/STHeiti Light.ttc'
 ```
 
@@ -127,16 +128,17 @@ python3 hardcode_bilingual_srt.py \
 
 | Parameter | Recommended | Notes |
 |-----------|------------|-------|
-| `--font-size` | 21 | Normal subtitle size. Use 34-42 for large/elderly audiences |
-| `--text-color` | `255,255,0,255` | Yellow. RGBA format: R,G,B,A (0-255) |
+| `--font-size` | 34 | Optimal for readability on mobile and desktop without crowding the frame |
+| `--zh-text-color` | `255,235,59,255` | Professional Yellow for Chinese text (bottom line) |
+| `--text-color` | `255,255,255,255` | White for English text (top line) to establish visual hierarchy |
 | `--stroke-color` | `0,0,0,255` | Black stroke for readability against any background |
-| `--bottom-margin` | 40 | Pixels from bottom edge |
+| `--bottom-margin` | 56 | Safe area avoiding YouTube/video player control bars |
 | `--font` | STHeiti Light.ttc | macOS Chinese-capable font; Arial Unicode.ttf also works |
 
 **Color presets tested on this machine:**
-- Yellow on black: `--text-color 255,255,0,255 --stroke-color 0,0,0,255`
-- White on black (default): `--text-color 255,255,255,255 --stroke-color 0,0,0,255`
-- Green on black: `--text-color 0,255,0,255 --stroke-color 0,0,0,255`
+- **Consulting / Professional Dual-Color (Tested Default)**: Chinese Yellow (`255,235,59,255`), English White (`255,255,255,255`), Size `34`, Bottom Margin `56`
+- Classic Yellow on black: `--text-color 255,255,0,255 --stroke-color 0,0,0,255`
+- White on black: `--text-color 255,255,255,255 --stroke-color 0,0,0,255`
 
 ### Phase 6: Fix the concat duration bug
 
@@ -175,8 +177,11 @@ python3 hardcode_bilingual_srt.py \
   --video "$OUTDIR/source.mp4" \
   --srt "$OUTDIR/bilingual.srt" \
   --output "$OUTDIR/final_raw.mp4" \
-  --font-size 21 --text-color '255,255,0,255' \
-  --stroke-color '0,0,0,255' --bottom-margin 40
+  --font-size 34 \
+  --zh-text-color '255,235,59,255' \
+  --text-color '255,255,255,255' \
+  --stroke-color '0,0,0,255' \
+  --bottom-margin 56
 
 # Trim
 SRC_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUTDIR/source.mp4")

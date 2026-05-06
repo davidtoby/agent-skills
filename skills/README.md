@@ -28,6 +28,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/huashu-design.skill`
 - `../packages/huashu-nuwa.skill`
 - `../packages/ilya-sutskever-perspective.skill`
+- `../packages/litellm-vertex-proxy-repair.skill`
 - `../packages/mrbeast-perspective.skill`
 - `../packages/munger-perspective.skill`
 - `../packages/naval-perspective.skill`
@@ -51,7 +52,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (35)
+### root (36)
 - `academic-paper-to-chinese-insight-pdf`
 - `agent-skills-repo-publishing`
 - `andrej-karpathy-perspective`
@@ -68,6 +69,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `huashu-design`
 - `huashu-nuwa`
 - `ilya-sutskever-perspective`
+- `litellm-vertex-proxy-repair`
 - `mrbeast-perspective`
 - `munger-perspective`
 - `naval-perspective`
@@ -416,6 +418,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `kanban-orchestrator`
 - `kanban-worker`
 - `linear`
+- `litellm-vertex-proxy-repair`
 - `llama-cpp`
 - `llm-wiki`
 - `lm-evaluation-harness`

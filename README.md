@@ -74,6 +74,8 @@ Use this quick map if you are not sure where to start:
   → [`feishu-websocket-stability`](./skills/feishu-websocket-stability/)
 - **My OpenClaw Feishu bot stops replying, or agent prep is extremely slow after migration**  
   → [`openclaw-feishu-bot-troubleshooting`](./skills/openclaw-feishu-bot-troubleshooting/)
+- **My local LiteLLM + Vertex AI proxy is down, stuck at startup, or `/ui/login/` says `Not connected to DB!`**  
+  → [`litellm-vertex-proxy-repair`](./skills/litellm-vertex-proxy-repair/)
 
 ### 中文
 
@@ -180,6 +182,7 @@ This repo exists to turn one-off agent heroics into reusable, inspectable, share
 | [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and export premium PDF report variants / 下载 YouTube 视频、提取字幕与元数据，并导出高端报告风格 PDF | workflow guide, output package reference, style-variant reference |
 | [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual subtitles with shared EN/ZH timing / 创建、修复、审计并交付中英双语字幕 | subtitle scripts, workflow docs, troubleshooting, real repair lessons |
 | [`github-auth-recovery`](./skills/github-auth-recovery/) | Recover from broken GitHub auth/push flows when `gh` is logged out, HTTPS credentials fail, or SSH may already work / 当 `gh` 未登录、HTTPS 凭证失效、但 SSH 可能已可用时，恢复 GitHub push/认证流程 | concise recovery workflow, SSH-vs-HTTPS reference |
+| [`litellm-vertex-proxy-repair`](./skills/litellm-vertex-proxy-repair/) | Diagnose and repair a local LiteLLM + Vertex AI proxy on macOS when `/v1` is down, startup hangs, or Prisma/Admin UI failures need to be isolated from API recovery / 诊断并修复 macOS 本地 LiteLLM + Vertex AI 代理：当 `/v1` 不通、启动卡住、或 Prisma/Admin UI 故障需要和 API 恢复拆开处理时使用 | startup triage, loopback-proxy diagnosis, lite/full split, verification checklist |
 | [`feishu-approval-fallback`](./skills/feishu-approval-fallback/) | Recover and harden Hermes Feishu command approvals when card buttons fail, 200340 appears, or users need text fallback commands / 修复并加固 Hermes 的 Feishu 命令审批流程：按钮失效、出现 200340、或需要文本兜底时使用 | fallback workflow, callback-sync guidance, real fix reference |
 | [`feishu-websocket-stability`](./skills/feishu-websocket-stability/) | Stabilize Hermes Feishu websocket mode when reconnects are too slow, ping timing needs tuning, or duplicate local clients compete for one app_id / 稳定 Hermes 的 Feishu websocket 模式：重连过慢、ping 需调优、或本地重复客户端冲突时使用 | reconnect tuning, app-lock pattern, runtime override guidance |
 
@@ -321,6 +324,7 @@ Current packaged artifacts:
 - [`packages/huashu-design.skill`](./packages/huashu-design.skill)
 - [`packages/huashu-nuwa.skill`](./packages/huashu-nuwa.skill)
 - [`packages/ilya-sutskever-perspective.skill`](./packages/ilya-sutskever-perspective.skill)
+- [`packages/litellm-vertex-proxy-repair.skill`](./packages/litellm-vertex-proxy-repair.skill)
 - [`packages/mrbeast-perspective.skill`](./packages/mrbeast-perspective.skill)
 - [`packages/munger-perspective.skill`](./packages/munger-perspective.skill)
 - [`packages/naval-perspective.skill`](./packages/naval-perspective.skill)

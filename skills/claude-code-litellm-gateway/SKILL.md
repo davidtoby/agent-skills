@@ -354,6 +354,7 @@ This gives the user two explicit entrypoints:
 ## Files in this skill
 
 - `scripts/claude-gemini-wrapper.sh` — reference wrapper for LiteLLM-backed Claude Code
+- `references/quickstart-zh.md` — stronger Chinese quickstart for direct adoption
 - `references/toby-working-example.md` — exact working pattern and test commands from the real setup
 
 ---

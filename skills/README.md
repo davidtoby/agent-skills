@@ -17,6 +17,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/andrej-karpathy-perspective.skill`
 - `../packages/chinese-pdf-report.skill`
 - `../packages/chinese-video-transcribe-pdf.skill`
+- `../packages/claude-code-litellm-gateway.skill`
 - `../packages/consulting-pdf-from-youtube.skill`
 - `../packages/dogfood.skill`
 - `../packages/elon-musk-perspective.skill`
@@ -52,10 +53,11 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (36)
+### root (37)
 - `academic-paper-to-chinese-insight-pdf`
 - `agent-skills-repo-publishing`
 - `andrej-karpathy-perspective`
+- `claude-code-litellm-gateway`
 - `chinese-pdf-report`
 - `chinese-video-transcribe-pdf`
 - `consulting-pdf-from-youtube`
@@ -362,6 +364,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `chinese-video-transcribe-pdf`
 - `claude-code`
 - `claude-design`
+- `claude-code-litellm-gateway`
 - `clawddocs`
 - `clawhub`
 - `clawk`

@@ -76,6 +76,8 @@ Use this quick map if you are not sure where to start:
   → [`openclaw-feishu-bot-troubleshooting`](./skills/openclaw-feishu-bot-troubleshooting/)
 - **My local LiteLLM + Vertex AI proxy is down, stuck at startup, or `/ui/login/` says `Not connected to DB!`**  
   → [`litellm-vertex-proxy-repair`](./skills/litellm-vertex-proxy-repair/)
+- **I want Claude Code to use an existing LiteLLM gateway, especially for Gemini via Vertex AI, without breaking my current Claude/Hermes setup**  
+  → [`claude-code-litellm-gateway`](./skills/claude-code-litellm-gateway/)
 
 ### 中文
 
@@ -183,6 +185,7 @@ This repo exists to turn one-off agent heroics into reusable, inspectable, share
 | [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual subtitles with shared EN/ZH timing / 创建、修复、审计并交付中英双语字幕 | subtitle scripts, workflow docs, troubleshooting, real repair lessons |
 | [`github-auth-recovery`](./skills/github-auth-recovery/) | Recover from broken GitHub auth/push flows when `gh` is logged out, HTTPS credentials fail, or SSH may already work / 当 `gh` 未登录、HTTPS 凭证失效、但 SSH 可能已可用时，恢复 GitHub push/认证流程 | concise recovery workflow, SSH-vs-HTTPS reference |
 | [`litellm-vertex-proxy-repair`](./skills/litellm-vertex-proxy-repair/) | Diagnose and repair a local LiteLLM + Vertex AI proxy on macOS when `/v1` is down, startup hangs, or Prisma/Admin UI failures need to be isolated from API recovery / 诊断并修复 macOS 本地 LiteLLM + Vertex AI 代理：当 `/v1` 不通、启动卡住、或 Prisma/Admin UI 故障需要和 API 恢复拆开处理时使用 | startup triage, loopback-proxy diagnosis, lite/full split, verification checklist |
+| [`claude-code-litellm-gateway`](./skills/claude-code-litellm-gateway/) | Configure Claude Code to use an existing LiteLLM gateway safely, especially for Gemini/Vertex-backed routes, without breaking other Claude or agent setups / 安全地把 Claude Code 接到现有 LiteLLM 网关上，尤其适用于 Gemini/Vertex 路由，同时不破坏已有 Claude 或其他 Agent 配置 | Anthropic-style gateway config, wrapper pattern, settings conflict isolation, real working example |
 | [`feishu-approval-fallback`](./skills/feishu-approval-fallback/) | Recover and harden Hermes Feishu command approvals when card buttons fail, 200340 appears, or users need text fallback commands / 修复并加固 Hermes 的 Feishu 命令审批流程：按钮失效、出现 200340、或需要文本兜底时使用 | fallback workflow, callback-sync guidance, real fix reference |
 | [`feishu-websocket-stability`](./skills/feishu-websocket-stability/) | Stabilize Hermes Feishu websocket mode when reconnects are too slow, ping timing needs tuning, or duplicate local clients compete for one app_id / 稳定 Hermes 的 Feishu websocket 模式：重连过慢、ping 需调优、或本地重复客户端冲突时使用 | reconnect tuning, app-lock pattern, runtime override guidance |
 
@@ -313,6 +316,7 @@ Current packaged artifacts:
 - [`packages/andrej-karpathy-perspective.skill`](./packages/andrej-karpathy-perspective.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/chinese-video-transcribe-pdf.skill`](./packages/chinese-video-transcribe-pdf.skill)
+- [`packages/claude-code-litellm-gateway.skill`](./packages/claude-code-litellm-gateway.skill)
 - [`packages/consulting-pdf-from-youtube.skill`](./packages/consulting-pdf-from-youtube.skill)
 - [`packages/dogfood.skill`](./packages/dogfood.skill)
 - [`packages/elon-musk-perspective.skill`](./packages/elon-musk-perspective.skill)

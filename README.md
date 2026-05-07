@@ -72,7 +72,7 @@ Use this quick map if you are not sure where to start:
   → [`feishu-approval-fallback`](./skills/feishu-approval-fallback/)
 - **Feishu websocket mode reconnects too slowly or seems unstable**  
   → [`feishu-websocket-stability`](./skills/feishu-websocket-stability/)
-- **My OpenClaw Feishu bot stops replying, or agent prep is extremely slow after migration**  
+- **My OpenClaw Feishu bot stops replying, throws unexpected pairing codes, or two Feishu bot windows seem swapped**  
   → [`openclaw-feishu-bot-troubleshooting`](./skills/openclaw-feishu-bot-troubleshooting/)
 - **My local LiteLLM + Vertex AI proxy is down, stuck at startup, or `/ui/login/` says `Not connected to DB!`**  
   → [`litellm-vertex-proxy-repair`](./skills/litellm-vertex-proxy-repair/)
@@ -99,7 +99,7 @@ Use this quick map if you are not sure where to start:
   → [`feishu-approval-fallback`](./skills/feishu-approval-fallback/)
 - **Feishu websocket 模式重连太慢，或连接稳定性可疑**  
   → [`feishu-websocket-stability`](./skills/feishu-websocket-stability/)
-- **OpenClaw 飞书 Bot 不回复消息，或迁移后 agent 处理极慢**  
+- **OpenClaw 飞书 Bot 不回复、突然吐 pairing code，或两个飞书 bot 窗口像是对错了身份**  
   → [`openclaw-feishu-bot-troubleshooting`](./skills/openclaw-feishu-bot-troubleshooting/)
 
 ---

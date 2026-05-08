@@ -1,6 +1,6 @@
 ---
 name: claude-code-litellm-gateway
-description: Configure Claude Code to use an existing LiteLLM gateway safely, especially when you want Claude Code to run against a non-Anthropic model such as `gemini-3.1-pro-preview` through LiteLLM without breaking other existing Claude or agent setups.
+description: Configure Claude Code to use an existing LiteLLM gateway safely, including both a low-risk wrapper path and an optional main-command switch so Claude Code can route to Gemini or other non-Anthropic models through LiteLLM.
 ---
 
 # Claude Code + LiteLLM Gateway
@@ -12,6 +12,9 @@ This is especially useful when:
 - you want Claude Code to use a LiteLLM-routed model such as `gemini-3.1-pro-preview`
 - you must **not** break an existing Hermes / OpenClaw / direct-Vertex setup
 - Claude Code has conflicting user-level settings in `~/.claude/settings.json`
+- you want either:
+  - a **parallel wrapper** such as `claude-gemini`, or
+  - a **main-command takeover** so plain `claude` uses LiteLLM by default
 
 ---
 
@@ -22,6 +25,8 @@ Claude Code expects Anthropic-style configuration, while LiteLLM may be routing 
 The core trick is:
 - Claude Code speaks to LiteLLM using Anthropic-style environment variables
 - LiteLLM translates the request to the real upstream model
+- Claude Code still hits Anthropic-style endpoints such as `/v1/messages`
+- LiteLLM translates both request and response formats
 
 For Toby's working setup, Claude Code was successfully routed to:
 
@@ -41,7 +46,25 @@ backed by:
 /Users/toby/TobyLab/litellm-vertex-proxy
 ```
 
-without breaking Hermes Agent's existing LiteLLM usage.
+This was verified both as:
+- a dedicated wrapper command: `claude-gemini`
+- a direct main `claude` configuration in `~/.claude/settings.json`
+
+---
+
+## Official-docs-aligned mental model
+
+This skill matches the public Claude Code + LiteLLM pattern:
+- LiteLLM exposes a gateway with virtual model names in `config.yaml`
+- Claude Code is pointed at that gateway with:
+  - `ANTHROPIC_BASE_URL`
+  - `ANTHROPIC_AUTH_TOKEN`
+  - optionally `ANTHROPIC_MODEL`
+- Claude Code sends Anthropic Messages API requests
+- LiteLLM translates those requests to the actual upstream provider/model
+
+In other words, this is **not** teaching Claude Code to natively understand Gemini.
+It is teaching Claude Code to talk to LiteLLM, while LiteLLM handles Gemini.
 
 ---
 
@@ -49,16 +72,12 @@ without breaking Hermes Agent's existing LiteLLM usage.
 
 1. Confirm LiteLLM itself is healthy.
 2. Confirm LiteLLM accepts Anthropic-format `/v1/messages` requests.
-3. Inspect `~/.claude/settings.json` for conflicting direct-Vertex Claude settings.
-4. Do **not** overwrite a working global Claude setup unless you must.
-5. Create a dedicated wrapper command (for example `claude-gemini`) that:
-   - loads LiteLLM env
-   - exports `ANTHROPIC_BASE_URL`
-   - exports `ANTHROPIC_AUTH_TOKEN`
-   - exports `ANTHROPIC_MODEL`
-   - unsets conflicting direct-Vertex Claude env vars
-   - uses `--setting-sources project,local`
-6. Test with `claude -p` before recommending interactive use.
+3. Inspect `~/.claude/settings.json` for conflicting direct-Vertex or other user-level Claude settings.
+4. Choose an integration mode:
+   - **Mode A — wrapper path**: keep existing `claude`, add `claude-gemini`
+   - **Mode B — main-command takeover**: back up `~/.claude/settings.json`, then make plain `claude` use LiteLLM by default
+5. Test with `claude -p` before recommending interactive use.
+6. Keep a rollback path.
 
 ---
 
@@ -69,6 +88,7 @@ without breaking Hermes Agent's existing LiteLLM usage.
 - Claude Code is currently configured for direct Vertex / Anthropic access in `~/.claude/settings.json`
 - `claude --model gemini-3.1-pro-preview` fails even though LiteLLM already exposes that model
 - you want a reversible, low-blast-radius integration path
+- or you explicitly want plain `claude` itself to default to LiteLLM + Gemini
 
 ---
 
@@ -156,24 +176,18 @@ claude -p "..." --model gemini-3.1-pro-preview
 
 could fail with a model-selection error or route through the wrong provider path.
 
-### Fix
-
-Do **not** rip out the user's existing global Claude settings unless asked.
-
-Instead, create a dedicated wrapper that:
-- unsets the direct-Vertex Claude env vars
-- injects the LiteLLM env vars
-- narrows settings sources to:
-
-```bash
---setting-sources project,local
-```
-
-This preserves the user's existing `claude` behavior while giving them a separate LiteLLM-backed entrypoint.
-
 ---
 
-## Recommended wrapper pattern
+## Two supported integration modes
+
+### Mode A — dedicated wrapper (lowest risk)
+
+Use this when:
+- the user's existing `claude` setup works and should stay untouched
+- the user wants a reversible parallel entrypoint
+- other tooling may depend on the current `claude` behavior
+
+#### Recommended wrapper pattern
 
 Use a dedicated launcher such as:
 
@@ -187,7 +201,7 @@ Reference implementation:
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROXY_DIR="/Users/toby/TobyLab/litellm-vertex-proxy"
+PROXY_DIR="/path/to/litellm-project"
 
 source "$PROXY_DIR/scripts/env.sh" >/dev/null 2>&1
 
@@ -224,6 +238,50 @@ Why this works:
 - routes only this wrapper invocation through LiteLLM
 - preserves reversibility
 
+### Mode B — switch plain `claude` to LiteLLM + Gemini
+
+Use this when:
+- the user explicitly wants plain `claude` to route through LiteLLM
+- backing up and replacing `~/.claude/settings.json` is acceptable
+- the user still wants a parallel wrapper or rollback path preserved
+
+#### Safe workflow
+
+1. Back up the current `~/.claude/settings.json`
+2. Replace the `env` block with LiteLLM-backed variables
+3. Keep `claude-gemini` or another wrapper as a fallback/explicit entrypoint
+4. Verify plain `claude -p` succeeds against the LiteLLM model
+
+Reference `~/.claude/settings.json` shape:
+
+```json
+{
+  "theme": "dark",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:4000",
+    "ANTHROPIC_AUTH_TOKEN": "YOUR_LITELLM_MASTER_KEY",
+    "ANTHROPIC_MODEL": "gemini-3.1-pro-preview",
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+  }
+}
+```
+
+Notes:
+- preserve other top-level user preferences such as `theme`
+- the switch is simplest when `env` is replaced cleanly rather than merged with conflicting direct-provider variables
+- always keep a timestamped backup file
+
+Reusable helper:
+
+```bash
+scripts/switch-main-to-litellm.sh
+```
+
+This helper:
+- backs up the current settings file
+- rewrites the `env` block for LiteLLM use
+- preserves other top-level JSON fields
+
 ---
 
 ## Verification flow
@@ -257,10 +315,16 @@ This proves the gateway path is good.
 
 ### 2. Verify Claude Code in print mode first
 
-Use print mode as the first proof:
+Wrapper mode:
 
 ```bash
 claude-gemini -p "Reply with exactly: wrapper-ok" --output-format json
+```
+
+Main-command mode:
+
+```bash
+claude -p "Reply with exactly: main-ok" --output-format json
 ```
 
 Expected signal:
@@ -273,13 +337,13 @@ Expected signal:
 After print mode succeeds:
 
 ```bash
-claude-gemini
+claude
 ```
 
 or:
 
 ```bash
-claude-gemini "Summarize this repo"
+claude-gemini
 ```
 
 ---
@@ -306,7 +370,7 @@ Claude Code uses Anthropic-style flows like `/v1/messages`.
 
 So verify `/v1/messages`, not just `/v1/models`.
 
-### Lesson 3: Do not assume global `claude` settings are safe to overwrite
+### Lesson 3: Wrapper-first is the safer default
 
 If the user already has:
 - Claude direct Vertex config
@@ -315,13 +379,17 @@ If the user already has:
 
 then a dedicated wrapper is safer than editing the main settings file.
 
-### Lesson 4: Test with `-p` first
+### Lesson 4: But main-command takeover is valid when explicitly requested
+
+If the user wants plain `claude` to default to LiteLLM + Gemini, a backed-up `settings.json` replacement is a clean approach.
+
+### Lesson 5: Test with `-p` first
 
 `claude -p` is the smallest, safest proof that the routing works before you ask the user to trust interactive sessions.
 
-### Lesson 5: Preserve existing working agents
+### Lesson 6: Preserve existing working agents
 
-If Hermes Agent already uses LiteLLM successfully, Claude Code should be integrated **alongside** it, not by re-plumbing the existing working chain.
+If Hermes Agent or OpenClaw already uses LiteLLM successfully, Claude Code should be integrated **alongside** it unless the user explicitly requests a main-command switch.
 
 ---
 
@@ -334,8 +402,8 @@ alias cgemini="claude-gemini"
 ```
 
 This gives the user two explicit entrypoints:
-- `claude` -> existing/default Claude path
-- `cgemini` or `claude-gemini` -> LiteLLM + Gemini path
+- `claude` -> current default path (which may be original Claude or LiteLLM depending on chosen mode)
+- `cgemini` or `claude-gemini` -> explicit LiteLLM + Gemini path
 
 ---
 
@@ -343,18 +411,19 @@ This gives the user two explicit entrypoints:
 
 - pointing `ANTHROPIC_BASE_URL` at `/v1`
 - testing only `/v1/models` and forgetting `/v1/messages`
-- overwriting `~/.claude/settings.json` when a wrapper would do
-- forgetting to unset `CLAUDE_CODE_USE_VERTEX`
-- forgetting `--setting-sources project,local`
+- overwriting `~/.claude/settings.json` without a backup
+- forgetting to unset `CLAUDE_CODE_USE_VERTEX` in wrapper mode
+- forgetting `--setting-sources project,local` in wrapper mode
 - assuming a non-Anthropic model name will work through plain `claude` if user settings still force a different provider path
-- trying to “fix” Hermes Agent even though Hermes was already working
+- trying to “fix” Hermes Agent even though Hermes/OpenClaw was already working
 
 ---
 
 ## Files in this skill
 
 - `scripts/claude-gemini-wrapper.sh` — reference wrapper for LiteLLM-backed Claude Code
-- `references/quickstart-zh.md` — stronger Chinese quickstart for direct adoption
+- `scripts/switch-main-to-litellm.sh` — helper to back up and rewrite `~/.claude/settings.json`
+- `references/quickstart-zh.md` — Chinese quickstart and decision guide
 - `references/toby-working-example.md` — exact working pattern and test commands from the real setup
 
 ---
@@ -363,9 +432,11 @@ This gives the user two explicit entrypoints:
 
 When reporting a Claude Code + LiteLLM setup, include:
 
-1. whether the existing agent setup was preserved
-2. which LiteLLM base URL was used
-3. which model Claude Code was routed to
-4. whether `/v1/messages` was verified directly
-5. whether `claude -p` was verified successfully
-6. what wrapper or launch command the user should actually run
+1. which mode was used: wrapper, main-command takeover, or both
+2. whether the existing agent setup was preserved
+3. which LiteLLM base URL was used
+4. which model Claude Code was routed to
+5. whether `/v1/messages` was verified directly
+6. whether `claude -p` and/or `claude-gemini -p` was verified successfully
+7. what launch command the user should actually run
+8. where the rollback backup lives if the main settings file was changed

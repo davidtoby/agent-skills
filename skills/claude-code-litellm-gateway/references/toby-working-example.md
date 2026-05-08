@@ -22,10 +22,11 @@ Target model:
 gemini-3.1-pro-preview
 ```
 
-Existing Claude user settings already present in `~/.claude/settings.json`:
+Original Claude user settings that existed before the switch:
 
 ```json
 {
+  "theme": "dark",
   "env": {
     "CLAUDE_CODE_USE_VERTEX": "1",
     "ANTHROPIC_VERTEX_PROJECT_ID": "toby-geminiapi-no-org",
@@ -37,7 +38,7 @@ Existing Claude user settings already present in `~/.claude/settings.json`:
 }
 ```
 
-That configuration was the reason a separate wrapper path was safer than editing the main user settings.
+That configuration was the reason a separate wrapper path was safer at first.
 
 ## Direct Anthropic-format LiteLLM proof
 
@@ -47,32 +48,56 @@ curl -i http://127.0.0.1:4000/v1/messages \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gemini-3.1-pro-preview",
-    "max_tokens": 32,
+    "max_tokens": 64,
     "messages": [{"role": "user", "content": "Reply with exactly: ok"}]
   }'
 ```
 
-Expected result included:
+Observed result included:
 
 ```json
 {"type":"message","model":"gemini-3.1-pro-preview","content":[{"type":"text","text":"ok"}]}
 ```
 
-## Successful Claude Code proof command
+## Successful wrapper proof command
 
 ```bash
-bash -lc 'source /Users/toby/TobyLab/litellm-vertex-proxy/scripts/env.sh >/dev/null 2>&1
-unset CLAUDE_CODE_USE_VERTEX ANTHROPIC_VERTEX_PROJECT_ID CLOUD_ML_REGION ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL ANTHROPIC_DEFAULT_HAIKU_MODEL
-export ANTHROPIC_BASE_URL=http://127.0.0.1:4000
-export ANTHROPIC_AUTH_TOKEN="$LITELLM_MASTER_KEY"
-export ANTHROPIC_MODEL=gemini-3.1-pro-preview
-export CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1
-claude -p "Reply with exactly: via-env" --setting-sources project,local --output-format json'
+claude-gemini -p "Reply with exactly: wrapper-ok" --output-format json
 ```
 
 This succeeded and returned `modelUsage.gemini-3.1-pro-preview`.
 
-## Final ergonomic launcher
+## Main-command takeover that was later requested
+
+Before rewriting the main Claude settings, a backup was created at:
+
+```text
+~/.claude/backups/settings.json.backup-20260508-115456
+```
+
+Then `~/.claude/settings.json` was rewritten to:
+
+```json
+{
+  "theme": "dark",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:4000",
+    "ANTHROPIC_AUTH_TOKEN": "<LITELLM_MASTER_KEY>",
+    "ANTHROPIC_MODEL": "gemini-3.1-pro-preview",
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+  }
+}
+```
+
+## Successful main-command proof command
+
+```bash
+claude -p "Reply with exactly: main-ok" --output-format json
+```
+
+This also succeeded and returned `modelUsage.gemini-3.1-pro-preview`.
+
+## Final ergonomic entrypoints
 
 Wrapper path:
 
@@ -86,18 +111,30 @@ Alias:
 alias cgemini="claude-gemini"
 ```
 
-## Recommended user-facing usage
-
-Interactive:
+Main command:
 
 ```bash
-claude-gemini
+claude
+```
+
+## Recommended user-facing usage after the switch
+
+Plain default:
+
+```bash
+claude
 ```
 
 One-shot:
 
 ```bash
-claude-gemini -p "Summarize this repository" --output-format json
+claude -p "Summarize this repository" --output-format json
+```
+
+Explicit wrapper:
+
+```bash
+claude-gemini
 ```
 
 Short alias:

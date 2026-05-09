@@ -27,6 +27,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/feynman-perspective.skill`
 - `../packages/find-skills.skill`
 - `../packages/github-auth-recovery.skill`
+- `../packages/hermes-agent-litellm-vertex-gateway.skill`
 - `../packages/huashu-design.skill`
 - `../packages/huashu-nuwa.skill`
 - `../packages/ilya-sutskever-perspective.skill`

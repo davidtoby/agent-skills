@@ -337,6 +337,7 @@ Current packaged artifacts:
 - [`packages/feynman-perspective.skill`](./packages/feynman-perspective.skill)
 - [`packages/find-skills.skill`](./packages/find-skills.skill)
 - [`packages/github-auth-recovery.skill`](./packages/github-auth-recovery.skill)
+- [`packages/hermes-agent-litellm-vertex-gateway.skill`](./packages/hermes-agent-litellm-vertex-gateway.skill)
 - [`packages/huashu-design.skill`](./packages/huashu-design.skill)
 - [`packages/huashu-nuwa.skill`](./packages/huashu-nuwa.skill)
 - [`packages/ilya-sutskever-perspective.skill`](./packages/ilya-sutskever-perspective.skill)

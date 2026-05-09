@@ -20,6 +20,34 @@ Use this when a LiteLLM proxy backed by Vertex AI stops serving `http://127.0.0.
 
 ---
 
+## Deep Dive: API-Only vs Full DB Mode & Prisma Migrations (双语解析)
+
+### The Problem (问题背景)
+
+*English*: LiteLLM running in "API-only" mode lacks database configuration (`DATABASE_URL`). While the `/ui/login/` page might still load, submitting a login crashes the backend with `Authentication Error, Not connected to DB!` because session and user validation require a database. Furthermore, simply connecting a database isn't enough; if Prisma baseline migrations are skipped or interrupted, the backend background jobs will crash with errors like `relation "LiteLLM_SpendLogs" does not exist`.
+
+*中文*: LiteLLM 在“纯 API 代理”模式下运行时，没有配置数据库（`DATABASE_URL`）。虽然你可以打开 `/ui/login/` 页面，但在提交登录时，后端由于需要校验用户和生成 session，会直接崩溃并提示 `Not connected to DB!`。此外，仅仅连上数据库是不够的；如果跳过或中断了 Prisma 的基线同步（Baseline Migration），后端的统计进程就会不断报错崩溃，例如提示 `relation "LiteLLM_SpendLogs" does not exist`（缺少对应的表或视图）。
+
+### The Repair Strategy (修复策略)
+
+*English*:
+1. **Database Setup**: Install and run local PostgreSQL. Inject `DATABASE_URL` and `DIRECT_URL` into `.env`.
+2. **Prisma Dependencies**: Reinstall LiteLLM with proxy extras (`uv tool install --reinstall 'litellm[proxy,extra-proxy]'`) and execute `prisma generate` to build the local ORM client.
+3. **Lite vs. Full Mode Architecture**: Implement a fallback toggle (`LITELLM_MODE`). 
+   - `full` enables the DB and UI console.
+   - `lite` strips DB variables on startup, reverting to a pure API proxy to ensure AI generation stays online even if the database fails.
+4. **Full Schema Migration**: Run Prisma baseline migrations to synchronize all 100+ tables and views (including `LiteLLM_SpendLogs`). This resolves the missing relation crashes and fully restores the UI backend.
+
+*中文*:
+1. **数据库部署**: 安装并启动本地 PostgreSQL 服务，在 `.env` 中注入 `DATABASE_URL` 和 `DIRECT_URL`。
+2. **补齐 Prisma 依赖**: 重新安装带有 Proxy 扩展的 LiteLLM，并执行 `prisma generate` 生成本地的 ORM 客户端。
+3. **Lite / Full 双模式容灾架构**: 改造启动脚本，增加 `LITELLM_MODE` 切换机制。
+   - `full` 模式下启用数据库和 UI 控制台。
+   - `lite` 模式作为应急降级，启动时自动剥离数据库配置，退回纯粹的 API 代理模式，确保哪怕数据库全毁，AI 接口调用也不受影响。
+4. **完整表结构同步**: 完整执行 Prisma DB Push 和基线迁移（Baseline Migration），补全所有 100 多个表与视图（包含 `LiteLLM_SpendLogs`），从而彻底解决后台进程 `relation does not exist` 的报错崩溃循环。
+
+---
+
 ## When to use this skill
 
 - `curl http://127.0.0.1:4000/` fails

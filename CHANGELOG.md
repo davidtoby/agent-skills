@@ -6,8 +6,19 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 
 ## [Unreleased]
 
-- Added `--check-only` mode to `scripts/sync_package_lists.py` so maintainers can detect package-list drift without rewriting files.
+### Added
+- New skill: `skills/agent-skills-frontmatter-compatibility/`
+  - Added `SKILL.md`
+  - Added `references/examples.md`
+- New packaged artifact:
+  - `packages/agent-skills-frontmatter-compatibility.skill`
+- Documented Toby's local sync wrapper command `skills-sync` in `SYNC.md`.
+
+### Changed
+- Updated `SYNC.md` to record the current frontmatter-compatibility repair playbook for fragile SKILL packaging failures.
+- Added explicit repo docs for the preferred metadata-only fixes: remove `version:`, rewrite `description:` as a plain one-line string, avoid YAML block scalars, and rerun a full rebuild after the fix.
 - Added unit tests for sync/check behavior in `tests/test_sync_package_lists.py`.
+- Added `--check-only` mode to `scripts/sync_package_lists.py` so maintainers can detect package-list drift without rewriting files.
 
 ## [2026-04-24] - Skill catalog, packaging, and CI refresh
 

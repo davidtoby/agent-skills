@@ -51,8 +51,9 @@ It means the skill entered the shared library through import/consolidation rathe
    - `README.md`
    - `skills/README.md`
    - this `SYNC.md`
-3. Compare local `~/.agents/skills/` with repo `skills/`.
-4. Identify three sets:
+3. On Toby's current machine, prefer the wrapper command `skills-sync` for day-to-day sync execution; it dispatches to `~/.agents/skills/scripts/sync_agent_skills.sh`.
+4. Compare local `~/.agents/skills/` with repo `skills/`.
+5. Identify three sets:
    - overlapping paths with same content
    - overlapping paths with different content
    - local-only active skills
@@ -93,6 +94,22 @@ When that happens:
 - remove or relocate unsupported frontmatter keys
 - keep the core skill content intact
 - sync the compatibility fix back to the local shared library when appropriate
+- on Toby's machine, use the helper skill `agent-skills-frontmatter-compatibility` as the default troubleshooting playbook
+
+Current known safe repair pattern for this repo:
+- remove `version:` when packaging rejects it
+- rewrite `description:` as a plain one-line YAML string
+- avoid YAML block scalar descriptions (`>` / `|`)
+- simplify angle-bracket-heavy placeholder text in `description:` when the parser is brittle
+- rerun a full `python3 scripts/rebuild_all_packages.py` after the metadata fix because validation is repo-wide
+
+## Local operator shortcut on Toby's machine
+
+- wrapper command on PATH: `skills-sync`
+- underlying script: `~/.agents/skills/scripts/sync_agent_skills.sh`
+- preview: `skills-sync --dry-run`
+- local commit only: `skills-sync --commit`
+- commit and push: `skills-sync --push`
 
 ## Readme responsibilities
 

@@ -7,6 +7,25 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 ## [Unreleased]
 
 ### Added
+- New skill: `skills/litellm-vertex-gemini-local-gateway/`
+  - Added `SKILL.md`
+  - Added `references/fresh-macos-runbook.md`
+  - Added `references/config-templates.md`
+  - Added `references/api_reference.md`
+  - Added `references/claude-code-integration.md`
+  - Added `references/openclaw-integration.md`
+  - Added `references/troubleshooting.md`
+  - Added `scripts/render_gateway_bundle.py`
+  - Added `scripts/claude-gemini-wrapper.sh`
+  - Added `scripts/claude-direct-wrapper.sh`
+  - Added `scripts/claude-sonnet-direct-wrapper.sh`
+- New skill: `skills/openclaw-litellm-gemini-gateway/`
+  - Added `SKILL.md`
+  - Added `references/config-snippets.md`
+  - Added `references/verification-and-rollback.md`
+- New packaged artifacts:
+  - `packages/litellm-vertex-gemini-local-gateway.skill`
+  - `packages/openclaw-litellm-gemini-gateway.skill`
 - New skill: `skills/agent-skills-frontmatter-compatibility/`
   - Added `SKILL.md`
   - Added `references/examples.md`
@@ -15,6 +34,7 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 - Documented Toby's local sync wrapper command `skills-sync` in `SYNC.md`.
 
 ### Changed
+- Updated `README.md` and `skills/README.md` so the new LiteLLM/OpenClaw gateway skills are discoverable from both the quick-pick section and the catalog.
 - Updated `SYNC.md` to record the current frontmatter-compatibility repair playbook for fragile SKILL packaging failures.
 - Added explicit repo docs for the preferred metadata-only fixes: remove `version:`, rewrite `description:` as a plain one-line string, avoid YAML block scalars, and rerun a full rebuild after the fix.
 - Added unit tests for sync/check behavior in `tests/test_sync_package_lists.py`.

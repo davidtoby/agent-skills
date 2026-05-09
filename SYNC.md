@@ -57,24 +57,24 @@ It means the skill entered the shared library through import/consolidation rathe
    - overlapping paths with same content
    - overlapping paths with different content
    - local-only active skills
-5. For path conflicts:
+6. For path conflicts:
    - back up the local version
    - sync GitHub version back to local
-6. For local-only active skills:
+7. For local-only active skills:
    - copy them into the repo under the correct path
-7. Update indexes/documentation:
+8. Update indexes/documentation:
    - `README.md`
    - `skills/README.md`
    - package list blocks
-8. Remove generated junk before packaging:
+9. Remove generated junk before packaging:
    - `__pycache__/`
    - `.DS_Store`
    - accidental nested duplicate folders
-9. Rebuild packages and validate:
+10. Rebuild packages and validate:
    - `python3 scripts/rebuild_all_packages.py`
-10. Commit, fetch/rebase, and push.
-11. Verify the remote HEAD commit.
-12. Keep local `~/.agents/skills/` aligned with the final merged result.
+11. Commit, fetch/rebase, and push.
+12. Verify the remote HEAD commit.
+13. Keep local `~/.agents/skills/` aligned with the final merged result.
 
 ## Packaging reality
 

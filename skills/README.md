@@ -13,6 +13,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 <!-- package-list:start -->
 - `../packages/academic-paper-to-chinese-insight-pdf.skill`
+- `../packages/agent-skills-frontmatter-compatibility.skill`
 - `../packages/agent-skills-repo-publishing.skill`
 - `../packages/andrej-karpathy-perspective.skill`
 - `../packages/chinese-pdf-report.skill`
@@ -77,8 +78,9 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (37)
+### root (38)
 - `academic-paper-to-chinese-insight-pdf`
+- `agent-skills-frontmatter-compatibility`
 - `agent-skills-repo-publishing`
 - `andrej-karpathy-perspective`
 - `claude-code-litellm-gateway`

@@ -180,6 +180,7 @@ This repo exists to turn one-off agent heroics into reusable, inspectable, share
 | Skill | Problem it solves / 解决的问题 | Main assets / 主要内容 |
 |---|---|---|
 | [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/) | Turn an academic paper PDF into a readable Chinese insight report and polished Chinese PDF / 把学术论文 PDF 转成更易读的中文精读/洞察版 PDF | extraction script, PDF renderer, structure and quality references |
+| [`agent-skills-frontmatter-compatibility`](./skills/agent-skills-frontmatter-compatibility/) | Fix brittle SKILL frontmatter issues that break packaging/validation when publishing local skills into this repo / 修复把本地 skill 发布到本仓库时，由脆弱 SKILL frontmatter 引发的打包与校验失败 | compatibility checklist, real repair examples, repo-specific rebuild guidance |
 | [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering on macOS / 生成中文字体更稳、排版更专业的 PDF 报告 | renderer script, troubleshooting, font notes, example assets |
 | [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and export premium PDF report variants / 下载 YouTube 视频、提取字幕与元数据，并导出高端报告风格 PDF | workflow guide, output package reference, style-variant reference |
 | [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual subtitles with shared EN/ZH timing / 创建、修复、审计并交付中英双语字幕 | subtitle scripts, workflow docs, troubleshooting, real repair lessons |
@@ -312,6 +313,7 @@ Current packaged artifacts:
 
 <!-- package-list:start -->
 - [`packages/academic-paper-to-chinese-insight-pdf.skill`](./packages/academic-paper-to-chinese-insight-pdf.skill)
+- [`packages/agent-skills-frontmatter-compatibility.skill`](./packages/agent-skills-frontmatter-compatibility.skill)
 - [`packages/agent-skills-repo-publishing.skill`](./packages/agent-skills-repo-publishing.skill)
 - [`packages/andrej-karpathy-perspective.skill`](./packages/andrej-karpathy-perspective.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)

@@ -54,6 +54,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/lark-wiki.skill`
 - `../packages/lark-workflow-meeting-summary.skill`
 - `../packages/lark-workflow-standup-report.skill`
+- `../packages/litellm-vertex-gemini-local-gateway.skill`
 - `../packages/litellm-vertex-proxy-repair.skill`
 - `../packages/mrbeast-perspective.skill`
 - `../packages/munger-perspective.skill`
@@ -84,6 +85,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `agent-skills-repo-publishing`
 - `andrej-karpathy-perspective`
 - `claude-code-litellm-gateway`
+- `litellm-vertex-gemini-local-gateway`
 - `chinese-pdf-report`
 - `chinese-video-transcribe-pdf`
 - `consulting-pdf-from-youtube`

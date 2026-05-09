@@ -1,0 +1,1 @@
+This skill does not require runtime assets. Ignore this file if it remains in the source tree.

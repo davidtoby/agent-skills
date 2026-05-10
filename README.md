@@ -372,6 +372,7 @@ Current packaged artifacts:
 - [`packages/naval-perspective.skill`](./packages/naval-perspective.skill)
 - [`packages/openclaw-feishu-bot-troubleshooting.skill`](./packages/openclaw-feishu-bot-troubleshooting.skill)
 - [`packages/openclaw-litellm-gemini-gateway.skill`](./packages/openclaw-litellm-gemini-gateway.skill)
+- [`packages/opencode-litellm-gemini-provider.skill`](./packages/opencode-litellm-gemini-provider.skill)
 - [`packages/output-workspace-cleanup.skill`](./packages/output-workspace-cleanup.skill)
 - [`packages/paul-graham-perspective.skill`](./packages/paul-graham-perspective.skill)
 - [`packages/precise-bilingual-subtitle.skill`](./packages/precise-bilingual-subtitle.skill)

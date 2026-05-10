@@ -62,6 +62,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/naval-perspective.skill`
 - `../packages/openclaw-feishu-bot-troubleshooting.skill`
 - `../packages/openclaw-litellm-gemini-gateway.skill`
+- `../packages/opencode-litellm-gemini-provider.skill`
 - `../packages/output-workspace-cleanup.skill`
 - `../packages/paul-graham-perspective.skill`
 - `../packages/precise-bilingual-subtitle.skill`
@@ -81,7 +82,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (39)
+### root (40)
 - `academic-paper-to-chinese-insight-pdf`
 - `agent-skills-frontmatter-compatibility`
 - `agent-skills-repo-publishing`
@@ -107,6 +108,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `naval-perspective`
 - `openclaw-feishu-bot-troubleshooting`
 - `openclaw-litellm-gemini-gateway`
+- `opencode-litellm-gemini-provider`
 - `output-workspace-cleanup`
 - `paul-graham-perspective`
 - `precise-bilingual-subtitle`

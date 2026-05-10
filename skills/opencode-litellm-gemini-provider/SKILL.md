@@ -1,67 +1,118 @@
 ---
 name: opencode-litellm-gemini-provider
-description: Add an existing LiteLLM OpenAI-compatible Gemini model to OpenCode as an optional provider without changing the current default model, then optionally make plain `opencode` load LiteLLM credentials so users can switch between OpenAI and Gemini from `/models`.
+description: Configure official native OpenCode to add a local LiteLLM OpenAI-compatible Gemini model as a selectable provider using config-file secret references, without wrappers and without changing the current default model.
 ---
 
 # OpenCode + LiteLLM Gemini Provider
 
-This skill captures a field-tested setup for adding a local LiteLLM-routed Gemini model to OpenCode while preserving the current default model.
+This skill captures the final, upgrade-friendly way to add a local LiteLLM-routed Gemini model to official OpenCode.
 
-本 Skill 沉淀一次真实配置过程：在不改变 OpenCode 当前默认模型的前提下，把本地 LiteLLM 代理暴露的 Gemini 模型加入 OpenCode 模型列表，并可选地让普通 `opencode` 命令自动加载 LiteLLM 凭据，从而在 `/models` 里自由切换 OpenAI 和 Gemini。
+本 Skill 沉淀的是最终采用的、对 OpenCode 官方升级更友好的方案：不改 OpenCode 官方二进制，不使用 wrapper，只通过 OpenCode 原生配置文件把本地 LiteLLM 模型加入 `/models`，并保持现有默认模型不变。
+
+---
+
+## Best Current Approach
+
+Use the official OpenCode binary directly:
+
+```text
+~/.opencode/bin/opencode
+```
+
+Configure LiteLLM as a custom OpenAI-compatible provider in:
+
+```text
+~/.config/opencode/opencode.json
+```
+
+Store the LiteLLM master key in a local file with `0600` permissions and reference it from OpenCode config using OpenCode's native `{file:...}` substitution.
+
+核心方案：
+- `opencode` 直接命中官方二进制
+- 不把 `~/.opencode/bin/opencode` 改成 wrapper
+- 不依赖 shell 启动时 export `LITELLM_MASTER_KEY`
+- 不修改顶层 `model` 字段，因此不改变当前默认模型
+- 使用 `{file:/path/to/key}` 让 OpenCode 自己读取本地密钥文件
 
 ---
 
 ## When To Use
 
 Use this skill when:
-- OpenCode is installed locally and already works with a default model such as `openai/gpt-5.5`
+- OpenCode is installed locally and already works with a model such as `openai/gpt-5.5`
+- the user wants to keep official native OpenCode behavior and future `opencode upgrade` compatibility
 - LiteLLM is already deployed locally and exposes an OpenAI-compatible endpoint
 - LiteLLM can call Gemini or Vertex AI models such as `gemini-3.1-pro-preview`
-- the user wants to add Gemini as an option, not replace the existing default model
-- the user wants plain `opencode` to be the single entrypoint for both OpenAI and LiteLLM-backed models
+- the user wants Gemini as an additional selectable model, not as a forced default
+- the user wants `/models` to show both ChatGPT/OpenAI models and local LiteLLM models
 
 适用场景：
-- 本地已经安装 OpenCode，并且默认模型已经可用，例如 `openai/gpt-5.5`
-- 本地已经部署 LiteLLM，并暴露 OpenAI-compatible API
+- 本地已经安装 OpenCode，并且 `openai/gpt-5.5` 等模型已经可用
+- 用户希望尽量使用 OpenCode 官方原生能力，不想用 wrapper 包一层
+- 本地已经部署 LiteLLM，且提供 OpenAI-compatible `/v1` API
 - LiteLLM 已经能调用 Gemini / Vertex AI，例如 `gemini-3.1-pro-preview`
-- 用户只想新增一个模型选项，不想改掉当前默认模型
-- 用户希望继续只输入 `opencode`，然后在交互式 `/models` 中自由切换 OpenAI 与 Gemini
+- 用户只想新增一个模型选项，而不是替换当前默认模型
+- 用户希望在 OpenCode TUI 的 `/models` 中自由切换 OpenAI 与 LiteLLM Gemini
 
 ---
 
 ## Mental Model
 
-OpenCode has two separate concerns:
-- **Provider/model registration**: what appears in `/models`
-- **Runtime credentials**: whether the selected provider can authenticate when a request is sent
+OpenCode separates three concerns:
 
-The minimal safe integration is:
-- add a custom `litellm` provider in `~/.config/opencode/opencode.json`
-- use `@ai-sdk/openai-compatible` because LiteLLM exposes an OpenAI-compatible `/v1` API
-- define the LiteLLM model ID exactly as LiteLLM returns it from `/v1/models`
-- do **not** set the top-level OpenCode `model` field unless the user wants to change the default
-- ensure `LITELLM_MASTER_KEY` is present in the `opencode` process environment
+- **Program binary**: the executable that provides official OpenCode features
+- **Provider/model registration**: the config that determines what appears in `/models`
+- **Runtime credentials**: the API key used when a selected provider sends a request
+
+The safest setup keeps those concerns separate:
+
+- official binary remains at `~/.opencode/bin/opencode`
+- provider config lives at `~/.config/opencode/opencode.json`
+- LiteLLM key lives in a separate private file
+- config references that private file with `{file:...}`
+- no wrapper is needed
 
 核心理解：
-- OpenCode 的“模型能不能显示在 `/models`”和“调用时能不能鉴权成功”是两件事
-- `opencode.json` 负责把 LiteLLM 注册为 provider，并声明模型
-- `LITELLM_MASTER_KEY` 负责让实际请求通过 LiteLLM 鉴权
-- 只新增 provider，不写顶层 `model` 字段，就不会改变当前默认模型
+- `~/.opencode/` 是 OpenCode 程序本体/二进制相关目录
+- `~/.config/opencode/` 是 OpenCode 用户配置目录
+- 想让模型出现在 `/models`，改配置即可，不需要改二进制
+- 想让 LiteLLM 鉴权成功，配置里的 `apiKey` 必须能读到 key
+- `{file:...}` 比 wrapper 注入环境变量更适合长期维护
+
+---
+
+## Why Not Wrapper As The Primary Solution
+
+Earlier attempts used a wrapper named `opencode` to source LiteLLM environment variables before executing the real binary. It worked, but it introduced operational risk:
+
+- a wrapper can be shadowed or bypassed by PATH order
+- a new terminal may hit the official binary instead of the wrapper
+- `opencode upgrade` can overwrite installation-managed files if the wrapper replaces the official binary
+- future troubleshooting becomes confusing because `opencode` may not be the real executable
+
+The final solution avoids these issues by keeping official OpenCode untouched.
+
+为什么最终不用 wrapper 作为主方案：
+- PATH 顺序一变，新窗口可能绕过 wrapper
+- wrapper 如果放在 `~/.opencode/bin/opencode`，会占用官方安装器管理的路径
+- 升级时可能被覆盖，或者让升级排障变复杂
+- 原生配置方式更清晰：二进制归 OpenCode 管，模型与密钥归配置管
 
 ---
 
 ## Real Working Setup
 
-The setup that produced this skill used:
+The real machine setup that produced this skill:
 
 ```text
-OpenCode binary: /Users/toby/.opencode/bin/opencode
-OpenCode config: /Users/toby/.config/opencode/opencode.json
-LiteLLM project: /Users/toby/TobyLab/litellm-vertex-proxy
-LiteLLM API base: http://127.0.0.1:4000/v1
-LiteLLM model: gemini-3.1-pro-preview
-OpenCode model ID: litellm/gemini-3.1-pro-preview
-Existing default model: openai/gpt-5.5
+Official OpenCode binary: /Users/toby/.opencode/bin/opencode
+OpenCode config:          /Users/toby/.config/opencode/opencode.json
+LiteLLM project:          /Users/toby/TobyLab/litellm-vertex-proxy
+LiteLLM API base:         http://127.0.0.1:4000/v1
+LiteLLM key file:         /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key
+LiteLLM model:            gemini-3.1-pro-preview
+OpenCode model ID:        litellm/gemini-3.1-pro-preview
+Existing OpenAI model:    openai/gpt-5.5
 ```
 
 LiteLLM already exposed:
@@ -73,19 +124,26 @@ gemini-2.5-pro         -> vertex_ai/gemini-2.5-pro
 gemini-2.5-flash       -> vertex_ai/gemini-2.5-flash
 ```
 
-真实配置中的关键点：
-- LiteLLM 配置与密钥不写入 OpenCode 仓库或聊天输出
-- `LITELLM_MASTER_KEY` 从 LiteLLM 项目的 `.env` 读取
-- OpenCode 配置里只引用 `{env:LITELLM_MASTER_KEY}`
-- 普通 `opencode` 最终被包装为自动加载 LiteLLM 环境后再执行原始二进制
+Final verification showed:
+
+```text
+command -v opencode
+=> /Users/toby/.opencode/bin/opencode
+
+opencode models litellm
+=> litellm/gemini-3.1-pro-preview
+
+opencode models openai
+=> openai/gpt-5.5
+```
 
 ---
 
-## Step 1: Confirm LiteLLM Is Healthy
+## Step 1: Confirm LiteLLM Works First
 
-Before touching OpenCode, confirm the proxy itself works.
+Before changing OpenCode, verify the LiteLLM proxy itself.
 
-For Toby's local proxy:
+Example for Toby's local proxy:
 
 ```bash
 cd /Users/toby/TobyLab/litellm-vertex-proxy
@@ -100,47 +158,82 @@ Expected model list includes:
 gemini-3.1-pro-preview
 ```
 
-中文说明：先确认 LiteLLM 自己能跑，再接 OpenCode。不要一开始就改 OpenCode，否则排障时会混淆是 LiteLLM 挂了，还是 OpenCode 配置错了。
+中文说明：先确认 LiteLLM 自己健康，再接 OpenCode。否则后续 `Authentication Error` 或 model not found 很难判断是 LiteLLM 的问题还是 OpenCode 配置的问题。
 
 ---
 
-## Step 2: Inspect OpenCode Paths And Current Defaults
+## Step 2: Confirm Official OpenCode Is Being Used
 
-Use OpenCode's own debug commands:
+Check path resolution:
 
 ```bash
 command -v opencode
-opencode debug paths
-opencode debug config
-opencode providers list
-opencode models openai
+type opencode
+file /Users/toby/.opencode/bin/opencode
 ```
 
-Important observation from the real setup:
+Desired result:
 
-```json
-{
-  "agent": {},
-  "mode": {},
-  "plugin": [],
-  "command": {},
-  "username": "toby"
-}
+```text
+/Users/toby/.opencode/bin/opencode
+/Users/toby/.opencode/bin/opencode: Mach-O 64-bit executable arm64
 ```
 
-There was no top-level `model` in config, so OpenCode's current default came from its own last-used/internal priority behavior. The integration therefore avoided writing a top-level `model`.
+If `command -v opencode` points to a wrapper such as `~/.local/bin/opencode`, disable or rename that wrapper.
 
-中文说明：如果用户说“不改默认模型”，就不要写：
+Real cleanup command used:
 
-```json
-"model": "litellm/gemini-3.1-pro-preview"
+```bash
+mv /Users/toby/.local/bin/opencode /Users/toby/.local/bin/opencode.wrapper.backup
 ```
 
-只注册 provider 和 models 即可。
+Then make shell PATH prefer the official OpenCode directory if needed:
+
+```bash
+export PATH="/Users/toby/.opencode/bin:$HOME/.local/bin:$PATH"
+```
+
+真实排障：之前新窗口报 `Authentication Error, No api key passed in`，根因是 PATH 命中了错误的入口或没有加载 key。最终方案不再需要 wrapper，所以应确保 `opencode` 是官方二进制。
 
 ---
 
-## Step 3: Add The LiteLLM Provider
+## Step 3: Create A Private Key File For OpenCode
+
+OpenCode supports native file substitution:
+
+```text
+{file:/absolute/path/to/secret}
+```
+
+Create a key file that contains only the LiteLLM master key.
+
+Example:
+
+```bash
+bash -lc 'set -euo pipefail; source /Users/toby/TobyLab/litellm-vertex-proxy/scripts/env.sh; umask 077; printf "%s" "$LITELLM_MASTER_KEY" > /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key; chmod 600 /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key; test -s /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key'
+```
+
+Verify permissions without printing the secret:
+
+```bash
+ls -l /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key
+```
+
+Expected shape:
+
+```text
+-rw------- ... .opencode-litellm-key
+```
+
+中文说明：
+- 这个文件只放 LiteLLM master key
+- 不要把 key 打印到聊天、日志、README、commit 或截图里
+- 权限用 `600`
+- 如果 LiteLLM master key 以后变更，需要同步更新这个文件
+
+---
+
+## Step 4: Configure The LiteLLM Provider In OpenCode
 
 Create or update:
 
@@ -157,10 +250,9 @@ Reference config:
     "litellm": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "LiteLLM Vertex Proxy",
-      "env": ["LITELLM_MASTER_KEY"],
       "options": {
         "baseURL": "http://127.0.0.1:4000/v1",
-        "apiKey": "{env:LITELLM_MASTER_KEY}",
+        "apiKey": "{file:/Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key}",
         "timeout": 600000
       },
       "models": {
@@ -186,237 +278,189 @@ Reference config:
 }
 ```
 
-Notes:
-- `provider.litellm` is the provider ID, so the OpenCode model ID becomes `litellm/gemini-3.1-pro-preview`
-- `baseURL` must include `/v1` for the OpenAI-compatible provider
-- `apiKey` should come from the environment; do not hardcode secrets
-- leaving top-level `model` absent preserves the existing default model
+Important details:
+- `provider.litellm` is the provider ID
+- the selectable OpenCode model becomes `litellm/gemini-3.1-pro-preview`
+- `npm` should be `@ai-sdk/openai-compatible` for LiteLLM's OpenAI-compatible API
+- `baseURL` should include `/v1`
+- `apiKey` uses `{file:...}`, not `{env:...}`
+- do not set top-level `model` unless the user explicitly wants to change the default
 
 中文要点：
-- `litellm` 是 OpenCode 里的 provider 名称，不是 LiteLLM 服务名
-- 模型完整选择名是 `litellm/gemini-3.1-pro-preview`
-- `baseURL` 用 `http://127.0.0.1:4000/v1`
-- 不要把 `LITELLM_MASTER_KEY` 明文写进配置
+- `litellm` 是 OpenCode 中的 provider ID
+- 最终在 `/models` 里看到的是 `litellm/gemini-3.1-pro-preview`
+- `baseURL` 是 `http://127.0.0.1:4000/v1`
+- `apiKey` 通过 `{file:...}` 读取本地密钥文件
+- 不写顶层 `model`，就不会把默认模型从 `openai/gpt-5.5` 改成 Gemini
 
 ---
 
-## Step 4: Verify Model Visibility
+## Step 5: Verify Both Providers
 
-If `LITELLM_MASTER_KEY` is already in the shell environment:
-
-```bash
-opencode models litellm
-```
-
-If the key lives in the LiteLLM project `.env`, source the proxy environment first:
+Run from a fresh shell:
 
 ```bash
-bash -lc 'source /Users/toby/TobyLab/litellm-vertex-proxy/scripts/env.sh && opencode models litellm'
-```
-
-Expected output:
-
-```text
-litellm/gemini-3.1-pro-preview
-```
-
-Also verify OpenAI still works:
-
-```bash
-opencode models openai
-```
-
-Expected output includes:
-
-```text
-openai/gpt-5.5
-```
-
----
-
-## Step 5: Choose The Launch Mode
-
-There are two safe launch patterns.
-
-### Mode A: Parallel Wrapper
-
-Use this when the user wants a low-risk extra command and does not require plain `opencode` to load LiteLLM credentials.
-
-Example:
-
-```text
-~/.local/bin/opencode-litellm
-```
-
-Wrapper:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-source /Users/toby/TobyLab/litellm-vertex-proxy/scripts/env.sh
-exec opencode "$@"
-```
-
-Then:
-
-```bash
-chmod 700 ~/.local/bin/opencode-litellm
-opencode-litellm models litellm
-opencode-litellm
-```
-
-Inside TUI:
-
-```text
-/models
-```
-
-The user should see both:
-
-```text
-openai/gpt-5.5
-litellm/gemini-3.1-pro-preview
-```
-
-### Mode B: Make Plain `opencode` Load LiteLLM Credentials
-
-Use this only when the user explicitly asks to keep using the same `opencode` command.
-
-The real setup did this:
-
-```bash
-mv /Users/toby/.opencode/bin/opencode /Users/toby/.opencode/bin/opencode.real
-```
-
-Then created a new wrapper at:
-
-```text
-/Users/toby/.opencode/bin/opencode
-```
-
-Wrapper:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-source /Users/toby/TobyLab/litellm-vertex-proxy/scripts/env.sh
-exec /Users/toby/.opencode/bin/opencode.real "$@"
-```
-
-Then:
-
-```bash
-chmod 755 /Users/toby/.opencode/bin/opencode
+command -v opencode
+opencode debug config
 opencode models litellm
 opencode models openai
 ```
 
-中文说明：
-- Mode A 风险更低，新增 `opencode-litellm`
-- Mode B 用户体验最好，继续输入 `opencode`
-- Mode B 会移动原始二进制，因此必须保留 `opencode.real` 作为回滚点
-- 如果 OpenCode 升级器覆盖了二进制，可能需要重新应用 wrapper
+Expected:
+
+```text
+command -v opencode
+=> /Users/toby/.opencode/bin/opencode
+
+opencode models litellm
+=> litellm/gemini-3.1-pro-preview
+
+opencode models openai
+=> openai/gpt-5.5
+```
+
+Optional smoke test:
+
+```bash
+opencode run -m litellm/gemini-3.1-pro-preview "只回答 OK"
+```
+
+If `opencode debug config` shows the actual key value, avoid pasting that output into public logs or commits. The key should still not be stored in the config file itself.
+
+中文说明：验证重点是三件事：
+- `opencode` 是官方二进制
+- `litellm/gemini-3.1-pro-preview` 能出现在模型列表里
+- `openai/gpt-5.5` 仍然可见，说明没有破坏原有 OpenAI 模型
 
 ---
 
-## Step 6: Interactive Switching
+## Step 6: Use In TUI
 
-After Mode A or Mode B is in place, launch OpenCode:
+Launch OpenCode normally:
 
 ```bash
 opencode
 ```
 
-Then in the TUI:
+Inside the TUI:
 
 ```text
 /models
 ```
 
-Switch freely between:
+Switch between:
 
 ```text
 openai/gpt-5.5
 litellm/gemini-3.1-pro-preview
 ```
 
-The selected model applies to the current OpenCode session. Run `/models` again to switch back.
+The selected model applies to the current OpenCode session. Use `/models` again to switch back.
 
-中文说明：配置完成后，用户无需改默认模型。进入 OpenCode 后通过 `/models` 手动选择。切到 Gemini 后请求走 LiteLLM；再打开 `/models` 可以切回 GPT-5.5。
-
----
-
-## Smoke Tests
-
-Useful checks:
-
-```bash
-opencode debug config
-opencode models litellm
-opencode models openai
-opencode run -m litellm/gemini-3.1-pro-preview "只回答 OK"
-```
-
-If the run command prints the model header and does not fail authentication, the OpenCode-to-LiteLLM path is wired.
-
-If `opencode debug config` shows:
-
-```json
-"apiKey": ""
-```
-
-then the shell running `opencode debug config` did not have `LITELLM_MASTER_KEY`. This does not necessarily mean the config is wrong; it means the runtime environment did not load the key. Use the wrapper or source the LiteLLM env script.
-
-中文排障：如果 `apiKey` 为空，优先检查是不是直接运行了普通二进制，或者 wrapper 没有加载 LiteLLM 项目的 `scripts/env.sh`。
+中文说明：以后就是原生 OpenCode 用法。直接输入 `opencode`，在 TUI 里用 `/models` 选择模型。切换到 Gemini 时走本地 LiteLLM；切回 GPT-5.5 时走 OpenAI。
 
 ---
 
-## Rollback
+## Upgrade Behavior
 
-For Mode A:
+This approach is upgrade-friendly because it does not replace or wrap the official binary.
 
-```bash
-rm ~/.local/bin/opencode-litellm
-```
-
-For Mode B:
+Future command:
 
 ```bash
-mv /Users/toby/.opencode/bin/opencode.real /Users/toby/.opencode/bin/opencode
+opencode upgrade
 ```
 
-To remove the model option entirely, remove the `provider.litellm` block from:
+can update:
+
+```text
+~/.opencode/bin/opencode
+```
+
+The provider config remains in:
 
 ```text
 ~/.config/opencode/opencode.json
 ```
 
+So new OpenCode features should remain available through the official binary, and the LiteLLM provider should keep working as long as OpenCode continues supporting custom providers and `{file:...}` config substitution.
+
+升级影响：
+- 官方二进制仍然归 OpenCode 管理
+- `opencode upgrade` 更新官方二进制，不会覆盖你的 provider 配置
+- 新版 OpenCode 的官方功能仍然通过原生二进制获得
+- 只要 OpenCode 继续支持自定义 provider 与 `{file:...}`，这个配置就能延续
+
+---
+
+## Rollback
+
+To remove the LiteLLM model option:
+
+```text
+Remove provider.litellm from ~/.config/opencode/opencode.json
+```
+
+To remove the private key file:
+
+```bash
+rm /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key
+```
+
+To restore a previously disabled wrapper, only if needed:
+
+```bash
+mv /Users/toby/.local/bin/opencode.wrapper.backup /Users/toby/.local/bin/opencode
+```
+
 中文回滚：
-- 只加 wrapper 的模式，删掉 wrapper 即可
-- 替换普通 `opencode` 的模式，把 `opencode.real` 移回 `opencode`
-- 如果完全不要 LiteLLM 选项，删除 `opencode.json` 中的 `provider.litellm`
+- 删除 `opencode.json` 里的 `provider.litellm` 即可让模型从 `/models` 消失
+- 删除 `.opencode-litellm-key` 即可移除给 OpenCode 用的 LiteLLM key 文件
+- 不需要恢复或改动官方 OpenCode 二进制
 
 ---
 
 ## Common Pitfalls
 
-- Do not set top-level `model` unless the user explicitly wants to change the default.
-- Do not hardcode `LITELLM_MASTER_KEY` in `opencode.json`.
-- For OpenAI-compatible providers, use `/v1` in `baseURL`.
-- Confirm the LiteLLM model ID with `/v1/models`; do not guess the model name.
-- If using zsh, source Bash-oriented scripts through `bash -lc` when they rely on `BASH_SOURCE`.
-- Wrapping the main `opencode` binary can be overwritten by future OpenCode upgrades.
-- Keep a clear rollback path before moving the original binary.
+- Do not hardcode the LiteLLM key in `opencode.json`.
+- Do not commit `.opencode-litellm-key` or any `.env` file containing secrets.
+- Do not set top-level `model` if the user wants to preserve the default model.
+- Use `/v1` in `baseURL` for the OpenAI-compatible provider.
+- Confirm the model ID with LiteLLM's `/v1/models`; do not guess it.
+- If `Authentication Error, No api key passed in` appears, inspect `opencode debug config` and confirm `apiKey` resolves through `{file:...}`.
+- If `command -v opencode` points to `~/.local/bin/opencode`, a wrapper may still be shadowing the official binary.
+- If zsh PATH puts `~/.local/bin` before `~/.opencode/bin`, ensure there is no stale `~/.local/bin/opencode` wrapper.
 
 常见坑：
-- 写了顶层 `model`，导致默认模型被改掉
-- 把 master key 明文写进配置或提交到仓库
+- 把 master key 明文写进 `opencode.json`
+- 把 key 文件或 `.env` 提交到 GitHub
+- 写了顶层 `model`，导致默认模型被改成 Gemini
 - `baseURL` 少了 `/v1`
-- LiteLLM 真实模型 ID 和 OpenCode 配置里的模型 ID 不一致
-- zsh 直接 source 依赖 `BASH_SOURCE` 的 Bash 脚本会失败
-- OpenCode 升级后可能覆盖 wrapper，需要重新检查
+- 模型名和 LiteLLM 暴露的模型名不一致
+- 旧 wrapper 仍然在 PATH 前面，导致以为自己在用官方二进制，实际不是
+
+---
+
+## Historical Alternative: Wrapper Mode
+
+Wrapper mode can still work, but it is no longer the recommended primary solution for OpenCode.
+
+It looked like this:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+source /Users/toby/TobyLab/litellm-vertex-proxy/scripts/env.sh
+exec /Users/toby/.opencode/bin/opencode "$@"
+```
+
+Use wrapper mode only when:
+- the runtime cannot use `{file:...}`
+- the user explicitly wants environment-variable injection
+- the wrapper has a distinct name such as `opencode-litellm`, not a replacement for official `opencode`
+
+历史经验：wrapper 可以工作，但它不是最稳的长期方案。优先使用官方二进制 + `opencode.json` + `{file:...}`。
 
 ---
 
@@ -425,11 +469,11 @@ To remove the model option entirely, remove the `provider.litellm` block from:
 English:
 
 ```text
-OpenCode now has a LiteLLM provider at `litellm/gemini-3.1-pro-preview` while preserving the existing default model. Start OpenCode with `opencode`, run `/models`, and switch between `openai/gpt-5.5` and `litellm/gemini-3.1-pro-preview` as needed.
+OpenCode now uses the official native binary directly. The LiteLLM Gemini model is configured as `litellm/gemini-3.1-pro-preview` through `~/.config/opencode/opencode.json`, with the API key loaded via OpenCode's `{file:...}` secret reference. Start OpenCode with `opencode`, run `/models`, and switch between `openai/gpt-5.5` and `litellm/gemini-3.1-pro-preview`.
 ```
 
 中文：
 
 ```text
-已经在不改变默认模型的前提下，为 OpenCode 新增 `litellm/gemini-3.1-pro-preview`。以后直接运行 `opencode`，进入后用 `/models` 即可在 `openai/gpt-5.5` 和 Gemini 之间切换。
+现在使用的是官方原生 OpenCode 二进制，没有 wrapper。LiteLLM Gemini 模型通过 `~/.config/opencode/opencode.json` 配置为 `litellm/gemini-3.1-pro-preview`，API key 由 OpenCode 原生 `{file:...}` 读取。以后直接运行 `opencode`，进入后用 `/models` 在 `openai/gpt-5.5` 和 Gemini 之间切换。
 ```

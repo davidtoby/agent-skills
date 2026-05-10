@@ -23,22 +23,22 @@ file "$OPENCODE_BIN"
 
 echo
 echo "Checking LiteLLM provider models..."
-opencode models "$PROVIDER_ID" | tee /tmp/opencode-litellm-models.$$.txt
-if ! grep -Fxq "$PROVIDER_ID/$MODEL_ID" /tmp/opencode-litellm-models.$$.txt; then
-  rm -f /tmp/opencode-litellm-models.$$.txt
+tmp_models="$(mktemp -t opencode-litellm-models.XXXXXX)"
+trap 'rm -f "$tmp_models"' EXIT
+"$OPENCODE_BIN" models "$PROVIDER_ID" | tee "$tmp_models"
+if ! grep -Fxq "$PROVIDER_ID/$MODEL_ID" "$tmp_models"; then
   echo "ERROR: Expected model not found: $PROVIDER_ID/$MODEL_ID" >&2
   exit 1
 fi
-rm -f /tmp/opencode-litellm-models.$$.txt
 
 echo
 echo "Checking OpenAI models still load..."
-opencode models openai | sed -n '1,20p'
+"$OPENCODE_BIN" models openai | sed -n '1,20p'
 
 if [[ "$RUN_SMOKE_TEST" == "1" ]]; then
   echo
   echo "Running smoke test with $PROVIDER_ID/$MODEL_ID..."
-  opencode run -m "$PROVIDER_ID/$MODEL_ID" "只回答 OK"
+  "$OPENCODE_BIN" run -m "$PROVIDER_ID/$MODEL_ID" "只回答 OK"
 else
   echo
   echo "Skipping smoke test. Set RUN_SMOKE_TEST=1 to run one request."

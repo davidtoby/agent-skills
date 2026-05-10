@@ -82,6 +82,8 @@ Use this quick map if you are not sure where to start:
   → [`litellm-vertex-proxy-repair`](./skills/litellm-vertex-proxy-repair/)
 - **I want Claude Code to use an existing LiteLLM gateway, especially for Gemini via Vertex AI, without breaking my current Claude/Hermes setup**  
   → [`claude-code-litellm-gateway`](./skills/claude-code-litellm-gateway/)
+- **I want native OpenCode to show a local LiteLLM-routed Gemini model in `/models`, without wrappers or changing the default model**  
+  → [`opencode-litellm-gemini-provider`](./skills/opencode-litellm-gemini-provider/)
 
 ### 中文
 
@@ -107,6 +109,8 @@ Use this quick map if you are not sure where to start:
   → [`litellm-vertex-gemini-local-gateway`](./skills/litellm-vertex-gemini-local-gateway/)
 - **本地 LiteLLM 网关已经可用，我只想把 OpenClaw 稳妥接到这条 Gemini 路线上，并保留可回滚路径**  
   → [`openclaw-litellm-gemini-gateway`](./skills/openclaw-litellm-gemini-gateway/)
+- **本地 LiteLLM 网关已经可用，我只想让原生 OpenCode 在 `/models` 中出现 Gemini，并且不改默认模型、不使用 wrapper**  
+  → [`opencode-litellm-gemini-provider`](./skills/opencode-litellm-gemini-provider/)
 - **OpenClaw 飞书 Bot 不回复、突然吐 pairing code，或两个飞书 bot 窗口像是对错了身份**  
   → [`openclaw-feishu-bot-troubleshooting`](./skills/openclaw-feishu-bot-troubleshooting/)
 
@@ -195,6 +199,7 @@ This repo exists to turn one-off agent heroics into reusable, inspectable, share
 | [`github-auth-recovery`](./skills/github-auth-recovery/) | Recover from broken GitHub auth/push flows when `gh` is logged out, HTTPS credentials fail, or SSH may already work / 当 `gh` 未登录、HTTPS 凭证失效、但 SSH 可能已可用时，恢复 GitHub push/认证流程 | concise recovery workflow, SSH-vs-HTTPS reference |
 | [`litellm-vertex-gemini-local-gateway`](./skills/litellm-vertex-gemini-local-gateway/) | Build a fresh local LiteLLM + Vertex Gemini gateway on macOS end to end, including LaunchAgent autostart plus Claude Code and OpenClaw integration / 在 macOS 上从零搭建本地 LiteLLM + Vertex Gemini 网关，并完成 LaunchAgent 自启动、Claude Code 与 OpenClaw 集成 | scaffold generator, config templates, verification runbook, Claude/OpenClaw integration notes |
 | [`openclaw-litellm-gemini-gateway`](./skills/openclaw-litellm-gemini-gateway/) | Connect OpenClaw to an already-working local LiteLLM Gemini gateway with low-risk config edits, exact `openclaw.json` snippets, verification commands, and rollback guidance / 把 OpenClaw 接到已经可用的本地 LiteLLM Gemini 网关上，包含低风险配置修改、精确 `openclaw.json` 片段、验证命令与回滚指南 | provider snippet, model alias workflow, verification order, rollback notes |
+| [`opencode-litellm-gemini-provider`](./skills/opencode-litellm-gemini-provider/) | Add a local LiteLLM-routed Gemini model to native OpenCode as a selectable `/models` provider without wrappers or changing the default model / 把本地 LiteLLM 路由的 Gemini 模型加入原生 OpenCode 的 `/models`，不使用 wrapper，也不修改默认模型 | setup script, verification script, config-file secret reference workflow |
 | [`litellm-vertex-proxy-repair`](./skills/litellm-vertex-proxy-repair/) | Diagnose and repair a local LiteLLM + Vertex AI proxy on macOS when `/v1` is down, startup hangs, or Prisma/Admin UI failures need to be isolated from API recovery / 诊断并修复 macOS 本地 LiteLLM + Vertex AI 代理：当 `/v1` 不通、启动卡住、或 Prisma/Admin UI 故障需要和 API 恢复拆开处理时使用 | startup triage, loopback-proxy diagnosis, lite/full split, verification checklist |
 | [`claude-code-litellm-gateway`](./skills/claude-code-litellm-gateway/) | Configure Claude Code to use an existing LiteLLM gateway safely, especially for Gemini/Vertex-backed routes, without breaking other Claude or agent setups / 安全地把 Claude Code 接到现有 LiteLLM 网关上，尤其适用于 Gemini/Vertex 路由，同时不破坏已有 Claude 或其他 Agent 配置 | Anthropic-style gateway config, wrapper pattern, settings conflict isolation, real working example |
 | [`feishu-approval-fallback`](./skills/feishu-approval-fallback/) | Recover and harden Hermes Feishu command approvals when card buttons fail, 200340 appears, or users need text fallback commands / 修复并加固 Hermes 的 Feishu 命令审批流程：按钮失效、出现 200340、或需要文本兜底时使用 | fallback workflow, callback-sync guidance, real fix reference |

@@ -68,7 +68,7 @@ RUN_SMOKE_TEST=1 ./scripts/verify-native-opencode-litellm.sh
 Defaults match Toby's local setup:
 
 ```text
-LITELLM_DIR=/Users/toby/TobyLab/litellm-vertex-proxy
+LITELLM_DIR=$HOME/TobyLab/litellm-vertex-proxy
 OPENCODE_CONFIG=~/.config/opencode/opencode.json
 OPENCODE_BIN=~/.opencode/bin/opencode
 PROVIDER_ID=litellm
@@ -76,6 +76,8 @@ MODEL_ID=gemini-3.1-pro-preview
 BASE_URL=http://127.0.0.1:4000/v1
 KEY_FILE=$LITELLM_DIR/.opencode-litellm-key
 ```
+
+If `$HOME/TobyLab/litellm-vertex-proxy/scripts/env.sh` does not exist but `$HOME/GitHub-Codebase/litellm-vertex-proxy/scripts/env.sh` does, the setup script uses the GitHub-Codebase path automatically. This keeps the skill usable across Toby's two observed local layouts, including cases where the `TobyLab` directory exists but is only an empty placeholder.
 
 Override any of them with environment variables:
 
@@ -90,6 +92,7 @@ What the setup script does:
 - checks that the official OpenCode binary exists
 - sources `LITELLM_DIR/scripts/env.sh` to read `LITELLM_MASTER_KEY`
 - writes the key to `KEY_FILE` with `0600` permissions
+- backs up an existing `opencode.json` before editing it
 - updates `~/.config/opencode/opencode.json`
 - adds or replaces only `provider.litellm`
 - does **not** set top-level `model`
@@ -100,6 +103,7 @@ What the setup script does:
 - 检查官方 OpenCode 二进制是否存在
 - 从 LiteLLM 项目的 `scripts/env.sh` 读取 `LITELLM_MASTER_KEY`
 - 把 key 写入私有文件，并设置 `600` 权限
+- 如果已有 `opencode.json`，先创建时间戳备份
 - 更新 `~/.config/opencode/opencode.json`
 - 只新增/替换 `provider.litellm`
 - 不设置顶层 `model`
@@ -218,10 +222,15 @@ Before changing OpenCode, verify the LiteLLM proxy itself.
 Example for Toby's local proxy:
 
 ```bash
-cd /Users/toby/TobyLab/litellm-vertex-proxy
-./scripts/service.sh status
-bash -lc 'source ./scripts/env.sh && ./scripts/list-models.sh'
-bash -lc 'source ./scripts/env.sh && ./scripts/test-chat.sh gemini-3.1-pro-preview'
+cd "$HOME/TobyLab/litellm-vertex-proxy"
+source ./scripts/env.sh
+curl -sS -H "Authorization: Bearer $LITELLM_MASTER_KEY" "http://${LITELLM_HOST:-127.0.0.1}:${LITELLM_PORT:-4000}/v1/models"
+```
+
+If that directory does not exist, check the common alternate checkout location:
+
+```bash
+cd "$HOME/GitHub-Codebase/litellm-vertex-proxy"
 ```
 
 Expected model list includes:
@@ -241,14 +250,14 @@ Check path resolution:
 ```bash
 command -v opencode
 type opencode
-file /Users/toby/.opencode/bin/opencode
+file "$HOME/.opencode/bin/opencode"
 ```
 
 Desired result:
 
 ```text
-/Users/toby/.opencode/bin/opencode
-/Users/toby/.opencode/bin/opencode: Mach-O 64-bit executable arm64
+$HOME/.opencode/bin/opencode
+$HOME/.opencode/bin/opencode: Mach-O 64-bit executable arm64
 ```
 
 If `command -v opencode` points to a wrapper such as `~/.local/bin/opencode`, disable or rename that wrapper.
@@ -282,13 +291,15 @@ Create a key file that contains only the LiteLLM master key.
 Example:
 
 ```bash
-bash -lc 'set -euo pipefail; source /Users/toby/TobyLab/litellm-vertex-proxy/scripts/env.sh; umask 077; printf "%s" "$LITELLM_MASTER_KEY" > /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key; chmod 600 /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key; test -s /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key'
+bash -lc 'set -euo pipefail; LITELLM_DIR="$HOME/TobyLab/litellm-vertex-proxy"; [[ -d "$LITELLM_DIR" ]] || LITELLM_DIR="$HOME/GitHub-Codebase/litellm-vertex-proxy"; source "$LITELLM_DIR/scripts/env.sh"; umask 077; printf "%s" "$LITELLM_MASTER_KEY" > "$LITELLM_DIR/.opencode-litellm-key"; chmod 600 "$LITELLM_DIR/.opencode-litellm-key"; test -s "$LITELLM_DIR/.opencode-litellm-key"'
 ```
 
 Verify permissions without printing the secret:
 
 ```bash
-ls -l /Users/toby/TobyLab/litellm-vertex-proxy/.opencode-litellm-key
+LITELLM_DIR="$HOME/TobyLab/litellm-vertex-proxy"
+[[ -f "$LITELLM_DIR/.opencode-litellm-key" ]] || LITELLM_DIR="$HOME/GitHub-Codebase/litellm-vertex-proxy"
+ls -l "$LITELLM_DIR/.opencode-litellm-key"
 ```
 
 Expected shape:
@@ -373,7 +384,6 @@ Run from a fresh shell:
 
 ```bash
 command -v opencode
-opencode debug config
 opencode models litellm
 opencode models openai
 ```
@@ -398,6 +408,8 @@ opencode run -m litellm/gemini-3.1-pro-preview "只回答 OK"
 ```
 
 If `opencode debug config` shows the actual key value, avoid pasting that output into public logs or commits. The key should still not be stored in the config file itself.
+
+Use `opencode debug config` only when troubleshooting; it may reveal resolved secret values depending on OpenCode version.
 
 中文说明：验证重点是三件事：
 - `opencode` 是官方二进制

@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LITELLM_DIR="${LITELLM_DIR:-/Users/toby/TobyLab/litellm-vertex-proxy}"
+DEFAULT_LITELLM_DIR="$HOME/TobyLab/litellm-vertex-proxy"
+if [[ ! -f "$DEFAULT_LITELLM_DIR/scripts/env.sh" && -f "$HOME/GitHub-Codebase/litellm-vertex-proxy/scripts/env.sh" ]]; then
+  DEFAULT_LITELLM_DIR="$HOME/GitHub-Codebase/litellm-vertex-proxy"
+fi
+
+LITELLM_DIR="${LITELLM_DIR:-$DEFAULT_LITELLM_DIR}"
 OPENCODE_CONFIG="${OPENCODE_CONFIG:-$HOME/.config/opencode/opencode.json}"
 OPENCODE_BIN="${OPENCODE_BIN:-$HOME/.opencode/bin/opencode}"
 PROVIDER_ID="${PROVIDER_ID:-litellm}"
@@ -16,7 +21,7 @@ usage() {
 Usage: setup-native-opencode-litellm.sh
 
 Environment overrides:
-  LITELLM_DIR       LiteLLM project directory. Default: /Users/toby/TobyLab/litellm-vertex-proxy
+  LITELLM_DIR       LiteLLM project directory. Default: $HOME/TobyLab/litellm-vertex-proxy, or $HOME/GitHub-Codebase/litellm-vertex-proxy if present
   OPENCODE_CONFIG  OpenCode config path. Default: ~/.config/opencode/opencode.json
   OPENCODE_BIN     Official OpenCode binary path. Default: ~/.opencode/bin/opencode
   PROVIDER_ID      OpenCode provider id. Default: litellm
@@ -60,6 +65,13 @@ printf "%s" "$LITELLM_MASTER_KEY" > "$KEY_FILE"
 chmod 600 "$KEY_FILE"
 
 mkdir -p "$(dirname "$OPENCODE_CONFIG")"
+
+if [[ -f "$OPENCODE_CONFIG" ]]; then
+  backup_path="$OPENCODE_CONFIG.bak.$(date +%Y%m%d%H%M%S)"
+  cp "$OPENCODE_CONFIG" "$backup_path"
+else
+  backup_path=""
+fi
 
 python3 - "$OPENCODE_CONFIG" "$PROVIDER_ID" "$PROVIDER_NAME" "$MODEL_ID" "$MODEL_NAME" "$BASE_URL" "$KEY_FILE" <<'PY'
 import json
@@ -120,6 +132,7 @@ OpenCode config:          $OPENCODE_CONFIG
 Provider/model:           $PROVIDER_ID/$MODEL_ID
 LiteLLM base URL:         $BASE_URL
 Private key file:         $KEY_FILE
+Backup config:            ${backup_path:-not needed; config did not exist}
 
 Next:
   opencode models $PROVIDER_ID

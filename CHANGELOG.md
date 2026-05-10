@@ -35,6 +35,7 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 
 ### Changed
 - Updated `README.md` and `skills/README.md` so the new LiteLLM/OpenClaw gateway skills are discoverable from both the quick-pick section and the catalog.
+- Hardened `opencode-litellm-gemini-provider` with setup/verify scripts that avoid wrapper mode, use config-file secret references, back up existing OpenCode config, and support both `~/TobyLab` and `~/GitHub-Codebase` LiteLLM checkout layouts.
 - Updated `SYNC.md` to record the current frontmatter-compatibility repair playbook for fragile SKILL packaging failures.
 - Added explicit repo docs for the preferred metadata-only fixes: remove `version:`, rewrite `description:` as a plain one-line string, avoid YAML block scalars, and rerun a full rebuild after the fix.
 - Added unit tests for sync/check behavior in `tests/test_sync_package_lists.py`.

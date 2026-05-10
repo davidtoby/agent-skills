@@ -36,6 +36,78 @@ Store the LiteLLM master key in a local file with `0600` permissions and referen
 
 ---
 
+## Bundled Scripts
+
+This skill includes scripts so an agent can reproduce the setup without manually retyping every command.
+
+本 Skill 附带脚本，目标是让从未做过这个配置的 Agent 也能按步骤完成，不只阅读说明。
+
+Scripts:
+
+```text
+scripts/setup-native-opencode-litellm.sh
+scripts/verify-native-opencode-litellm.sh
+```
+
+### Fast Path
+
+From this skill directory:
+
+```bash
+chmod +x scripts/*.sh
+./scripts/setup-native-opencode-litellm.sh
+./scripts/verify-native-opencode-litellm.sh
+```
+
+Optional smoke test that sends one real OpenCode request through LiteLLM:
+
+```bash
+RUN_SMOKE_TEST=1 ./scripts/verify-native-opencode-litellm.sh
+```
+
+Defaults match Toby's local setup:
+
+```text
+LITELLM_DIR=/Users/toby/TobyLab/litellm-vertex-proxy
+OPENCODE_CONFIG=~/.config/opencode/opencode.json
+OPENCODE_BIN=~/.opencode/bin/opencode
+PROVIDER_ID=litellm
+MODEL_ID=gemini-3.1-pro-preview
+BASE_URL=http://127.0.0.1:4000/v1
+KEY_FILE=$LITELLM_DIR/.opencode-litellm-key
+```
+
+Override any of them with environment variables:
+
+```bash
+LITELLM_DIR=/path/to/litellm-proxy \
+MODEL_ID=gemini-3.1-pro-preview \
+BASE_URL=http://127.0.0.1:4000/v1 \
+./scripts/setup-native-opencode-litellm.sh
+```
+
+What the setup script does:
+- checks that the official OpenCode binary exists
+- sources `LITELLM_DIR/scripts/env.sh` to read `LITELLM_MASTER_KEY`
+- writes the key to `KEY_FILE` with `0600` permissions
+- updates `~/.config/opencode/opencode.json`
+- adds or replaces only `provider.litellm`
+- does **not** set top-level `model`
+- does **not** modify the OpenCode binary
+- does **not** create an `opencode` wrapper
+
+脚本做的事情：
+- 检查官方 OpenCode 二进制是否存在
+- 从 LiteLLM 项目的 `scripts/env.sh` 读取 `LITELLM_MASTER_KEY`
+- 把 key 写入私有文件，并设置 `600` 权限
+- 更新 `~/.config/opencode/opencode.json`
+- 只新增/替换 `provider.litellm`
+- 不设置顶层 `model`
+- 不修改 OpenCode 官方二进制
+- 不创建 `opencode` wrapper
+
+---
+
 ## When To Use
 
 Use this skill when:

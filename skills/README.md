@@ -30,8 +30,10 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/hermes-agent-litellm-vertex-gateway.skill`
 - `../packages/huashu-design.skill`
 - `../packages/huashu-nuwa.skill`
+- `../packages/humanizer-zh.skill`
 - `../packages/ilya-sutskever-perspective.skill`
 - `../packages/lark-approval.skill`
+- `../packages/lark-apps.skill`
 - `../packages/lark-attendance.skill`
 - `../packages/lark-base.skill`
 - `../packages/lark-calendar.skill`
@@ -43,6 +45,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/lark-mail.skill`
 - `../packages/lark-markdown.skill`
 - `../packages/lark-minutes.skill`
+- `../packages/lark-note.skill`
 - `../packages/lark-okr.skill`
 - `../packages/lark-openapi-explorer.skill`
 - `../packages/lark-shared.skill`
@@ -51,6 +54,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/lark-slides.skill`
 - `../packages/lark-task.skill`
 - `../packages/lark-vc.skill`
+- `../packages/lark-vc-agent.skill`
 - `../packages/lark-whiteboard.skill`
 - `../packages/lark-wiki.skill`
 - `../packages/lark-workflow-meeting-summary.skill`
@@ -82,7 +86,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (40)
+### root (41)
 - `academic-paper-to-chinese-insight-pdf`
 - `agent-skills-frontmatter-compatibility`
 - `agent-skills-repo-publishing`
@@ -101,6 +105,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `github-auth-recovery`
 - `huashu-design`
 - `huashu-nuwa`
+- `humanizer-zh`
 - `ilya-sutskever-perspective`
 - `litellm-vertex-proxy-repair`
 - `mrbeast-perspective`
@@ -447,6 +452,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `huashu-nuwa`
 - `huggingface-hub`
 - `humanizer`
+- `humanizer-zh`
 - `ilya-sutskever-perspective`
 - `imessage`
 - `imsg`

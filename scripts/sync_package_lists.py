@@ -27,7 +27,7 @@ def fail(msg: str) -> None:
 def package_names(packages_dir: Path = PACKAGES_DIR) -> list[str]:
     if not packages_dir.exists():
         fail(f'{packages_dir} is missing')
-    return sorted(p.name for p in packages_dir.glob('*.skill'))
+    return [p.name for p in sorted(packages_dir.glob('*.skill'), key=lambda p: p.stem)]
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

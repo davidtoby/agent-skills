@@ -1,6 +1,5 @@
 # minutes +search
 
-> **前置条件：** 先阅读 [`../lark-shared/SKILL.md`](../../lark-shared/SKILL.md) 了解认证、全局参数和安全规则。
 
 搜索妙记列表，支持关键词、所有者、参与者以及时间范围等多条件过滤。所有者与参与者都支持传入多个 open\_id，也支持传入 `me` 表示当前用户。只读操作，不修改任何妙记数据。
 
@@ -129,8 +128,6 @@ CLI 会先按输入的本地日历日语义解析，再标准化为 RFC3339 时�
 2. `vc +recording` 获取 `minute_token`
 3. `minutes minutes get` 查询妙记基础信息
 
-不要为了查"妙记信息"直接走 `vc +notes --meeting-ids`。`vc +notes` 只适用于逐字稿、总结、待办、章节等纪要内容。
-
 <br />
 
 ## 时间格式
@@ -145,14 +142,14 @@ CLI 会先按输入的本地日历日语义解析，再标准化为 RFC3339 时�
 
 ## 输出结果
 
-- 默认输出包含 `items`、`total`、`has_more` 和 `page_token`。
+- 默认输出包含 `items`、`has_more` 和 `page_token`。
 
 ## Pagination (`has_more` / `page_token`)
 
 - 当结果中返回 `has_more=true` 时，说明还有更多页可继续获取。
 - 继续翻页时，使用响应中的 `page_token` 搭配 `--page-token` 发起下一次查询。
 - 不要假设调大 `--page-size` 就能拿全结果；分页遍历时应以 `has_more` 和 `page_token` 为准。
-- `total` 数量小于 50 时，自动分页获取所有结果；`total` 数量大于 50 时，向用户确认是否获取全部结果。
+- 当 `has_more=true` 时，逐页累计已读取的 `items` 数：累计不到 50 条之前可自动继续翻页；超过 50 条后应停下来向用户确认是否获取全部结果。
 
 ```bash
 # First page
@@ -173,8 +170,8 @@ lark-cli minutes +search --query "预算复盘" --page-size 20 --page-token '<PA
 # 首先查询妙记元信息（标题、时长、封面） → 用本 skill
 lark-cli minutes minutes get --params '{"minute_token": "obcn***************"}'
 
-# 查妙记关联的纪要产物：逐字稿、总结、待办、章节等 → 用 lark-cli vc +notes
-lark-cli vc +notes --minute-tokens obcnhijv43vq6bcsl5xasfb2
+# 查妙记关联的产物(--summary --todo --chapter --keyword --transcript 按需返回)
+lark-cli minutes +detail --minute-tokens <minute_token> --summary
 ```
 
 ## 常见错误与排查
@@ -192,7 +189,7 @@ lark-cli vc +notes --minute-tokens obcnhijv43vq6bcsl5xasfb2
 - 当用户说“我的妙记”时，优先理解为 `--owner-ids me`。
 - 当用户说“我参与的妙记”“我参加过的妙记”时，默认理解为 `--owner-ids me` 与 `--participant-ids me` 两次查询后的并集。
 - 当用户明确说“仅我参与但不是我拥有”时，才优先理解为 `--participant-ids me`。
-- 当用户同时提到“会议 / 会 / 开会 / 某场会”和“妙记”时，优先先定位会议；如果要的是妙记信息，走 `vc +recording` → `minutes minutes get`，只有要纪要内容时才走 `vc +notes --minute-tokens`。
+- 当用户同时提到“会议 / 会 / 开会 / 某场会”和“妙记”时，优先先定位会议；如果要的是妙记信息，走 `vc +recording` 获取 `minute_token` → `minutes minutes get`，只有要妙记产物内容时才走 `minutes +detail --minute-tokens`。
 - 必须使用 `--format json` 输出，你更加擅长解析 JSON 数据。
 - 排查参数与请求结构时优先使用 `--dry-run`。
 - 搜索的时间范围最大为 1 个月，如果需要搜索更长时间范围的妙记，需要拆分为多次时间范围为一个月查询。
@@ -200,7 +197,6 @@ lark-cli vc +notes --minute-tokens obcnhijv43vq6bcsl5xasfb2
 ## 参考
 
 - [lark-minutes](../SKILL.md) -- 妙记相关命令
-- [lark-vc-notes](../../lark-vc/references/lark-vc-notes.md) -- 基于 `minute_token` 获取逐字稿、总结、待办、章节等产物
-- [lark-shared](../../lark-shared/SKILL.md) -- 认证和全局参数
+- [lark-minutes-detail](lark-minutes-detail.md) -- 基于 `minute_token` 获取逐字稿、总结、待办、章节等产物
 - [lark-vc](../../lark-vc/SKILL.md) -- 视频会议全部命令
 

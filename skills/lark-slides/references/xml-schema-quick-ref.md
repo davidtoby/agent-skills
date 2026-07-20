@@ -44,7 +44,7 @@
 
 **子元素：**
 - `<style>?` - 页面样式，目前可放 `<fill>`
-- `<data>?` - 页面元素容器，可放 `shape`、`line`、`polyline`、`img`、`table`、`icon`、`chart`、`undefined`
+- `<data>?` - 页面元素容器，可放 `shape`、`line`、`polyline`、`img`、`table`、`icon`、`chart`、`whiteboard`、`undefined`
 - `<note>?` - 演讲者备注，内部可放 `<content>`
 
 ## theme 与文本类型
@@ -139,8 +139,42 @@ XSD 中的 `title`、`headline`、`sub-headline`、`body`、`caption` 主要出�
 ### icon
 
 ```xml
-<icon iconType="iconpark/Base/setting.svg" topLeftX="80" topLeftY="120" width="32" height="32"/>
+<icon iconType="iconpark/Base/setting.svg" topLeftX="80" topLeftY="120" width="32" height="32">
+  <fill>
+    <fillColor color="rgba(37, 99, 235, 1)"/>
+  </fill>
+</icon>
 ```
+
+`iconType` 必须来自已验证的 IconPark 路径；视觉 lint 规范要求 `fillColor` 显式设置为非透明颜色，避免图标不可见。需要语义图标时，先运行 `scripts/iconpark_tool.py search --query "<语义>"`，不要凭记忆拼路径。更多规则见 [iconpark.md](iconpark.md)。
+
+### whiteboard
+
+```xml
+<!-- SVG 模式：<chart> 不支持的图表或自定义视觉、装饰元素 -->
+<whiteboard topLeftX="580" topLeftY="120" width="340" height="280">
+  <svg xmlns="http://www.w3.org/2000/svg">
+    <rect x="60" y="80" width="40" height="140" rx="3" fill="rgba(59,130,246,0.85)"/>
+    <text x="80" y="238" text-anchor="middle" font-size="11" fill="rgba(100,116,139,1)">ABC</text>
+  </svg>
+</whiteboard>
+
+<!-- Mermaid 模式：流程图、时序图等结构化图表 -->
+<whiteboard topLeftX="72" topLeftY="100" width="816" height="340">
+  <mermaid>
+    <![CDATA[
+      flowchart LR
+          A[开始] --> B{判断}
+          B -- 是 --> C[执行]
+          B -- 否 --> D[结束]
+    ]]>
+  </mermaid>
+</whiteboard>
+```
+
+SVG 模式：`<svg>` 需声明 `xmlns="http://www.w3.org/2000/svg"`，内容大小由子元素包围盒决定；`width`/`height`/`viewBox` 不影响渲染，仅当元素使用百分比属性值时需声明 `viewBox`。\
+Mermaid 模式：内容用 `<![CDATA[...]]>` 包裹，避免 `[`、`>`、`-->` 等字符破坏 XML 解析。\
+详细用法见 [lark-slides-whiteboard.md](lark-slides-whiteboard.md)。
 
 ## 颜色与样式
 

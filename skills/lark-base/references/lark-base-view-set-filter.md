@@ -30,13 +30,23 @@
 
 ## 3. value 写法
 
-### `text` / `location`
+### `text`
 
 用字符串：
 
 ```json
 ["标题", "intersects", "发布"]
 ```
+
+### `location`
+
+location 筛选只按 `full_address` 字符串匹配，不能直接按经纬度筛选；优先使用 `intersects` 做包含匹配，例如查深圳：
+
+```json
+["位置", "intersects", "深圳"]
+```
+
+不推荐写 `["位置", "==", "深圳"]` 这类精确匹配，除非确保筛选值与完整 `full_address` 完全一致。
 
 ### `number` / `auto_number`
 
@@ -58,6 +68,8 @@
 
 用对象数组：
 
+> **人员筛选：不要猜 ID。** 不知道 `open_id` 时，先用 `lark-contact` 查 id：`lark-cli contact +search-user --query "<姓名/邮箱/手机号>" --as user`。
+
 ```json
 ["负责人", "intersects", [{ "id": "ou_xxx" }]]
 ```
@@ -65,6 +77,8 @@
 ### `group_chat`
 
 用对象数组：
+
+> **群组筛选：不要猜 ID。** 不知道 `chat_id` 时，先用 `lark-im` 搜群：`lark-cli im +chat-search --query "<群名关键词>" --as user`；取结果里的 `oc_xxx`。
 
 ```json
 ["负责群", "intersects", [{ "id": "oc_xxx" }]]
@@ -158,7 +172,7 @@ lark-cli base +view-set-filter \
 
 ## 6. 使用建议
 
-- 建议先用 [lark-base-view-get-filter.md](lark-base-view-get-filter.md) 读取现状，再改。
+- 先读取当前筛选配置，理解现有 `logic` 和 `conditions` 的组合关系；只替换用户要求变更的条件，未提到的条件默认保留。
 - 优先传字段 id，不要依赖字段名。
 - 需要清空全部筛选时，直接传 `{"conditions":[]}`。
 
@@ -172,6 +186,4 @@ lark-cli base +view-set-filter \
 
 ## 8. 参考
 
-- [lark-base-view.md](lark-base-view.md)
-- [lark-base-view-get-filter.md](lark-base-view-get-filter.md)
 - [lookup-field-guide.md](lookup-field-guide.md)

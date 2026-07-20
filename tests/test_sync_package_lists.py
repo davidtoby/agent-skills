@@ -79,6 +79,16 @@ class SyncPackageListsTests(unittest.TestCase):
                 check_only=True,
             )
 
+    def test_package_names_sort_by_skill_stem_not_extension_punctuation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            packages_dir = Path(tmp)
+            for name in ['lark-vc.skill', 'lark-vc-agent.skill']:
+                (packages_dir / name).write_text('', encoding='utf-8')
+            self.assertEqual(
+                sync_package_lists.package_names(packages_dir),
+                ['lark-vc.skill', 'lark-vc-agent.skill'],
+            )
+
     def test_parse_args_supports_check_only_flag(self) -> None:
         args = sync_package_lists.parse_args(['--check-only'])
         self.assertTrue(args.check_only)

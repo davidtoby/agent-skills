@@ -1,5 +1,6 @@
 ---
 name: lark-attendance
+version: 1.0.0
 description: "飞书考勤打卡：查询自己的考勤打卡记录"
 metadata:
   requires:

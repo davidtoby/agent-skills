@@ -7,6 +7,10 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 ## [Unreleased]
 
 ### Added
+- New skill: `skills/humanizer-zh/`
+  - Added a Chinese-first rewrite and editing workflow for removing formulaic AI-writing patterns while preserving meaning, audience, and authentic voice.
+  - Adapted from `op7418/Humanizer-zh` under its MIT license; normalized frontmatter for this repository's package validator.
+- New Lark CLI skill folders: `lark-apps`, `lark-note`, and `lark-vc-agent`.
 - New skill: `skills/litellm-vertex-gemini-local-gateway/`
   - Added `SKILL.md`
   - Added `references/fresh-macos-runbook.md`
@@ -34,6 +38,7 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 - Documented Toby's local sync wrapper command `skills-sync` in `SYNC.md`.
 
 ### Changed
+- Refreshed the published Lark CLI skill snapshot from the current local `lark-cli` 1.0.72 skill library, including expanded reference coverage and updated safety/authentication guidance.
 - Updated `README.md` and `skills/README.md` so the new LiteLLM/OpenClaw gateway skills are discoverable from both the quick-pick section and the catalog.
 - Hardened `opencode-litellm-gemini-provider` with setup/verify scripts that avoid wrapper mode, use config-file secret references, back up existing OpenCode config, and support both `~/TobyLab` and `~/GitHub-Codebase` LiteLLM checkout layouts.
 - Updated `SYNC.md` to record the current frontmatter-compatibility repair playbook for fragile SKILL packaging failures.

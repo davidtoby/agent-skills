@@ -5,6 +5,7 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = ROOT / 'skills'
@@ -62,10 +63,31 @@ def resolve_skill_dirs(requested: list[str]) -> list[Path]:
     return [by_name[name] for name in requested]
 
 
+def package_skill(skill_dir: Path) -> None:
+    """Build one package, using the OpenClaw packager when installed.
+
+    The repository validator only requires a ZIP bundle whose paths and bytes
+    mirror the source directory. A standard-library fallback keeps publishing
+    available on machines where the historical OpenClaw absolute path is not
+    installed.
+    """
+    if PACKAGE_SCRIPT.exists():
+        subprocess.run(
+            [sys.executable, str(PACKAGE_SCRIPT), str(skill_dir), str(PACKAGES_DIR)],
+            check=True,
+        )
+        return
+
+    package = PACKAGES_DIR / f'{skill_dir.name}.skill'
+    temp_package = package.with_suffix('.skill.tmp')
+    with zipfile.ZipFile(temp_package, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+        for source in sorted(path for path in skill_dir.rglob('*') if path.is_file()):
+            archive.write(source, f'{skill_dir.name}/{source.relative_to(skill_dir).as_posix()}')
+    temp_package.replace(package)
+
+
 def main() -> None:
     args = parse_args()
-    if not PACKAGE_SCRIPT.exists():
-        fail(f'Packaging script not found: {PACKAGE_SCRIPT}')
     if not SYNCER.exists():
         fail(f'Package list sync script not found: {SYNCER}')
 
@@ -77,10 +99,7 @@ def main() -> None:
     if not args.check_only:
         for skill_dir in skill_dirs:
             print(f'[REBUILD] {skill_dir.name}')
-            subprocess.run(
-                [sys.executable, str(PACKAGE_SCRIPT), str(skill_dir), str(PACKAGES_DIR)],
-                check=True,
-            )
+            package_skill(skill_dir)
         print('[SYNC] Updating package list blocks in README files')
         subprocess.run([sys.executable, str(SYNCER)], check=True)
     else:

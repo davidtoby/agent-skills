@@ -48,7 +48,7 @@ lark-cli docs +media-insert --doc doxcnXXX --from-clipboard
 
 # 从本地文件插入
 # 除了上传本地文件，还可以在 `docs +update` 时直接通过网络 URL 插入图片，无需先下载到本地：
-lark-cli docs +update --api-version v2 --doc "<doc_id>" --command block_insert_after \
+lark-cli docs +update --doc "<doc_id>" --command block_insert_after \
   --block-id "目标 block_id" \
   --content '<img href="https://example.com/photo.png"/>'
 
@@ -67,6 +67,12 @@ lark-cli docs +media-insert --doc doxcnXXX --file ./spec.pdf --type file
 
 # 图片对齐与描述（caption）
 lark-cli docs +media-insert --doc doxcnXXX --from-clipboard --align center --caption "架构图"
+
+# Insert image with explicit display width (height auto-computed from aspect ratio)
+lark-cli docs +media-insert --doc doxcnXXX --file ./banner.png --width 800 --align center
+
+# Insert image with explicit width and height
+lark-cli docs +media-insert --doc doxcnXXX --from-clipboard --width 800 --height 447 --caption "architecture diagram"
 ```
 
 ## 参数
@@ -79,6 +85,8 @@ lark-cli docs +media-insert --doc doxcnXXX --from-clipboard --align center --cap
 | `--type <type>` | 否 | `image`（默认）或 `file`。`--from-clipboard` 目前只产出 image。 |
 | `--align <align>` | 否 | 仅图片：`left` / `center`（默认）/ `right` |
 | `--caption <text>` | 否 | 仅图片：图片描述 |
+| `--width <px>` | 否 | Image display width in pixels (only for `--type=image`). If `--height` is omitted, it is auto-computed from the source image aspect ratio. Supported auto-detection formats: PNG, JPEG, GIF; other formats (WebP, BMP, etc.) require both `--width` and `--height`. |
+| `--height <px>` | 否 | Image display height in pixels (only for `--type=image`). If `--width` is omitted, it is auto-computed from the source image aspect ratio. Supported auto-detection formats: PNG, JPEG, GIF; other formats (WebP, BMP, etc.) require both `--width` and `--height`. |
 
 > [!IMPORTANT]
 > 如果上一步是 [`lark-doc-create`](lark-doc-create.md)，并且它在知识库/知识空间场景下返回的是 `/wiki/...` 形式的 `doc_url`，后续调用 `docs +media-insert` 时应优先传 `doc_id`，不要直接传这个 `doc_url`。

@@ -66,6 +66,8 @@ Use this quick map if you are not sure where to start:
   → [`chinese-video-transcribe-pdf`](./skills/chinese-video-transcribe-pdf/)
 - **I need bilingual English/Chinese subtitles for a video**  
   → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
+- **I have Chinese draft text that feels templated or AI-written and want a more natural rewrite**
+  → [`humanizer-zh`](./skills/humanizer-zh/)
 - **My GitHub push/auth flow is broken and I need a reliable recovery path**  
   → [`github-auth-recovery`](./skills/github-auth-recovery/)
 - **Feishu approval buttons fail, show 200340, or users must type `/approve always` manually**  
@@ -99,6 +101,8 @@ Use this quick map if you are not sure where to start:
   → [`chinese-video-transcribe-pdf`](./skills/chinese-video-transcribe-pdf/)
 - **我需要给视频做中英双语字幕**  
   → [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/)
+- **我有一段中文草稿，读起来模板化或 AI 味很重，想保留原意但改得更自然**
+  → [`humanizer-zh`](./skills/humanizer-zh/)
 - **我的 GitHub push / 认证流程坏了，需要一条可靠恢复路径**  
   → [`github-auth-recovery`](./skills/github-auth-recovery/)
 - **Feishu 审批按钮失效、报 200340，或只能手动输入 `/approve always`**  
@@ -196,6 +200,7 @@ This repo exists to turn one-off agent heroics into reusable, inspectable, share
 | [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering on macOS / 生成中文字体更稳、排版更专业的 PDF 报告 | renderer script, troubleshooting, font notes, example assets |
 | [`consulting-pdf-from-youtube`](./skills/consulting-pdf-from-youtube/) | Download a YouTube video, extract transcript/metadata, and export premium PDF report variants / 下载 YouTube 视频、提取字幕与元数据，并导出高端报告风格 PDF | workflow guide, output package reference, style-variant reference |
 | [`video-bilingual-subtitle-delivery`](./skills/video-bilingual-subtitle-delivery/) | Create, repair, audit, and deliver bilingual subtitles with shared EN/ZH timing / 创建、修复、审计并交付中英双语字幕 | subtitle scripts, workflow docs, troubleshooting, real repair lessons |
+| [`humanizer-zh`](./skills/humanizer-zh/) | Rewrite Chinese text to remove templated AI-writing patterns while preserving meaning, audience, and an authentic human voice / 去除中文文本的模板化 AI 痕迹，同时保留原意、受众与真实表达 | 24-pattern checklist, rewrite workflow, quality rubric; adapted from [op7418/Humanizer-zh](https://github.com/op7418/Humanizer-zh) |
 | [`github-auth-recovery`](./skills/github-auth-recovery/) | Recover from broken GitHub auth/push flows when `gh` is logged out, HTTPS credentials fail, or SSH may already work / 当 `gh` 未登录、HTTPS 凭证失效、但 SSH 可能已可用时，恢复 GitHub push/认证流程 | concise recovery workflow, SSH-vs-HTTPS reference |
 | [`litellm-vertex-gemini-local-gateway`](./skills/litellm-vertex-gemini-local-gateway/) | Build a fresh local LiteLLM + Vertex Gemini gateway on macOS end to end, including LaunchAgent autostart plus Claude Code and OpenClaw integration / 在 macOS 上从零搭建本地 LiteLLM + Vertex Gemini 网关，并完成 LaunchAgent 自启动、Claude Code 与 OpenClaw 集成 | scaffold generator, config templates, verification runbook, Claude/OpenClaw integration notes |
 | [`openclaw-litellm-gemini-gateway`](./skills/openclaw-litellm-gemini-gateway/) | Connect OpenClaw to an already-working local LiteLLM Gemini gateway with low-risk config edits, exact `openclaw.json` snippets, verification commands, and rollback guidance / 把 OpenClaw 接到已经可用的本地 LiteLLM Gemini 网关上，包含低风险配置修改、精确 `openclaw.json` 片段、验证命令与回滚指南 | provider snippet, model alias workflow, verification order, rollback notes |
@@ -345,8 +350,10 @@ Current packaged artifacts:
 - [`packages/hermes-agent-litellm-vertex-gateway.skill`](./packages/hermes-agent-litellm-vertex-gateway.skill)
 - [`packages/huashu-design.skill`](./packages/huashu-design.skill)
 - [`packages/huashu-nuwa.skill`](./packages/huashu-nuwa.skill)
+- [`packages/humanizer-zh.skill`](./packages/humanizer-zh.skill)
 - [`packages/ilya-sutskever-perspective.skill`](./packages/ilya-sutskever-perspective.skill)
 - [`packages/lark-approval.skill`](./packages/lark-approval.skill)
+- [`packages/lark-apps.skill`](./packages/lark-apps.skill)
 - [`packages/lark-attendance.skill`](./packages/lark-attendance.skill)
 - [`packages/lark-base.skill`](./packages/lark-base.skill)
 - [`packages/lark-calendar.skill`](./packages/lark-calendar.skill)
@@ -358,6 +365,7 @@ Current packaged artifacts:
 - [`packages/lark-mail.skill`](./packages/lark-mail.skill)
 - [`packages/lark-markdown.skill`](./packages/lark-markdown.skill)
 - [`packages/lark-minutes.skill`](./packages/lark-minutes.skill)
+- [`packages/lark-note.skill`](./packages/lark-note.skill)
 - [`packages/lark-okr.skill`](./packages/lark-okr.skill)
 - [`packages/lark-openapi-explorer.skill`](./packages/lark-openapi-explorer.skill)
 - [`packages/lark-shared.skill`](./packages/lark-shared.skill)
@@ -366,6 +374,7 @@ Current packaged artifacts:
 - [`packages/lark-slides.skill`](./packages/lark-slides.skill)
 - [`packages/lark-task.skill`](./packages/lark-task.skill)
 - [`packages/lark-vc.skill`](./packages/lark-vc.skill)
+- [`packages/lark-vc-agent.skill`](./packages/lark-vc-agent.skill)
 - [`packages/lark-whiteboard.skill`](./packages/lark-whiteboard.skill)
 - [`packages/lark-wiki.skill`](./packages/lark-wiki.skill)
 - [`packages/lark-workflow-meeting-summary.skill`](./packages/lark-workflow-meeting-summary.skill)

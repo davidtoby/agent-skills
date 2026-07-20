@@ -1,6 +1,7 @@
 ---
 name: lark-task
-description: "飞书任务：管理任务、清单和任务智能体。创建待办任务、查看和更新任务状态、拆分子任务、组织任务清单、分配协作成员、注册或注销任务智能体、更新任务智能体的主页数据、写入智能体任务记录。当用户需要创建待办事项、查看任务列表、跟踪任务进度、管理项目清单或给他人分配任务、注册注销任务智能体、更新智能体主页数据、写入任务记录时使用。"
+version: 1.0.0
+description: "飞书任务：管理任务、清单和任务智能体。创建待办任务、查看和更新任务状态、拆分子任务、组织任务清单、分配协作成员、上传任务附件、注册或注销任务智能体、更新任务智能体的主页数据、写入智能体任务记录。当用户需要创建待办事项、查看任务列表、跟踪任务进度、管理项目清单或给他人分配任务、为任务上传附件文件、注册注销任务智能体、更新智能体主页数据、写入任务记录时使用。"
 metadata:
   requires:
     bins: ["lark-cli"]
@@ -12,10 +13,15 @@ metadata:
 **CRITICAL — 开始前 MUST 先用 Read 工具读取 [`../lark-shared/SKILL.md`](../lark-shared/SKILL.md)，其中包含认证、权限处理**
 
 > **任务搜索技巧**：先区分用户是否**特地指定使用搜索 skill**，以及是否真的提供了**查询关键字**（例如任务名称、关键词、片段描述）。如果用户特地指定使用搜索 skill，或明确给出了任务查询关键字，则目标是**任务**时优先使用 `+search`。如果用户没有特地指定使用搜索 skill，且意图里没有查询关键字，只有范围条件（例如“今年以来”“已完成”“由我创建”“我关注的”），并且使用 `+search` 与 `+get-related-tasks` / `+get-my-tasks` 都能达到目的时，应优先使用列表型能力，而不是搜索型能力。其中，“与我相关 / 我关注的 / 由我创建”等优先考虑 `+get-related-tasks`；“我负责的 / 分配给我”的列表优先考虑 `+get-my-tasks`。不要把时间范围词（例如“今年以来”）本身误当成 `query` 去走搜索。
+> **任务搜索相关性提示**：`+search` 当前不会自动判断搜索结果与搜索发起人的相关性。如果用户明确要求搜索“与我相关”的任务，必须先识别具体关系，获取当前用户的 `open_id`，并显式传入对应的 `--assignee`（负责人）、`--creator`（创建人）或 `--follower`（关注人）过滤条件；不能只依赖 `query` 期待自动返回与当前用户相关的任务。
 > **任务清单搜索技巧**：任务清单也遵循同样的判断逻辑。先区分用户是否**特地指定使用搜索 skill**，以及是否真的提供了**清单查询关键字**（例如清单名称、关键词、片段描述）。如果用户特地指定使用搜索 skill，或明确给出了清单查询关键字，则优先使用 `+tasklist-search`。如果用户没有特地指定使用搜索 skill，且意图里没有查询关键字，只有范围条件（例如“由我创建的任务清单”“今年以来创建的清单”），并且使用搜索或原生列取清单都能达到目的时，应优先使用原生 `tasklists.list` 接口列取清单（先 `schema task.tasklists.list`，再 `lark-cli task tasklists list --as user ...`），再按 `creator`、`created_at` 等字段做本地筛选和分页控制。
 > **意图区分补充**：像“搜索飞书中今年以来我关注的任务”这类表达，虽然字面带有“搜索”，但如果没有真正的查询关键字，且本质是在限定“与我相关 + 时间范围”，则应优先走 `+get-related-tasks`；像“搜索飞书中由我创建的任务清单”这类表达，如果没有清单关键字，且本质是在限定“清单范围 + 创建者”，则应优先走原生 `tasklists.list` 后筛选，而不是直接走搜索型 shortcut。
 > **用户身份识别**：在用户身份（user identity）场景下，如果用户提到了“我”（例如“分配给我”、“由我创建”），请默认获取当前登录用户的 `open_id` 作为对应的参数值。
-> **术语理解**：如果用户提到 “todo”（待办），应当思考其是否是指“task”（任务），并优先尝试使用本 Skill 提供的命令来处理。
+> **术语理解 — 待办 disambiguation（必读）**：
+> - 用户提到「待办 / todo / 任务」时，**先判断归属**，不要默认走本 skill。
+> - **走 [lark-minutes](../lark-minutes/SKILL.md) 的 `minutes +todo`**（禁止本 skill）：上下文含 **妙记 / 会议纪要 / minute_token / 妙记 URL**（`/minutes/`）；或「在某某妙记里新建/修改待办」「妙记 AI 待办」「会议录制里的待办」。
+> - **走本 skill（lark-task）**：任务清单、分配给我、项目待办、截止日期/提醒、子任务、任务清单成员；或 applink 含 `client/todo/task?guid=`；或明确说「飞书任务」「任务中心」「我的任务清单」。
+> - **禁止**：用户要在妙记里加待办时，**不要**调用 `task tasklists list`、`task +create` 或任何 task 命令去「找清单再放任务」。
 > **友好输出**：在输出任务（或清单）的执行结果给用户时，建议同时提取并输出命令返回结果中的 `url` 字段（任务链接），以便用户可以直接点击跳转查看详情。
 
 > **创建/更新注意**：
@@ -32,25 +38,25 @@ metadata:
 > Task OpenAPI 中用于更新/操作任务的 `guid` 是任务的全局唯一标识（GUID），不是客户端展示的任务编号（例如 `t104121` / `suite_entity_num`）。
 > 对于 Feishu 的任务 applink（例如 `.../client/todo/task?guid=...`），必须使用 URL query 里的 `guid` 参数作为 task guid。
 
-## Shortcuts
-
-- [`+create`](./references/lark-task-create.md) — Create a task
-- [`+update`](./references/lark-task-update.md) — Update a task
-- [`+comment`](./references/lark-task-comment.md) — Add a comment to a task
-- [`+complete`](./references/lark-task-complete.md) — Complete a task
-- [`+reopen`](./references/lark-task-reopen.md) — Reopen a task
-- [`+assign`](./references/lark-task-assign.md) — Assign or remove members from a task
-- [`+followers`](./references/lark-task-followers.md) — Manage task followers
-- [`+reminder`](./references/lark-task-reminder.md) — Manage task reminders
-- [`+get-my-tasks`](./references/lark-task-get-my-tasks.md) — List tasks assigned to me
-- [`+get-related-tasks`](./references/lark-task-get-related-tasks.md) — List tasks related to me
-- [`+search`](./references/lark-task-search.md) — Search tasks
-- [`+subscribe-event`](./references/lark-task-subscribe-event.md) — Subscribe to task events
-- [`+set-ancestor`](./references/lark-task-set-ancestor.md) — Set or clear a task ancestor
-- [`+tasklist-create`](./references/lark-task-tasklist-create.md) — Create a tasklist and batch add tasks
-- [`+tasklist-search`](./references/lark-task-tasklist-search.md) — Search tasklists
-- [`+tasklist-task-add`](./references/lark-task-tasklist-task-add.md) — Add existing tasks to a tasklist
-- [`+tasklist-members`](./references/lark-task-tasklist-members.md) — Manage tasklist members
+| Shortcut | 说明 |
+|----------|------|
+| [`+create`](references/lark-task-create.md) | create a task |
+| [`+update`](references/lark-task-update.md) | update task attributes |
+| [`+set-ancestor`](references/lark-task-set-ancestor.md) | set or clear a task ancestor |
+| [`+comment`](references/lark-task-comment.md) | add a comment to a task |
+| [`+complete`](references/lark-task-complete.md) | mark a task as complete |
+| [`+reopen`](references/lark-task-reopen.md) | reopen a completed task |
+| [`+assign`](references/lark-task-assign.md) | assign or remove task members |
+| [`+followers`](references/lark-task-followers.md) | manage task followers |
+| [`+reminder`](references/lark-task-reminder.md) | manage task reminders |
+| [`+get-my-tasks`](references/lark-task-get-my-tasks.md) | List tasks assigned to me |
+| [`+get-related-tasks`](references/lark-task-get-related-tasks.md) | list tasks related to me |
+| [`+search`](references/lark-task-search.md) | search tasks |
+| [`+upload-attachment`](references/lark-task-upload-attachment.md) | upload a local file as an attachment to a task |
+| [`+tasklist-create`](references/lark-task-tasklist-create.md) | create a tasklist and optionally add tasks |
+| [`+tasklist-search`](references/lark-task-tasklist-search.md) | search tasklists |
+| [`+tasklist-task-add`](references/lark-task-tasklist-task-add.md) | add tasks to a tasklist |
+| [`+tasklist-members`](references/lark-task-tasklist-members.md) | manage tasklist members |
 
 ## API Resources
 

@@ -13,20 +13,16 @@ Use this split on purpose:
 
 ## Default merge rules
 
-### 1) Remote wins on conflicts
+### 1) State-aware two-way sync; GitHub wins true conflicts
 
-If the **same skill path** changed both locally and on GitHub, prefer the GitHub version.
+The sync helper records the hash of every skill after a successful reconciliation in `~/.agents/skills/.archive/sync-state.json`.
 
-Meaning:
-- fetch the latest GitHub repo
-- compare overlapping skill paths
-- back up the local conflicting copy
-- overwrite the local copy from GitHub
-- then continue the merge
+On later runs it applies a three-way comparison:
+- **local changed; GitHub unchanged since the recorded baseline** → publish the local update upstream
+- **GitHub changed; local unchanged since the recorded baseline** → copy the GitHub update back to local
+- **both sides changed, or no trustworthy baseline exists** → back up the local copy and let GitHub win
 
-Reason:
-- the GitHub repo is the reviewed/published reference snapshot
-- this avoids silent divergence between local and published variants
+This keeps ordinary updates flowing in both directions while retaining the reviewed GitHub snapshot as the safe tie-breaker for real conflicts or untracked divergence.
 
 ### 2) Local new active skills publish upstream
 
@@ -105,8 +101,9 @@ Current known safe repair pattern for this repo:
 
 ## Local operator shortcut on Toby's machine
 
+- portable implementation tracked in this repo: `scripts/sync_agent_skills.sh`
+- installed local wrapper: `~/.agents/skills/scripts/sync_agent_skills.sh`
 - wrapper command on PATH: `skills-sync`
-- underlying script: `~/.agents/skills/scripts/sync_agent_skills.sh`
 - preview: `skills-sync --dry-run`
 - local commit only: `skills-sync --commit`
 - commit and push: `skills-sync --push`

@@ -46,8 +46,6 @@
 | `background_style` | 否 | String | default | 同上 |
 | `action` | 否 | Object | / | 点击列跳转，同 column_set.action |
 
-> **兼容性提示（lark-cli 1.0.72 验证）**：尽管部分示例会在 `column` 上使用 `corner_radius`，当前飞书卡片解析器会报 `unknown property: corner_radius`。为保证发送成功，请不要在 `column` 上设置该字段；需要圆角分组时改用 `interactive_container` 的 `corner_radius`。
-
 ## 嵌套 / 易错点
 
 - **column_set 的直接子节点只能是 `column`**；不能 `column_set → column_set`。二级分栏要走 `column_set → column → column_set`。

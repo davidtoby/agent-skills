@@ -16,6 +16,8 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/agent-skills-frontmatter-compatibility.skill`
 - `../packages/agent-skills-repo-publishing.skill`
 - `../packages/andrej-karpathy-perspective.skill`
+- `../packages/beautiful-feishu-card.skill`
+- `../packages/beautiful-feishu-whiteboard.skill`
 - `../packages/chinese-pdf-report.skill`
 - `../packages/chinese-video-transcribe-pdf.skill`
 - `../packages/claude-code-litellm-gateway.skill`

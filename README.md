@@ -336,6 +336,8 @@ Current packaged artifacts:
 - [`packages/agent-skills-frontmatter-compatibility.skill`](./packages/agent-skills-frontmatter-compatibility.skill)
 - [`packages/agent-skills-repo-publishing.skill`](./packages/agent-skills-repo-publishing.skill)
 - [`packages/andrej-karpathy-perspective.skill`](./packages/andrej-karpathy-perspective.skill)
+- [`packages/beautiful-feishu-card.skill`](./packages/beautiful-feishu-card.skill)
+- [`packages/beautiful-feishu-whiteboard.skill`](./packages/beautiful-feishu-whiteboard.skill)
 - [`packages/chinese-pdf-report.skill`](./packages/chinese-pdf-report.skill)
 - [`packages/chinese-video-transcribe-pdf.skill`](./packages/chinese-video-transcribe-pdf.skill)
 - [`packages/claude-code-litellm-gateway.skill`](./packages/claude-code-litellm-gateway.skill)

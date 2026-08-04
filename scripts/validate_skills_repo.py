@@ -91,7 +91,7 @@ def validate_package(skill_dir: Path) -> None:
                 name for name in names
                 if name.startswith(f"{skill_dir.name}/") and not name.endswith('/')
             )
-            expected_zip_files = [f"{skill_dir.name}/{p.relative_to(skill_dir).as_posix()}" for p in src_files]
+            expected_zip_files = sorted(f"{skill_dir.name}/{p.relative_to(skill_dir).as_posix()}" for p in src_files)
             if zip_files != expected_zip_files:
                 fail(
                     f"Package {pkg.name} file list is stale. Expected {expected_zip_files}, got {zip_files}"

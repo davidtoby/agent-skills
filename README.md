@@ -56,6 +56,8 @@ cp -R skills/consulting-pdf-from-youtube /path/to/your/skills/
 
 Use this quick map if you are not sure where to start:
 
+- **My Mac is low on disk space and I want to clean caches or explicitly remove local AI models while preserving work files**
+  → [`macos-disk-cleanup`](./skills/macos-disk-cleanup/)
 - **I have an academic paper PDF and want a Chinese insight handout**  
   → [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/)
 - **I already have Chinese report content, but the PDF typography/font rendering is bad**  
@@ -91,6 +93,8 @@ Use this quick map if you are not sure where to start:
 
 如果你不确定该选哪个 Skill，可以先看这个快速决策区：
 
+- **我的 Mac 磁盘空间不足，想清理缓存或明确删除本地模型，同时保留工作和个人资料**
+  → [`macos-disk-cleanup`](./skills/macos-disk-cleanup/)
 - **我有一篇学术论文 PDF，想做成中文精读/洞察版讲义**  
   → [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/)
 - **我已经有中文报告内容，但 PDF 字体/排版很差**  
@@ -195,6 +199,7 @@ This repo exists to turn one-off agent heroics into reusable, inspectable, share
 
 | Skill | Problem it solves / 解决的问题 | Main assets / 主要内容 |
 |---|---|---|
+| [`macos-disk-cleanup`](./skills/macos-disk-cleanup/) | Inspect and reclaim macOS disk space using exact cache targets and explicitly authorized model deletion / 盘点并清理 Mac 磁盘，限定缓存范围，删除模型需当前任务明确授权，保留资料及配置 | read-only scan, guarded cleanup script, Markdown/JSON audit reports, 10 temporary-directory safety tests |
 | [`academic-paper-to-chinese-insight-pdf`](./skills/academic-paper-to-chinese-insight-pdf/) | Turn an academic paper PDF into a readable Chinese insight report and polished Chinese PDF / 把学术论文 PDF 转成更易读的中文精读/洞察版 PDF | extraction script, PDF renderer, structure and quality references |
 | [`agent-skills-frontmatter-compatibility`](./skills/agent-skills-frontmatter-compatibility/) | Fix brittle SKILL frontmatter issues that break packaging/validation when publishing local skills into this repo / 修复把本地 skill 发布到本仓库时，由脆弱 SKILL frontmatter 引发的打包与校验失败 | compatibility checklist, real repair examples, repo-specific rebuild guidance |
 | [`chinese-pdf-report`](./skills/chinese-pdf-report/) | Generate professional Chinese PDF reports with reliable font rendering on macOS / 生成中文字体更稳、排版更专业的 PDF 报告 | renderer script, troubleshooting, font notes, example assets |
@@ -383,6 +388,7 @@ Current packaged artifacts:
 - [`packages/lark-workflow-standup-report.skill`](./packages/lark-workflow-standup-report.skill)
 - [`packages/litellm-vertex-gemini-local-gateway.skill`](./packages/litellm-vertex-gemini-local-gateway.skill)
 - [`packages/litellm-vertex-proxy-repair.skill`](./packages/litellm-vertex-proxy-repair.skill)
+- [`packages/macos-disk-cleanup.skill`](./packages/macos-disk-cleanup.skill)
 - [`packages/mrbeast-perspective.skill`](./packages/mrbeast-perspective.skill)
 - [`packages/munger-perspective.skill`](./packages/munger-perspective.skill)
 - [`packages/naval-perspective.skill`](./packages/naval-perspective.skill)
@@ -624,6 +630,7 @@ This generated block helps humans and validators confirm repository coverage.
 - `lm-evaluation-harness`
 - `local-media-smart-device-workflows`
 - `local-places`
+- `macos-disk-cleanup`
 - `manim-video`
 - `maps`
 - `markdown-converter`

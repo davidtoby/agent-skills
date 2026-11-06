@@ -63,6 +63,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/lark-workflow-standup-report.skill`
 - `../packages/litellm-vertex-gemini-local-gateway.skill`
 - `../packages/litellm-vertex-proxy-repair.skill`
+- `../packages/macos-disk-cleanup.skill`
 - `../packages/mrbeast-perspective.skill`
 - `../packages/munger-perspective.skill`
 - `../packages/naval-perspective.skill`
@@ -88,7 +89,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (41)
+### root (42)
 - `academic-paper-to-chinese-insight-pdf`
 - `agent-skills-frontmatter-compatibility`
 - `agent-skills-repo-publishing`
@@ -110,6 +111,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `humanizer-zh`
 - `ilya-sutskever-perspective`
 - `litellm-vertex-proxy-repair`
+- `macos-disk-cleanup`
 - `mrbeast-perspective`
 - `munger-perspective`
 - `naval-perspective`
@@ -468,6 +470,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `lm-evaluation-harness`
 - `local-media-smart-device-workflows`
 - `local-places`
+- `macos-disk-cleanup`
 - `manim-video`
 - `maps`
 - `markdown-converter`

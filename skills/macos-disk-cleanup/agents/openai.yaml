@@ -1,0 +1,4 @@
+interface:
+  display_name: "macOS 磁盘清理"
+  short_description: "扫描磁盘占用并清理可再生成文件，保护工作资料、配置及系统稳定性"
+  default_prompt: "使用 $macos-disk-cleanup 检查并清理我的 Mac 磁盘，保留工作资料，报告实际释放空间。"

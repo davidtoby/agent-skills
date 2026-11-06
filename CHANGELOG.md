@@ -7,6 +7,10 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 ## [Unreleased]
 
 ### Added
+- New skill: `skills/macos-disk-cleanup/`
+  - Added a read-only macOS disk scan and guarded cleanup for npm/pip download caches and explicitly authorized Ollama/LM Studio models.
+  - Preserve work files, credentials, conversations, application settings, installed dependencies, and inference runtimes; write Markdown/JSON audit reports.
+  - Added 10 temporary-directory safety tests and `packages/macos-disk-cleanup.skill`.
 - New skill: `skills/humanizer-zh/`
   - Added a Chinese-first rewrite and editing workflow for removing formulaic AI-writing patterns while preserving meaning, audience, and authentic voice.
   - Adapted from `op7418/Humanizer-zh` under its MIT license; normalized frontmatter for this repository's package validator.

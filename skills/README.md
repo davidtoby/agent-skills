@@ -63,6 +63,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/lark-workflow-standup-report.skill`
 - `../packages/litellm-vertex-gemini-local-gateway.skill`
 - `../packages/litellm-vertex-proxy-repair.skill`
+- `../packages/london-reception-admissions.skill`
 - `../packages/macos-disk-cleanup.skill`
 - `../packages/mrbeast-perspective.skill`
 - `../packages/munger-perspective.skill`
@@ -89,7 +90,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 
 ## Active skills by path
 
-### root (42)
+### root (43)
 - `academic-paper-to-chinese-insight-pdf`
 - `agent-skills-frontmatter-compatibility`
 - `agent-skills-repo-publishing`
@@ -112,6 +113,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `ilya-sutskever-perspective`
 - `litellm-vertex-proxy-repair`
 - `macos-disk-cleanup`
+- `london-reception-admissions` — [中文介绍](london-reception-admissions/README.zh-CN.md) / [English](london-reception-admissions/README.en.md)
 - `mrbeast-perspective`
 - `munger-perspective`
 - `naval-perspective`
@@ -471,6 +473,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `local-media-smart-device-workflows`
 - `local-places`
 - `macos-disk-cleanup`
+- `london-reception-admissions`
 - `manim-video`
 - `maps`
 - `markdown-converter`

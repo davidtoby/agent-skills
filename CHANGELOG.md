@@ -7,6 +7,9 @@ The format is inspired by Keep a Changelog, adapted for skill repositories where
 ## [Unreleased]
 
 ### Added
+- New skill: `skills/london-reception-admissions/`
+  - London Reception preparation covering cross-borough routes, year-specific policies, CAF/SIF, clergy evidence, tour-transcript conflicts and submission receipts.
+  - Added English/Chinese introductions, anonymised process lessons and an application brief template.
 - New skill: `skills/macos-disk-cleanup/`
   - Added a read-only macOS disk scan and guarded cleanup for npm/pip download caches and explicitly authorized Ollama/LM Studio models.
   - Preserve work files, credentials, conversations, application settings, installed dependencies, and inference runtimes; write Markdown/JSON audit reports.

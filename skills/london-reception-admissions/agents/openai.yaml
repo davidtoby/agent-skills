@@ -1,0 +1,4 @@
+interface:
+  display_name: "London Reception Admissions"
+  short_description: "Check London Reception routes, evidence and bilingual drafts"
+  default_prompt: "Use $london-reception-admissions to verify my child's application route and prepare a concise bilingual action plan."

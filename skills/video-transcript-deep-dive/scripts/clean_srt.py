@@ -2,15 +2,17 @@
 """
 clean_srt.py: 解析、清洗与去重 SRT/VTT 字幕文件。
 处理 YouTube 自动生成字幕中的连续重复词汇与高频重叠行。
+支持单文件清洗与文件夹内全量字幕批量清洗。
 """
 
 import argparse
 import re
 import sys
 from pathlib import Path
+from typing import List, Tuple
 
 
-def parse_srt(file_path: Path):
+def parse_srt(file_path: Path) -> List[Tuple[str, str]]:
     with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
         text = f.read()
 
@@ -33,7 +35,7 @@ def parse_srt(file_path: Path):
     return entries
 
 
-def deduplicate_entries(entries):
+def deduplicate_entries(entries: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
     clean_entries = []
     last_text = ""
     for ts, text in entries:
@@ -58,7 +60,7 @@ def deduplicate_entries(entries):
     return clean_entries
 
 
-def format_timeline(entries, chunk_minutes=10):
+def format_timeline(entries: List[Tuple[str, str]], chunk_minutes: int = 10) -> str:
     output_lines = []
     current_chunk = -1
 
@@ -80,32 +82,55 @@ def format_timeline(entries, chunk_minutes=10):
     return " ".join(output_lines)
 
 
+def process_single_file(file_path: Path, chunk_minutes: int, output_path: Path = None, verbose: bool = True):
+    raw_entries = parse_srt(file_path)
+    clean_entries = deduplicate_entries(raw_entries)
+    formatted = format_timeline(clean_entries, chunk_minutes=chunk_minutes)
+
+    if verbose:
+        print(f"[{file_path.name}] 解析 {len(raw_entries)} 行 -> 去重后 {len(clean_entries)} 行，约 {len(formatted.split())} 词。")
+
+    if output_path:
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(formatted)
+        if verbose:
+            print(f"  -> 已保存至: {output_path}")
+    return formatted
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Clean, deduplicate, and format SRT subtitle files.")
-    parser.add_argument("srt_file", type=Path, help="Path to input SRT or VTT file")
+    parser = argparse.ArgumentParser(description="Clean, deduplicate, and format SRT subtitle files (single file or batch directory).")
+    parser.add_argument("target", type=Path, help="Path to input SRT file or directory containing SRT files")
     parser.add_argument("--chunk-minutes", type=int, default=10, help="Interval in minutes for section markers")
-    parser.add_argument("-o", "--output", type=Path, default=None, help="Optional output text file path")
+    parser.add_argument("-o", "--output", type=Path, default=None, help="Optional output text file path (for single file) or output directory (for batch)")
 
     args = parser.parse_args()
 
-    if not args.srt_file.exists():
-        print(f"Error: File not found: {args.srt_file}", file=sys.stderr)
+    if not args.target.exists():
+        print(f"Error: Target path not found: {args.target}", file=sys.stderr)
         sys.exit(1)
 
-    raw_entries = parse_srt(args.srt_file)
-    clean_entries = deduplicate_entries(raw_entries)
-    formatted = format_timeline(clean_entries, chunk_minutes=args.chunk_minutes)
+    if args.target.is_file():
+        # 单文件清洗
+        formatted = process_single_file(args.target, args.chunk_minutes, args.output)
+        if not args.output:
+            print("\n--- 预览内容 (前 1000 字符) ---")
+            print(formatted[:1000])
+    elif args.target.is_dir():
+        # 批量清洗目录下的 srt 文件
+        srt_files = sorted(list(args.target.glob("*.srt")) + list(args.target.glob("*.vtt")))
+        if not srt_files:
+            print(f"未在目录 {args.target} 中找到 .srt 或 .vtt 文件。")
+            return
 
-    print(f"Parsed {len(raw_entries)} raw lines -> {len(clean_entries)} deduplicated lines.")
-    print(f"Estimated word count: {len(formatted.split())}")
+        out_dir = args.output if args.output else args.target
+        out_dir.mkdir(parents=True, exist_ok=True)
 
-    if args.output:
-        with open(args.output, "w", encoding="utf-8") as f:
-            f.write(formatted)
-        print(f"Saved cleaned transcript to {args.output}")
-    else:
-        print("\n--- 预览内容 (前 1000 字符) ---")
-        print(formatted[:1000])
+        print(f"[BATCH] 正在批量清洗目录下的 {len(srt_files)} 个字幕文件...")
+        for srt_path in srt_files:
+            out_file = out_dir / f"{srt_path.stem}.cleaned.txt"
+            process_single_file(srt_path, args.chunk_minutes, out_file)
+        print(f"[SUCCESS] 批量清洗完成，文本均已保存至: {out_dir}")
 
 
 if __name__ == "__main__":

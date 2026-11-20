@@ -81,6 +81,7 @@ This directory contains the source-of-truth skill folders for the GitHub reposit
 - `../packages/taleb-perspective.skill`
 - `../packages/trump-perspective.skill`
 - `../packages/video-bilingual-subtitle-delivery.skill`
+- `../packages/video-transcript-deep-dive.skill`
 - `../packages/x-mastery-mentor.skill`
 - `../packages/youtube-bilingual-subtitle-delivery.skill`
 - `../packages/yuanbao.skill`

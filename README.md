@@ -413,6 +413,7 @@ Current packaged artifacts:
 - [`packages/taleb-perspective.skill`](./packages/taleb-perspective.skill)
 - [`packages/trump-perspective.skill`](./packages/trump-perspective.skill)
 - [`packages/video-bilingual-subtitle-delivery.skill`](./packages/video-bilingual-subtitle-delivery.skill)
+- [`packages/video-transcript-deep-dive.skill`](./packages/video-transcript-deep-dive.skill)
 - [`packages/x-mastery-mentor.skill`](./packages/x-mastery-mentor.skill)
 - [`packages/youtube-bilingual-subtitle-delivery.skill`](./packages/youtube-bilingual-subtitle-delivery.skill)
 - [`packages/yuanbao.skill`](./packages/yuanbao.skill)
